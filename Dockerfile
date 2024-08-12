@@ -20,12 +20,12 @@ RUN apt-get update && \
 # Définir la variable d'environnement pour GDAL
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
-ENV GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
+ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/lib/libgdal.so
 # Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /epidemietrackr-app/
-
+nano
 # Exposer le port sur lequel l'application Django sera accessible
 EXPOSE 8000
 

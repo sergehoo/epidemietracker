@@ -7,14 +7,27 @@ WORKDIR /epidemietrackr-app
 
 COPY requirements.txt /epidemietrackr-app/requirements.txt
 
-RUN pip install -r requirements.txt
+# Installer les dépendances système nécessaires pour GDAL et PostgreSQL
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
     gdal-bin \
-    libgdal-dev
+    libgdal-dev \
+    libpq-dev \
+    gcc \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Définir la variable d'environnement pour GDAL
+ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
+ENV C_INCLUDE_PATH=/usr/include/gdal
+
+# Installer les dépendances Python
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /epidemietrackr-app/
 
-#RUN python3 manage.py makemigrations && python3 manage.py migrate
+# Exposer le port sur lequel l'application Django sera accessible
+EXPOSE 8000
 
-CMD ["gunicorn","epidemietrackr.wsgi:application","--bind=0.0.0.0:8000"]
+# Démarrer l'application
+CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]

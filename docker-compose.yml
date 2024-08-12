@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     ports:
   #port du server : port de l'appliaction
-      - 0508:8000
+      - 5091:8000
     volumes:
       - .:/epidemietrackr-app/
     environment:

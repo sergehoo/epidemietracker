@@ -1,10 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Surveillance des Épidémies</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
+
+{#     <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.FullScreen.css" />#}
+    <style>
+        #map {
+            width: 100%;
+            height: 900px;
+        }
+    </style>
 </head>
 <body>
 
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script src="https://unpkg.com/terraformer@1.0.7"></script>
+    <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
+
+    <script>
+        var map = L.map('map').setView([7.54, -5.55], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
+        }).addTo(map);
+
+        fetch('dingue/api/epidemiccases/')
+            .then(response => response.json())
+            .then(cases => {
+                cases.forEach(c => {
+                    fetch(`dingue/api/cities/${c.city}/`)
+                        .then(response => response.json())
+                        .then(city => {
+                            if (city.geom) {
+                                try {
+                                    var cleanedWKT = city.geom.replace(/^SRID=\d+;/, '');
+                                    var geoJSON = Terraformer.WKT.parse(cleanedWKT);
+                                    L.geoJSON(geoJSON).addTo(map);
+
+                                    // Trouver le centre du GeoJSON pour y placer un marqueur
+                                    var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
+
+                                    // Créer un DivIcon avec un style personnalisé
+                                    var myIcon = L.divIcon({
+                                        className: 'custom-div-icon',
+                                        html: "<div class='circle-marker'></div>",
+                                        iconSize: [30, 30],
+                                        iconAnchor: [15, 15]
+                                    });
+
+                                    // Ajouter le marqueur avec le DivIcon personnalisé
+                                    L.marker(centroid, {icon: myIcon}).addTo(map)
+                                        .bindPopup(`<b>${city.name}</b><br>${c.disease_name}: ${c.num_cases} cas`)
+                                        .openPopup();
+
+                                } catch (error) {
+                                    console.error(`Erreur lors de l'analyse GeoJSON pour la ville : ${city.name}`, error);
+                                }
+                            } else {
+                                console.error(`Données de localisation invalides pour la ville : ${city.name}`);
+                            }
+                        })
+                        .catch(error => console.error(`Erreur lors de la récupération des données de la ville pour ${c.city} :`, error));
+                });
+            })
+            .catch(error => console.error('Erreur lors de la récupération des cas épidémiques :', error));
+
+        // Exemple d'un marqueur test
+        // L.marker([7.54, -5.55], {
+        //    icon: L.divIcon({
+        //        className: 'custom-div-icon',
+        //        html: "<div class='circle-marker'></div>",
+        //        iconSize: [30, 30],
+        //        iconAnchor: [15, 15]
+        //    })
+        //}).addTo(map)
+        //.bindPopup('Test Marker')
+        //.openPopup();
+
+    </script>
+    <style>
+        /* Style pour le marqueur circulaire */
+        .circle-marker {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            border: 3px dashed white;
+            animation: dash 2s linear infinite;
+        }
+
+        /* Animation des bordures en pointillés */
+        @keyframes dash {
+            0% {
+                border-style: dashed;
+                border-width: 3px;
+            }
+            50% {
+                border-style: dashed;
+                border-width: 3px;
+                transform: rotate(180deg);
+            }
+            100% {
+                border-style: dashed;
+                border-width: 3px;
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </body>
 </html>

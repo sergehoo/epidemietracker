@@ -1,149 +1,63 @@
 {% load static %}
-{% load widget_tweaks %}
-<!DOCTYPE html>
-
-<html lang="en" >
-    <!--begin::Head-->
-    <head>
-        <meta charset="utf-8"/>
-        <title>URAP || INSTITUT PASTEUR DE COTE D'IVOIRE</title>
-        <meta name="description" content="Login page example"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-
-        <!--begin::Fonts-->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700"/>        <!--end::Fonts-->
 
 
-                    <!--begin::Page Custom Styles(used by this page)-->
-        <link href="{% static 'assets/css/pages/login/classic/login-3.css' %}" rel="stylesheet" type="text/css"/>
-                        <!--end::Page Custom Styles-->
+<html lang="zxx" class="js">
 
-        <!--begin::Global Theme Styles(used by all pages)-->
-        <link href="{% static 'assets/plugins/global/plugins.bundle.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="{% static 'assets/plugins/custom/prismjs/prismjs.bundle.css' %}" rel="stylesheet" type="text/css"/>
-        <link href="{% static 'assets/css/style.bundle.css' %}" rel="stylesheet" type="text/css"/>
-                <!--end::Global Theme Styles-->
+<head>
+    <title>DENGUE  |EPIDEMIE TRACKER</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Softnio">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
+    <!-- Fav Icon  -->
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
+    <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+</head>
 
-        <!--begin::Layout Themes(used by all pages)-->
-                <!--end::Layout Themes-->
+<body class="nk-body bg-white npc-general pg-auth">
+    <div class="nk-app-root">
+        <!-- main @s -->
+        <div class="nk-main center ">
+            <!-- wrap @s -->
+            <div class="nk-wrap nk-wrap">
+                <!-- content @s -->
+                <div class="nk-content ">
+                    <div class="nk-block nk-block-middle nk-auth-body  wide-xs">
+                        <div class="brand-logo pb-4 text-center">
+                            <a href="{% url 'dingue-home' %}" class="logo-link">
+                                <img class="logo-light logo-img logo-img-lg" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo">
+                                <img class="logo-dark logo-img logo-img-lg" src="{% static 'images/logokeneya260.png' %}" srcset="{% static 'images/logokeneya260.png' %}" alt="logo-dark">
+                            </a>
+                            <h3>Dengue Epidemie Tracker</h3>
+                        </div>
+                        <div class="card card-bordered">
+                            <div class="card-inner card-inner-lg">
 
-        <link rel="shortcut icon" href="assets/media/logos/favicon.ico"/>
-
-            </head>
-    <!--end::Head-->
-
-    <!--begin::Body-->
-    <body  id="kt_body"  class="header-fixed header-mobile-fixed subheader-enabled sidebar-enabled page-loading"  >
-
-    	<!--begin::Main-->
-	<div class="d-flex flex-column flex-root">
-		<!--begin::Login-->
-<div class="login login-3 login-signin-on d-flex flex-row-fluid " id="kt_login">
-	<div class="d-flex flex-center bgi-size-cover bgi-no-repeat flex-row-fluid" style="background-image: url({% static 'assets/media/bg/bg-7_custom.png' %});">
-		<div class="login-form text-center text-white p-7 position-relative overflow-hidden">
-			<!--begin::Login Header-->
-			<div class="d-flex flex-center mb-10">
-				<a href="/">
-					<img src="{% static 'assets/media/logo.png' %}" class="max-h-250px" alt=""/>
-				</a>
-			</div>
-			<!--end::Login Header-->
-
-			<!--begin::Login Sign in form-->
-			<div class="login-signin">
-
-				{% block content %}
+                                	{% block content %}
 
                 {% endblock %}
 
-			</div>
-			<!--end::Login Sign in form-->
 
 
+                            </div>
+                        </div>
+                    </div>
 
-		</div>
-	</div>
-</div>
-<!--end::Login-->
-	</div>
-<!--end::Main-->
-
-
-        <script>var HOST_URL = "https://preview.keenthemes.com/metronic/theme/html/tools/preview";</script>
-        <!--begin::Global Config(global config for global JS scripts)-->
-        <script>
-            var KTAppSettings = {
-    "breakpoints": {
-        "sm": 576,
-        "md": 768,
-        "lg": 992,
-        "xl": 1200,
-        "xxl": 1200
-    },
-    "colors": {
-        "theme": {
-            "base": {
-                "white": "#ffffff",
-                "primary": "#663259",
-                "secondary": "#E5EAEE",
-                "success": "#1BC5BD",
-                "info": "#8950FC",
-                "warning": "#FFA800",
-                "danger": "#F64E60",
-                "light": "#F3F6F9",
-                "dark": "#212121"
-            },
-            "light": {
-                "white": "#ffffff",
-                "primary": "#F4E1F0",
-                "secondary": "#ECF0F3",
-                "success": "#C9F7F5",
-                "info": "#EEE5FF",
-                "warning": "#FFF4DE",
-                "danger": "#FFE2E5",
-                "light": "#F3F6F9",
-                "dark": "#D6D6E0"
-            },
-            "inverse": {
-                "white": "#ffffff",
-                "primary": "#ffffff",
-                "secondary": "#212121",
-                "success": "#ffffff",
-                "info": "#ffffff",
-                "warning": "#ffffff",
-                "danger": "#ffffff",
-                "light": "#464E5F",
-                "dark": "#ffffff"
-            }
-        },
-        "gray": {
-            "gray-100": "#F3F6F9",
-            "gray-200": "#ECF0F3",
-            "gray-300": "#E5EAEE",
-            "gray-400": "#D6D6E0",
-            "gray-500": "#B5B5C3",
-            "gray-600": "#80808F",
-            "gray-700": "#464E5F",
-            "gray-800": "#1B283F",
-            "gray-900": "#212121"
-        }
-    },
-    "font-family": "Poppins"
-};
-        </script>
-        <!--end::Global Config-->
-
-    	<!--begin::Global Theme Bundle(used by all pages)-->
-    	    	   <script src="{% static 'assets/plugins/global/plugins.bundle.js'%}"></script>
-		    	   <script src="{% static 'assets/plugins/custom/prismjs/prismjs.bundle.js'%}"></script>
-		    	   <script src="{% static 'assets/js/scripts.bundle.js'%}"></script>
-				<!--end::Global Theme Bundle-->
-
-
-                    <!--begin::Page Scripts(used by this page)-->
-                  <script src="{% static 'assets/js/pages/custom/login/login-general.js'%}"></script>
-                        <!--end::Page Scripts-->
-     <script>
+                </div>
+                <!-- wrap @e -->
+            </div>
+            <!-- content @e -->
+        <div><img class="" width="400" src="{% static 'aucun-signe-moustique-blanc_1308-70728.avif' %}" srcset="{% static 'aucun-signe-moustique-blanc_1308-70728.avif' %}" alt="logo-dark">
+                           </div>
+        </div>
+        <!-- main @e -->
+    </div>
+    <!-- app-root @e -->
+    <!-- JavaScript -->
+    <script src="{% static 'assets/js/bundle.js' %}"></script>
+    <script src="{% static 'assets/js/scripts.js' %}"></script>
+<script>
         //according to loftblog tut
         $('input').addClass('form-control')
         $('button').addClass('btn btn-primary')
@@ -191,6 +105,8 @@
           checkSection();
         });
     </script>
-            </body>
-    <!--end::Body-->
+
 </html>
+
+
+

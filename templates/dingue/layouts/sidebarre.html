@@ -1,0 +1,80 @@
+{% load static %} 
+<div class="nk-sidebar nk-sidebar-short nk-sidebar-fixed is-light" data-content="sidebarMenu">
+                <div class="nk-sidebar-element nk-sidebar-head">
+                    <div class="nk-sidebar-brand">
+                        <a href="./index.html" class="logo-link nk-sidebar-logo">
+                            <img class="logo-light logo-img" src="{% static 'images/logoke.png' %}" srcset="{% static 'images/logoke.png' %}" alt="logo">
+                            <img class="logo-dark logo-img" src="{% static 'images/logoke.png' %}" srcset="{% static 'images/logoke.png' %}" alt="logo-dark">
+                        </a>
+                        <a href="./index.html" class="logo-link nk-sidebar-logo-small">
+                            <img class="logo-light logo-img" src="{% static 'images/logoke.png' %}" srcset="{% static 'images/logoke.png' %}" alt="logo">
+                            <img class="logo-dark logo-img" src="{% static 'images/logoke.png' %}" srcset="{% static 'images/logoke.png' %}" alt="logo-dark">
+                        </a>
+                    </div>
+                    <div class="nk-menu-trigger mr-n2">
+                        <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu"><em class="icon ni ni-arrow-left"></em></a>
+                    </div>
+                </div><!-- .nk-sidebar-element -->
+                <div class="nk-sidebar-element">
+                    <div class="nk-sidebar-body" data-simplebar>
+                        <div class="nk-sidebar-content">
+                            <div class="nk-sidebar-menu nk-sidebar-menu-middle">
+                                <!-- Menu -->
+                                <ul class="nk-menu short-menu">
+                                    <li class="nk-menu-item">
+                                        <a href="{% url 'patientlist' %}" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-users-fill"></em></span>
+                                            <span class="nk-menu-text">Patients</span>
+                                            <span class="nk-menu-tooltip" title="Patients"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nk-menu-item">
+                                        <a href="{% url 'echantillons' %}" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-archive-fill"></em></span>
+                                            <span class="nk-menu-text">Echantillons</span>
+                                            <span class="nk-menu-tooltip" title="Echantillons"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nk-menu-item">
+                                        <a href="html/symptoms.html" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-sun"></em></span>
+                                            <span class="nk-menu-text">Symptoms</span>
+                                            <span class="nk-menu-tooltip" title="Symptoms"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nk-menu-item">
+                                        <a href="html/prevention.html" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-security"></em></span>
+                                            <span class="nk-menu-text">Prevention</span>
+                                            <span class="nk-menu-tooltip" title="Prevention"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nk-menu-item">
+                                        <a href="html/faqs.html" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-help"></em></span>
+                                            <span class="nk-menu-text">FAQs</span>
+                                            <span class="nk-menu-tooltip" title="FAQs"></span>
+                                        </a>
+                                    </li>
+                                    <li class="nk-menu-item">
+                                        <a href="{% url 'dingue-home' %}" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-virus"></em></span>
+                                            <span class="nk-menu-text">Dengue</span>
+                                            <span class="nk-menu-tooltip" title="Dengue"></span>
+                                        </a>
+                                    </li>
+                                    
+                                    <li class="nk-menu-item">
+                                        <a href="#" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-virus"></em></span>
+                                            <span class="nk-menu-text">Maladies</span>
+                                            <span class="nk-menu-tooltip" title="Covid"></span>
+                                        </a>
+                                    </li>
+                                </ul><!-- .nk-menu -->
+                            </div><!-- .nk-sidebar-menu -->
+                          {% include 'dingue/layouts/footer.html' %}
+                        </div><!-- .nk-sidebar-contnet -->
+                    </div><!-- .nk-sidebar-body -->
+                </div><!-- .nk-sidebar-element -->
+            </div>

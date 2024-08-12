@@ -11,11 +11,11 @@ services:
       - .:/epidemietrackr-app/
     environment:
     #variable dans le setting de django : variable du ficher .env
-      - DB_NAME=$DATABASE_NAME
-      - DB_USER=$DATABASE_USER
-      - DB_PASSWORD=$DATABASE_PASSWORD
-      - DB_HOST=$DATABASE_HOST
-      - DB_PORT=$DATABASE_PORT
+      - NAME=$DATABASE_NAME
+      - USER=$DATABASE_USER
+      - PASSWORD=$DATABASE_PASSWORD
+      - HOST=$DATABASE_HOST
+      - PORT=$DATABASE_PORT
     depends_on:
       - epidemietrackrDB
 

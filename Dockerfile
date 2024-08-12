@@ -28,6 +28,6 @@ COPY . /epidemietrackr-app/
 
 # Exposer le port sur lequel l'application Django sera accessible
 EXPOSE 8000
-RUN python manage.py migrate --noinput
+RUN python3 manage.py migrate --noinput
 # Démarrer l'application
 CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]

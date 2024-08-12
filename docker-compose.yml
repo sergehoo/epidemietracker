@@ -21,7 +21,8 @@ services:
 
 
   epidemietrackrDB:
-    image: postgis/postgis:16-3.4-alpine
+    image: postgres
+    restart: always
     #garder le port pour un acces a lexterrieur si non retirer
 #      ports:
 #        -5432:5432
@@ -30,8 +31,9 @@ services:
       - POSTGRES_DB=$DATABASE_NAME
       - POSTGRES_USER=$DATABASE_USER
       - PG_DATA=/data
+
     volumes:
-      - ogah:/data
+      - pgdata:/var/lib/postgresql/data
 
   adminer:
     image: adminer
@@ -41,4 +43,4 @@ services:
       - 8080:8080
 
 volumes:
-  ogah:
+  pgdata:

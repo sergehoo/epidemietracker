@@ -8,6 +8,10 @@ WORKDIR /epidemietrackr-app
 COPY requirements.txt /epidemietrackr-app/requirements.txt
 
 RUN pip install -r requirements.txt
+RUN apt-get update && \
+    apt-get install -y \
+    gdal-bin \
+    libgdal-dev
 
 COPY . /epidemietrackr-app/
 

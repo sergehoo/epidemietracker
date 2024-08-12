@@ -1,1 +1,5 @@
 .env
+# Exemple de contenu pour .gitignore
+*.log
+*.tmp
+

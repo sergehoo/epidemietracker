@@ -30,4 +30,5 @@ COPY . /epidemietrackr-app/
 EXPOSE 8000
 RUN python3 manage.py migrate
 # Démarrer l'application
-CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]
+CMD ["./wait-for-it.sh", "db:5432", "--","gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]
+

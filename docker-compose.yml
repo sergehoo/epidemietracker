@@ -9,16 +9,16 @@ services:
       - 5191:8000
     volumes:
       - .:/epidemie-app/
-    env_file:
-      - ./.env
+#    env_file:
+#      - ./.env
     restart: always
-#    environment:
-#    #variable dans le setting de django : variable du ficher .env_exemple
-#      - NAME=$DATABASE_NAME
-#      - USER=$DATABASE_USER
-#      - PASSWORD=$DATABASE_PASSWORD
-#      - HOST=$DATABASE_HOST
-#      - PORT=$DATABASE_PORT
+    environment:
+    #variable dans le setting de django : variable du ficher .env_exemple
+      - NAME=$DATABASE_NAME
+      - USER=$DATABASE_USER
+      - PASSWORD=$DATABASE_PASSWORD
+      - HOST=$DATABASE_HOST
+      - PORT=$DATABASE_PORT
 #    depends_on:
 #      - epidemieDB
 

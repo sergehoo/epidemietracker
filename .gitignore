@@ -1,6 +1,6 @@
-.env_exemple
+*.env_exemple
 # Exemple de contenu pour .gitignore
 *.log
 *.tmp
-.env.prod
+*.env.prod
 

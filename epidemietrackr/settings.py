@@ -27,14 +27,14 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1:5091', 'localhost', '*']
+ALLOWED_HOSTS = ['127.0.0.1:5191', 'localhost', '*']
 CSRF_TRUSTED_ORIGINS = ['https://laboipci.com', 'https://localhost', 'http://127.0.0.1']
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5091",  # Adresse de votre serveur local
-    "http://localhost:5091",  # Alias localhost
+    "http://127.0.0.1:5191",  # Adresse de votre serveur local
+    "http://localhost:5191",  # Alias localhost
     "http://127.0.0.1",  # Autoriser également sans le port
     "http://localhost",
-    "192.168.160.1:5091",
+    "192.168.160.1:5191",
     "*"
 ]
 # Application definition

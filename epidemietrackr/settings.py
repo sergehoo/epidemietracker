@@ -21,19 +21,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_wq)knn@9e7h8&20rbs$w&etfn)7_u1wdi*0cgn6*yigxn1p_z'
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.160.1:8000', 'localhost', '*']
+ALLOWED_HOSTS = ['127.0.0.1:5091', 'localhost', '*']
 CSRF_TRUSTED_ORIGINS = ['https://laboipci.com', 'https://localhost', 'http://127.0.0.1']
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000",  # Adresse de votre serveur local
-    "http://localhost:8000",  # Alias localhost
+    "http://127.0.0.1:5091",  # Adresse de votre serveur local
+    "http://localhost:5091",  # Alias localhost
     "http://127.0.0.1",  # Autoriser également sans le port
     "http://localhost",
-    "192.168.160.1:8000",
+    "192.168.160.1:5091",
     "*"
 ]
 # Application definition
@@ -108,7 +109,7 @@ DATABASES = {
         'NAME': os.environ.get('DATABASE_NAME'),
         'USER': os.environ.get('DATABASE_USER'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
+        'HOST': os.environ.get('DATABASE_HOST_DEV' if DEBUG else 'DATABASE_HOST'),
         'PORT': os.environ.get('DATABASE_PORT'),
     }
 }
@@ -192,3 +193,11 @@ LEAFLET_CONFIG = {
 SITE_ID = 1
 USE_L10N = True
 USE_THOUSAND_SEPARATOR = True
+
+# Production setting
+# SECURE_HSTS_SECONDS = 3600  # 1 heure, à ajuster selon vos besoins
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Si vous avez des sous-domaines
+# SECURE_HSTS_PRELOAD = True  # Pour permettre le préchargement par les navigateurs
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+# SECURE_SSL_REDIRECT = True

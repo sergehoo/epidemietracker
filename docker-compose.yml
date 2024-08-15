@@ -1,46 +1,54 @@
 services:
 
-  epidemietrackr-back:
+  epidemieweb:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
   #port du server : port de l'appliaction
-      - 5091:8000
+      - 5191:8000
     volumes:
-      - .:/epidemietrackr-app/
-    environment:
-    #variable dans le setting de django : variable du ficher .env
-      - NAME=$DATABASE_NAME
-      - USER=$DATABASE_USER
-      - PASSWORD=$DATABASE_PASSWORD
-      - HOST=$DATABASE_HOST
-      - PORT=$DATABASE_PORT
-    depends_on:
-      - epidemietrackrDB
+      - .:/epidemie-app/
+    env_file:
+      - ./.env
+    restart: always
+#    environment:
+#    #variable dans le setting de django : variable du ficher .env_exemple
+#      - NAME=$DATABASE_NAME
+#      - USER=$DATABASE_USER
+#      - PASSWORD=$DATABASE_PASSWORD
+#      - HOST=$DATABASE_HOST
+#      - PORT=$DATABASE_PORT
+#    depends_on:
+#      - epidemieDB
 
 
-  epidemietrackrDB:
-    image: postgres
+  epidemieDB:
+    image: postgis/postgis:12-3.4
+    platform: linux/amd64
     restart: always
     #garder le port pour un acces a lexterrieur si non retirer
 #      ports:
 #        -5432:5432
     environment:
-      - POSTGRES_PASSWORD=$DATABASE_PASSWORD
-      - POSTGRES_DB=$DATABASE_NAME
-      - POSTGRES_USER=$DATABASE_USER
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
       - PG_DATA=/data
 
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  adminer:
-    image: adminer
-    restart: always
-
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=sergeleo14@yahoo.fr
+      - PGADMIN_DEFAULT_PASSWORD=weddingLIFE18
     ports:
-      - 8080:8080
+      - 5050:80
+    restart: always
 
 volumes:
   pgdata:
+    driver: local

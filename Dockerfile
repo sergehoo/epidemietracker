@@ -1,10 +1,17 @@
 FROM python:3.9-slim
 LABEL authors="ogahserge"
 
-ENV DJANGO_SETTINGS_MODULE=epidemietrackr.settings
+#ENV DJANGO_SETTINGS_MODULE=epidemietrackr.settings
 
 WORKDIR /epidemietrackr-app
 
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# set environment variables
+#ENV PYTHONDONTWRITEBYTECODE 1
+#ENV PYTHONUNBUFFERED 1
+RUN pip install --upgrade pip
 COPY requirements.txt /epidemietrackr-app/requirements.txt
 
 # Installer les dépendances système nécessaires pour GDAL et PostgreSQL
@@ -28,7 +35,8 @@ COPY . /epidemietrackr-app/
 
 # Exposer le port sur lequel l'application Django sera accessible
 EXPOSE 8000
-RUN python3 manage.py migrate
+
 # Démarrer l'application
-CMD ["./wait-for-it.sh", "db:5432", "--","gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]
+#CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]
+CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000", "--workers=2", "--timeout=120", "--log-level=debug"]
 

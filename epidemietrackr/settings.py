@@ -127,16 +127,29 @@ WSGI_APPLICATION = 'epidemietrackr.wsgi.application'
 #         'PORT': DATABASE_PORT,
 #     }
 # }
+#Productionone
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'epidemitracker',
-        'USER': 'postgres',
-        'PASSWORD': 'weddingLIFE18',
-        'HOST': 'localhost',
-        'PORT': '5433',
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOST'),
+        'PORT': os.environ.get('DATABASE_PORT'),
     }
 }
+#local one
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
+#         'NAME': 'epidemitracker',
+#         'USER': 'postgres',
+#         'PASSWORD': 'weddingLIFE18',
+#         'HOST': 'localhost',
+#         'PORT': '5433',
+#     }
+# }
 #gdal-config --libs >---commande linux ou mac os
 # GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/Cellar/gdal/3.9.1_1/lib/libgdal.dylib')
 # GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/Cellar/geos/3.12.2/lib/libgeos_c.dylib')
@@ -178,7 +191,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")

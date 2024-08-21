@@ -75,5 +75,6 @@ RUN apt-get update && apt-get install -y postgresql-client
 EXPOSE 8000
 
 # Démarrer l'application
-CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]
+#CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000"]
 #CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000", "--workers=7", "--timeout=120", "--log-level=debug"]
+CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000", "--timeout=120", "--log-level=debug"]

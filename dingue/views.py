@@ -57,6 +57,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
     #         # return HttpResponseForbidden("You don't have permission to access this page.")
 
 
+
 class PatientListView(LoginRequiredMixin, ListView):
     model = Patient
     template_name = "dingue/patientlist.html"

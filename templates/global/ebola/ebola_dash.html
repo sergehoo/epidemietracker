@@ -1,0 +1,740 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="zxx" class="js">
+
+<head>
+    <base href="../">
+    <meta charset="utf-8">
+    <meta name="author" content="Softnio">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="@@page-discription">
+    <!-- Fav Icon  -->
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <!-- Page Title  -->
+    <title>Dengue Situation Tracker & Dashboard</title>
+    <!-- StyleSheets  -->
+    <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
+    <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+</head>
+
+<body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
+    <div class="nk-app-root">
+        <!-- main @s -->
+        <div class="nk-main ">
+            <!-- sidebar @s -->
+            {% include 'dingue/layouts/sidebarre.html' %}
+             <!-- sidebar @e -->
+            <!-- wrap @s -->
+            <div class="nk-wrap ">
+                <!-- main header @s -->
+                <div class="nk-header nk-header-fluid nk-header-fixed nk-header-onlymobile is-light">
+                    <div class="container-fluid">
+                        <div class="nk-header-wrap">
+                            <div class="nk-header-brand">
+                                <a href="index.html" class="logo-link">
+                                    <img class="logo-light logo-img" src="./images/logo.png" srcset="./images/logo2x.png 2x" alt="logo">
+                                    <img class="logo-dark logo-img" src="./images/logo-dark.png" srcset="./images/logo-dark2x.png 2x" alt="logo-dark">
+                                </a>
+                            </div>
+                            <div class="nk-menu-trigger ml-auto mr-n1">
+                                <a href="#" class="nk-nav-toggle nk-quick-nav-icon" data-target="sidebarMenu"><em class="icon ni ni-menu"></em></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- main header @e -->
+                <!-- content @s -->
+                <div class="nk-content ">
+                    <div class="container-fluid">
+                        <div class="nk-content-body">
+                            <div class="nk-block-head">
+                                <div class=" ">
+                                    <div class="">
+                                        <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoCI.png' %}" width="50"></span> EBOLA Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"></h5>
+                                    </div>
+                                    <div class="nk-block-head-content">
+                                        <p class="note-text">Derniere mise  a jours : Lundi 19 Août 2024 10:00</p>
+                                    </div>
+                                </div>
+                            </div><!-- .nk-block-head -->
+                            <div class="nk-block">
+                                <div class="row g-gs">
+                                    <div class="col-xl-4">
+                                        <div class="row g-gs">
+                                            <div class="col-lg-6 col-xl-12">
+                                                <div class="card card-bordered card-full">
+                                                    <div class="card-inner">
+                                                        <div class="nk-cov-wg1">
+                                                            <div class="card-title">
+                                                                <h5 class="title">Taux d'evolution - <small>Côte d'Ivoire</small></h5>
+                                                            </div>
+                                                            <div class="nk-cov-data">
+                                                                <h6 class="overline-title">Total des cas confirmés</h6>
+                                                                <div class="amount">0</div>
+                                                            </div>
+                                                            <div class="nk-cov-wg1-progress">
+                                                                <div class="progress progress-reverse progress-md progress-pill progress-bordered">
+                                                                    <div class="progress-bar bg-danger" data-progress="0" data-toggle="tooltip" title="Décédés : 0%"></div>
+                                                                    <div class="progress-bar bg-success" data-progress="0" data-toggle="tooltip" title="Gueris : 0%"></div>
+                                                                    <div class="progress-bar bg-primary" data-progress="0" data-toggle="tooltip" title="Cas Confirmés : 0%"></div>
+                                                                </div>
+                                                            </div>
+                                                            <ul class="nk-cov-wg1-data">
+                                                                <li>
+                                                                    <div class="title">
+                                                                        <div class="dot dot-lg sq bg-secondary"></div>
+                                                                        <span>Cas Diagnostoqués</span>
+                                                                    </div>
+                                                                    <div class="count">0</div>
+                                                                </li>
+                                                                <li>
+                                                                    <div class="title">
+                                                                        <div class="dot dot-lg sq bg-primary"></div>
+                                                                        <span>Cas confirmés</span>
+                                                                    </div>
+                                                                    <div class="count">0</div>
+                                                                </li>
+                                                                <li>
+                                                                    <div class="title">
+                                                                        <div class="dot dot-lg sq bg-success"></div>
+                                                                        <span>Guéris</span>
+                                                                    </div>
+                                                                    <div class="count">0</div>
+                                                                </li>
+                                                                <li>
+                                                                    <div class="title">
+                                                                        <div class="dot dot-lg sq bg-danger"></div>
+                                                                        <span>Décès</span>
+                                                                    </div>
+                                                                    <div class="count">0</div>
+                                                                </li>
+                                                            </ul>
+                                                            <div class="nk-cov-wg-note">Taux de  <a href="#">guerisons (0)</a> &amp; <a href="#">Décès (0)</a>.</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div><!-- .col -->
+                                            <div class="col-lg-6 col-xl-12">
+                                                <div class="card card-bordered card-full">
+                                                    <div class="card-inner">
+                                                        <div class="nk-cov-wg2">
+                                                            <div class="card-title">
+                                                                <h5 class="title">Taux de propagation - <small>Abidjan</small></h5>
+                                                            </div>
+                                                            <div class="nk-cov-group">
+                                                                <div class="nk-cov-data">
+                                                                    <h6 class="overline-title">Confirmés</h6>
+                                                                    <div class="amount amount-sm">0</div>
+                                                                </div>
+                                                                <div class="nk-cov-data">
+                                                                    <h6 class="overline-title">Guéris</h6>
+                                                                    <div class="amount amount-sm text-success">0</div>
+                                                                </div>
+                                                                <div class="nk-cov-data">
+                                                                    <h6 class="overline-title">Décès</h6>
+                                                                    <div class="amount amount-sm text-danger">0</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="nk-cov-wg-note">Taux de <a href="#">Guérisons (0%)</a> &amp; <a href="#">Décès (0%)</a>.</div>
+                                                            <div class="nk-cov-wg2-group">
+                                                                <div class="nk-cov-data">
+                                                                    <h6 class="sub-text">Patients <br class="d-xxl-none">Infectés actuellement</h6>
+                                                                    <div class="amount amount-xs">0</div>
+                                                                </div>
+                                                                <ul class="nk-cov-wg2-data">
+                                                                    <li>
+                                                                        <div class="title">
+                                                                            <div class="dot dot-lg sq bg-purple"></div>
+                                                                            <span>En Etat stable </span>
+                                                                        </div>
+                                                                        <div class="count">0</div>
+                                                                    </li>
+                                                                    <li>
+                                                                        <div class="title">
+                                                                            <div class="dot dot-lg sq bg-success"></div>
+                                                                            <span>En etat Critic</span>
+                                                                        </div>
+                                                                        <div class="count">0</div>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div><!-- .col -->
+                                        </div><!-- .row -->
+                                    </div><!-- .col -->
+                                    <div class="col-xl-8">
+                                        <div class="card card-bordered card-full">
+                                            <div class="nk-cov-wg4">
+                                                <div class="nk-cov-wg4-aside">
+                                                    <div class="nk-cov-wg4-aside-head">
+                                                        <h6 class="nk-cov-wg4-aside-title"> District Sanitaire</h6>
+                                                        <div class="nk-cov-wg4-aside-action mr-n2">
+                                                            <a href="#" class="btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
+                                                        </div>
+                                                        <div class="search-wrap" data-search="search">
+                                                            <div class="search-content">
+                                                                <a href="#" class="search-back btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-arrow-left"></em></a>
+                                                                <input type="text" class="form-control border-transparent form-focus-none" placeholder="Search by Country">
+                                                                <button class="search-submit btn btn-icon"><em class="icon ni ni-search"></em></button>
+                                                            </div>
+                                                        </div><!-- .search-wrap -->
+                                                    </div>
+                                                    <div class="nk-cov-wg4-aside-body" data-simplebar>
+                                                        <ul class="nk-cov-wg4-list">
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Abidjan 1 (Adjamé, Plateau, Attécoubé)</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Abidjan 2 (Yopougon)</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Abidjan 3 (Abobo Est, Abobo Ouest)</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Abidjan 4 (Treichville, Marcory, Koumassi)</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Abidjan 5 (Port-Bouët, Vridi)</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Bingerville</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <!-- Continuez à lister les districts sanitaires ici -->
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Songon</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Aboisso</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Adiaké</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+
+     <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Grand-Bassam</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+                                                             <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Agboville</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+                                                            <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Tiassalé</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+
+                                                            <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Sikensi</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+                                                            <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">N’douci</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+                                                            <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Alépé</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+                                                            <li>
+        <a class="nk-cov-wg4-list-item" href="#">
+            <span class="title">Akoupé</span>
+            <span class="count">00</span>
+        </a>
+    </li>
+    <!-- Ajoutez les autres districts sanitaires ici -->
+</ul>
+                                                    </div>
+                                                    <div class="nk-cov-wg4-aside-foot text-center">
+                                                        <a href="#" class="btn btn-round btn-outline-primary">Statistics des villes</a>
+                                                    </div>
+                                                </div>
+                                                <div class="nk-cov-wg4-content">
+                                                    <div class="nk-cov-wg4-map">
+{#                                                        <button onclick="toggleFullScreen()">Plein écran</button>#}
+                                                        <div id="map"></div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div><!-- .col -->
+                                    <div class="col-xl-4 col-md-6">
+                                        <div class="card card-bordered card-full">
+                                            <div class="card-inner">
+                                                <div class="card-title-group mb-1">
+                                                    <div class="card-title">
+                                                        <h6 class="title">Evolution des cas - <small>Regions</small></h6>
+                                                        <p>Quelques statistiques de l'évolution des cas</p>
+                                                    </div>
+                                                </div>
+                                                <div class="nk-cov-wg3">
+                                                    <ul class="nav nav-tabs nav-tabs-card nav-tabs-xs">
+                                                        <li class="nav-item">
+                                                            <a class="nav-link active" data-toggle="tab" href="#confirmed-cases">Cas Confirmés</a>
+                                                        </li>
+                                                        <li class="nav-item">
+                                                            <a class="nav-link" data-toggle="tab" href="#daily-increase">Evolution Journalier</a>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="tab-content mt-0">
+                                                        <div class="tab-pane active" id="confirmed-cases">
+                                                            <div class="nk-cov-wg3-legend-wrap">
+                                                                <h6 class="title">Evolution des cas</h6>
+                                                                <ul class="nk-cov-wg3-legend">
+                                                                    <li>
+                                                                        <div class="dot dot-md sq bg-purple"></div>
+                                                                        <span>Infectés</span>
+                                                                    </li>
+                                                                    <li>
+                                                                        <div class="dot dot-md sq bg-danger"></div>
+                                                                        <span>Décédés</span>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="nk-cov-wg3-ck">
+                                                                <canvas class="covid-case-line-chart" id="confirmedCases"></canvas>
+                                                            </div>
+                                                            <div class="justify-between ml-5">
+                                                                <div class="chart-label small text-soft">22 Jan, 2024</div>
+                                                                <div class="chart-label small text-soft">28 Mar, 2024</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tab-pane" id="daily-increase">
+                                                            <div class="nk-cov-wg3-legend-wrap">
+                                                                <h6 class="title">Flow of Cases</h6>
+                                                                <ul class="nk-cov-wg3-legend">
+                                                                    <li>
+                                                                        <div class="dot dot-md sq bg-purple"></div>
+                                                                        <span>Infected</span>
+                                                                    </li>
+                                                                    <li>
+                                                                        <div class="dot dot-md sq bg-danger"></div>
+                                                                        <span>Deaths</span>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                            <div class="nk-cov-wg3-ck">
+                                                                <canvas class="covid-case-bar-chart" id="dailyIncrease"></canvas>
+                                                            </div>
+                                                            <div class="justify-between ml-5">
+                                                                <div class="chart-label small text-soft">22 Jan, 2020</div>
+                                                                <div class="chart-label small text-soft">28 Mar, 2020</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div><!-- .col -->
+                                    <div class="col-xl-4 col-md-6">
+                                        <div class="card card-bordered card-full">
+                                            <div class="card-inner mb-n2">
+                                                <div class="card-title-group">
+                                                    <div class="card-title mb-0">
+                                                        <h6 class="title">Districts Sanitaire les Plus Affectés </h6>
+                                                    </div>
+                                                    <div class="card-tools">
+                                                        <a href="#" class="link">View All</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="nk-tb-list is-medium nk-cov-wg5-table">
+                                                <div class="nk-tb-item nk-tb-head">
+                                                    <div class="nk-tb-col">Regions</div>
+                                                    <div class="nk-tb-col text-right">Confirmés</div>
+                                                    <div class="nk-tb-col text-right">Guéris</div>
+                                                    <div class="nk-tb-col text-right">Décédés</div>
+                                                </div>
+                                                <div class="nk-tb-item">
+                                                    <div class="nk-tb-col">
+                                                        <div class="tb-country">
+                                                            <img class="flag" src="./images/flags/us.png" alt="">
+                                                            <div class="name">Abidjan 1</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                </div>
+                                                <div class="nk-tb-item">
+                                                    <div class="nk-tb-col">
+                                                        <div class="tb-country">
+                                                            <img class="flag" src="./images/flags/it.png" alt="">
+                                                            <div class="name">Abidjan 2</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                </div>
+                                                <div class="nk-tb-item">
+                                                    <div class="nk-tb-col">
+                                                        <div class="tb-country">
+                                                            <img class="flag" src="./images/flags/cn.png" alt="">
+                                                            <div class="name">Bouake</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                </div>
+                                                <div class="nk-tb-item">
+                                                    <div class="nk-tb-col">
+                                                        <div class="tb-country">
+                                                            <img class="flag" src="./images/flags/es.png" alt="">
+                                                            <div class="name">Korhogo</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                </div>
+                                                <div class="nk-tb-item">
+                                                    <div class="nk-tb-col">
+                                                        <div class="tb-country">
+                                                            <img class="flag" src="./images/flags/de.png" alt="">
+                                                            <div class="name">Yamoussoukro</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                    <div class="nk-tb-col text-right">
+                                                        <div class="tb-lead tb-amount">0</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div><!-- .col -->
+                                    <div class="col-xl-4">
+                                        <div class="card card-bordered card-full is-center-mb">
+                                            <div class="card-inner">
+                                                <div class="card-title mb-4">
+                                                    <h6 class="title">Actualités et importantes mise à jours</h6>
+                                                </div>
+                                                <div class="nk-cov-newswg">
+                                                    <div class="nk-cov-newswg-item">
+                                                        <div class="nk-cov-newswg-content">
+                                                            <h6 class="title"><a href="#">The rules of safe shopping under coronavirus: five tips for social distancing</a></h6>
+                                                            <ul class="nk-cov-newswg-meta">
+                                                                <li><a href="#">The Guardian</a></li>
+                                                                <li>1 day ago</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="nk-cov-newswg-image">
+                                                            <img src="./images/gfx/covid-news-a.jpg" alt="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="nk-cov-newswg-item">
+                                                        <div class="nk-cov-newswg-content">
+                                                            <h6 class="title"><a href="#">Japan’s relatively small coronavirus case count may be a mirage</a></h6>
+                                                            <ul class="nk-cov-newswg-meta">
+                                                                <li><a href="#">Vox</a></li>
+                                                                <li>1 day ago</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="nk-cov-newswg-image">
+                                                            <img src="./images/gfx/covid-news-b.jpg" alt="">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <a href="#" class="link link-sm"><span>More Stories</span> <em class="icon ni ni-arrow-long-right"></em></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div><!-- .col -->
+                                </div><!-- .row -->
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
+                <!-- content @e -->
+                <!-- footer @s -->
+                <div class="nk-footer d-md-none">
+                    <div class="container-fluid">
+                        <div class="nk-footer-wrap gy-1 gx-4">
+                            <div class="nk-footer-links">
+                                <ul class="nav nav-sm">
+                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">Feedback</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-about">About Data</a></li>
+                                </ul>
+                            </div>
+                            <div class="nk-footer-copyright"> &copy; Copyright 2020, <a href="#">Softnio</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- footer @e -->
+            </div>
+            <!-- wrap @e -->
+        </div>
+        <!-- main @e -->
+    </div>
+    <!-- app-root @e -->
+    <!-- Modal About -->
+    <div class="modal fade" tabindex="-1" id="covid-about">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                    <em class="icon ni ni-cross"></em>
+                </a>
+                <div class="modal-body">
+                    <h5 class="title mb-3">About this data</h5>
+                    <h6 class="lead-text text-primary">It changes rapidly</h6>
+                    <p>This data changes rapidly, so what’s shown may be out of date. Table totals may not always represent an accurate sum. Information about reported cases is also available on the <a href="#">World Health Organization</a> & <a href="#">WorldoMeters.info</a> site.</p>
+                    <h6 class="lead-text text-primary">It doesn’t include all cases</h6>
+                    <p>Confirmed cases aren’t all cases. They only include people who tested positive. Testing rules and availability vary by country.</p>
+                    <div class="note-text">Updated: March 27, 2020 12:30 (GMT +6)</div>
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Feedback -->
+    <div class="modal fade" tabindex="-1" id="covid-feedback">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="justify-between gx-5 mb-3">
+                        <div>
+                            <h6 class="modal-title text-primary">What kind of feedback do you have about this tool?</h6>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-icon btn-trigger mr-n2 mt-n1" data-dismiss="modal" aria-label="Close">
+                                <em class="icon ni ni-cross"></em>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="btn-list-vr g-2">
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-report"></em> <span>Report an issue</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-bulb"></em> <span>Share an idea</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-question-alt"></em> <span>Give a compliment</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-policy"></em> <span>Legal or privacy concern</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Feedback Form -->
+    <div class="modal fade" tabindex="-1" id="covid-feedback-form">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="justify-between gx-5 mb-1">
+                        <div>
+                            <h6 class="modal-title text-primary">Tell us about the issue</h6>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-icon btn-trigger mr-n2 mt-n1" data-dismiss="modal" aria-label="Close">
+                                <em class="icon ni ni-cross"></em>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JavaScript -->
+    <script src="{% static 'assets/js/bundle.js' %}"></script>
+    <script src="{% static 'assets/js/scripts.js' %}"></script>
+    <script src="{% static 'assets/js/libs/jqvmap.js' %}"></script>
+    <script src="{% static 'assets/js/chart-covid.js' %}"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/terraformer@1.0.7"></script>
+    <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
+    
+    <script>
+    var map = L.map('map').setView([7.54, -5.55], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
+    }).addTo(map);
+
+    // Utilisation de Leaflet.markercluster pour regrouper les marqueurs
+    var markers = L.markerClusterGroup();
+
+    // Récupération des données agrégées par commune
+    {#fetch('dingue/api/communes_aggregated/')#}
+    {#    .then(response => response.json())#}
+    {#    .then(communes => {#}
+    {#        communes.forEach(commune => {#}
+    {#            if (commune.geom) {#}
+    {#                try {#}
+    {#                    var cleanedWKT = commune.geom.replace(/^SRID=\d+;/, '');#}
+    {#                    var geoJSON = Terraformer.WKT.parse(cleanedWKT);#}
+    {#                    var centroid = L.geoJSON(geoJSON).getBounds().getCenter();#}
+    {##}
+    {#                    var myIcon = L.divIcon({#}
+    {#                        className: 'custom-div-icon',#}
+    {#                        html: `<div class='circle-marker'>${commune.total_patients}</div>`,#}
+    {#                        iconSize: [30, 30],#}
+    {#                        iconAnchor: [15, 15]#}
+    {#                    });#}
+    {##}
+    {#                    var marker = L.marker(centroid, {icon: myIcon})#}
+    {#                        .bindPopup(`<b>${commune.name}</b><br>Total Patients: ${commune.total_patients}`)#}
+    {#                        .on('click', function() {#}
+    {#                            // Lazy load des patients lors du clic#}
+    {#                            fetch(`dingue/api/patient/?commune_id=${commune.id}`)#}
+    {#                                .then(response => response.json())#}
+    {#                                .then(patients => {#}
+    {#                                    var popupContent = `<b>${commune.name}</b><br><br>`;#}
+    {#                                    patients.forEach(patient => {#}
+    {#                                        popupContent += `${patient.nom} ${patient.prenoms}<br>`;#}
+    {#                                    });#}
+    {#                                    this.getPopup().setContent(popupContent).openOn(map);#}
+    {#                                })#}
+    {#                                .catch(error => console.error('Erreur lors de la récupération des patients :', error));#}
+    {#                        });#}
+    {##}
+    {#                    markers.addLayer(marker);#}
+    {##}
+    {#                } catch (error) {#}
+    {#                    console.error(`Erreur lors de l'analyse GeoJSON pour la commune : ${commune.name}`, error);#}
+    {#                }#}
+    {#            } else {#}
+    {#                console.error(`Données de localisation invalides pour la commune : ${commune.name}`);#}
+    {#            }#}
+    {#        });#}
+    {##}
+    {#        map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group#}
+    {##}
+    {#    })#}
+    {#    .catch(error => console.error('Erreur lors de la récupération des données des communes :', error));#}
+</script>
+
+
+    <style>
+        /* Style pour le marqueur circulaire */
+        .circle-marker {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            border: 3px dashed white;
+            animation: dash 2s linear infinite;
+        }
+
+        /* Animation des bordures en pointillés */
+        @keyframes dash {
+            0% {
+                border-style: dashed;
+                border-width: 3px;
+            }
+            50% {
+                border-style: dashed;
+                border-width: 3px;
+                transform: rotate(180deg);
+            }
+            100% {
+                border-style: dashed;
+                border-width: 3px;
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+</body>
+
+</html>

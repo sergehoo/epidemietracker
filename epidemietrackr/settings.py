@@ -21,19 +21,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+
+# Clé secrète
 SECRET_KEY = 'django-insecure-_wq)knn@9e7h8&20rbs$w&etfn)7_u1wdi*0cgn6*yigxn1p_z'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Mode Debug
+# DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.160.1:8000', 'localhost', '*']
-CSRF_TRUSTED_ORIGINS = ['https://laboipci.com', 'https://localhost', 'http://127.0.0.1']
+# Hôtes autorisés
+# ALLOWED_HOSTS = ['https://localhost', 'http://127.0.0.1', '*'],
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1']
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",  # Adresse de votre serveur local
     "http://localhost:8000",  # Alias localhost
     "http://127.0.0.1",  # Autoriser également sans le port
     "http://localhost",
-    "192.168.160.1:8000",
+    "192.168.160.1:8001",
     "*"
 ]
 # Application definition
@@ -67,6 +74,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Add the account middleware:
     "allauth.account.middleware.AccountMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = 'epidemietrackr.urls'
@@ -102,19 +111,35 @@ WSGI_APPLICATION = 'epidemietrackr.wsgi.application'
 #     }
 # }
 
+# DATABASE_NAME = os.getenv('DATABASE_NAME')
+# DATABASE_USER = os.getenv('DATABASE_USER')
+# DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
+# DATABASE_HOST = os.getenv('DATABASE_HOST')
+# DATABASE_PORT = os.getenv('DATABASE_PORT', '5432')
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
+#         'NAME': DATABASE_NAME,
+#         'USER': DATABASE_USER,
+#         'PASSWORD': DATABASE_PASSWORD,
+#         'HOST': DATABASE_HOST,
+#         'PORT': DATABASE_PORT,
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': os.environ.get('DATABASE_PORT'),
+        'NAME': 'epidemitracker',
+        'USER': 'postgres',
+        'PASSWORD': 'weddingLIFE18',
+        'HOST': 'localhost',
+        'PORT': '5433',
     }
 }
 #gdal-config --libs >---commande linux ou mac os
-# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/Cellar/gdal/3.9.1_1/lib/libgdal.dylib')
-# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/Cellar/geos/3.12.2/lib/libgeos_c.dylib')
+GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/Cellar/gdal/3.9.1_1/lib/libgdal.dylib')
+GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/Cellar/geos/3.12.2/lib/libgeos_c.dylib')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -148,14 +173,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -179,7 +205,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 LOGOUT_REDIRECT_URL = 'account_login'
-LOGIN_REDIRECT_URL = 'dingue-home'
+LOGIN_REDIRECT_URL = 'landing'
 
 LEAFLET_CONFIG = {
     'DEFAULT_CENTER': (7.54, -5.55),

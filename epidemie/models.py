@@ -190,6 +190,7 @@ class Epidemie(models.Model):
     description = models.TextField(blank=True, null=True)
     date_debut = models.DateField()
     date_fin = models.DateField(blank=True, null=True)
+    thumbnails = models.ImageField(null=True, blank=True, upload_to='epidemie/thumbnails')
     symptômes = models.ManyToManyField(Symptom, related_name='épidémies')
 
     def __str__(self):

@@ -59,13 +59,13 @@
                 <div class="nk-content ">
                     <div class="container-fluid">
                         <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="nk-block-between flex-wrap g-1 align-start">
-                                    <div class="nk-block-head-content">
-                                        <h5 class="nk-block-title">Dengue Situation Tracker & Dashboard</h5>
+                            <div class="nk-block-head">
+                                <div class=" ">
+                                    <div class="">
+                                        <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoCI.png' %}" width="50"></span> Dengue Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"></h5>
                                     </div>
                                     <div class="nk-block-head-content">
-                                        <p class="note-text">Derniere mise  a jours : 19:00</p>
+                                        <p class="note-text">Derniere mise  a jours : Lundi 19 Août 2024 10:00</p>
                                     </div>
                                 </div>
                             </div><!-- .nk-block-head -->
@@ -150,7 +150,7 @@
                                                             <div class="nk-cov-wg-note">Taux de <a href="#">Guérisons (31.3%)</a> &amp; <a href="#">Décès (10.5%)</a>.</div>
                                                             <div class="nk-cov-wg2-group">
                                                                 <div class="nk-cov-data">
-                                                                    <h6 class="sub-text">Currently <br class="d-xxl-none"> Patients Infectés</h6>
+                                                                    <h6 class="sub-text">Patients <br class="d-xxl-none">Infectés actuellement</h6>
                                                                     <div class="amount amount-xs">28</div>
                                                                 </div>
                                                                 <ul class="nk-cov-wg2-data">
@@ -181,7 +181,7 @@
                                             <div class="nk-cov-wg4">
                                                 <div class="nk-cov-wg4-aside">
                                                     <div class="nk-cov-wg4-aside-head">
-                                                        <h6 class="nk-cov-wg4-aside-title">Cas par ville</h6>
+                                                        <h6 class="nk-cov-wg4-aside-title"> District Sanitaire</h6>
                                                         <div class="nk-cov-wg4-aside-action mr-n2">
                                                             <a href="#" class="btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
                                                         </div>
@@ -225,31 +225,31 @@
                                             <div class="card-inner">
                                                 <div class="card-title-group mb-1">
                                                     <div class="card-title">
-                                                        <h6 class="title">Cases Over Time - <small>worldwide</small></h6>
-                                                        <p>The charts below show daily and total case trends.</p>
+                                                        <h6 class="title">Evolution des cas - <small>Regions</small></h6>
+                                                        <p>Quelques statistiques de l'évolution des cas</p>
                                                     </div>
                                                 </div>
                                                 <div class="nk-cov-wg3">
                                                     <ul class="nav nav-tabs nav-tabs-card nav-tabs-xs">
                                                         <li class="nav-item">
-                                                            <a class="nav-link active" data-toggle="tab" href="#confirmed-cases">Confirmed Cases</a>
+                                                            <a class="nav-link active" data-toggle="tab" href="#confirmed-cases">Cas Confirmés</a>
                                                         </li>
                                                         <li class="nav-item">
-                                                            <a class="nav-link" data-toggle="tab" href="#daily-increase">Daily Increase</a>
+                                                            <a class="nav-link" data-toggle="tab" href="#daily-increase">Evolution Journalier</a>
                                                         </li>
                                                     </ul>
                                                     <div class="tab-content mt-0">
                                                         <div class="tab-pane active" id="confirmed-cases">
                                                             <div class="nk-cov-wg3-legend-wrap">
-                                                                <h6 class="title">Flow of Cases</h6>
+                                                                <h6 class="title">Evolution des cas</h6>
                                                                 <ul class="nk-cov-wg3-legend">
                                                                     <li>
                                                                         <div class="dot dot-md sq bg-purple"></div>
-                                                                        <span>Infected</span>
+                                                                        <span>Infectés</span>
                                                                     </li>
                                                                     <li>
                                                                         <div class="dot dot-md sq bg-danger"></div>
-                                                                        <span>Deaths</span>
+                                                                        <span>Décédés</span>
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -293,7 +293,7 @@
                                             <div class="card-inner mb-n2">
                                                 <div class="card-title-group">
                                                     <div class="card-title mb-0">
-                                                        <h6 class="title">Most Affected Countries</h6>
+                                                        <h6 class="title">Districts Sanitaire les Plus Affectés </h6>
                                                     </div>
                                                     <div class="card-tools">
                                                         <a href="#" class="link">View All</a>
@@ -302,16 +302,16 @@
                                             </div>
                                             <div class="nk-tb-list is-medium nk-cov-wg5-table">
                                                 <div class="nk-tb-item nk-tb-head">
-                                                    <div class="nk-tb-col">Country</div>
-                                                    <div class="nk-tb-col text-right">Confirmed</div>
-                                                    <div class="nk-tb-col text-right">Recovered</div>
-                                                    <div class="nk-tb-col text-right">Deaths</div>
+                                                    <div class="nk-tb-col">Regions</div>
+                                                    <div class="nk-tb-col text-right">Confirmés</div>
+                                                    <div class="nk-tb-col text-right">Guéris</div>
+                                                    <div class="nk-tb-col text-right">Décédés</div>
                                                 </div>
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
                                                         <div class="tb-country">
                                                             <img class="flag" src="./images/flags/us.png" alt="">
-                                                            <div class="name">USA</div>
+                                                            <div class="name">Abidjan 1</div>
                                                         </div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
@@ -328,7 +328,7 @@
                                                     <div class="nk-tb-col">
                                                         <div class="tb-country">
                                                             <img class="flag" src="./images/flags/it.png" alt="">
-                                                            <div class="name">Italy</div>
+                                                            <div class="name">Abidjan 2</div>
                                                         </div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
@@ -345,7 +345,7 @@
                                                     <div class="nk-tb-col">
                                                         <div class="tb-country">
                                                             <img class="flag" src="./images/flags/cn.png" alt="">
-                                                            <div class="name">China</div>
+                                                            <div class="name">Bouake</div>
                                                         </div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
@@ -362,7 +362,7 @@
                                                     <div class="nk-tb-col">
                                                         <div class="tb-country">
                                                             <img class="flag" src="./images/flags/es.png" alt="">
-                                                            <div class="name">Spain</div>
+                                                            <div class="name">Khorogo</div>
                                                         </div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
@@ -379,7 +379,7 @@
                                                     <div class="nk-tb-col">
                                                         <div class="tb-country">
                                                             <img class="flag" src="./images/flags/de.png" alt="">
-                                                            <div class="name">Germany</div>
+                                                            <div class="name">Yamoussoukro</div>
                                                         </div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
@@ -399,7 +399,7 @@
                                         <div class="card card-bordered card-full is-center-mb">
                                             <div class="card-inner">
                                                 <div class="card-title mb-4">
-                                                    <h6 class="title">Top Stories &amp; Updates</h6>
+                                                    <h6 class="title">Actualités et importantes mise à jours</h6>
                                                 </div>
                                                 <div class="nk-cov-newswg">
                                                     <div class="nk-cov-newswg-item">

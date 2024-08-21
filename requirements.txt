@@ -12,9 +12,11 @@ humanize==4.10.0
 importlib_metadata==8.2.0
 Markdown==3.6
 psycopg2-binary
-gunicorn
 python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
 six==1.16.0
 sqlparse==0.5.1
 typing_extensions==4.12.2
+whitenoise==6.7.0
 zipp==3.19.2
+gunicorn

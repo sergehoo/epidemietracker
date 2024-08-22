@@ -53,6 +53,8 @@ class EpidemicCaseAdmin(ModelAdmin):
 admin.site.register(EpidemicCase, EpidemicCaseAdmin)
 
 
+
+
 class HealthRegionAdminForm(forms.ModelForm):
     class Meta:
         model = HealthRegion

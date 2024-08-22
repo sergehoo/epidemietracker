@@ -60,8 +60,16 @@ Patient_statut_choices = [
 ]
 
 
+class HealthRegion(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class DistrictSanitaire(models.Model):
     nom = models.CharField(max_length=100, null=True, blank=True, )
+    region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True, )
 
 
 class ServiceSanitaire(models.Model):
@@ -246,7 +254,7 @@ class PreleveMode(models.Model):
 
 
 class Echantillon(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="echantillons", null=True, blank=True,)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="echantillons", null=True, blank=True, )
     code_echantillon = models.CharField(null=True, blank=True, max_length=10, unique=True)
     maladie = models.ForeignKey('Epidemie', null=True, blank=True, on_delete=models.CASCADE)
     mode_preleve = models.ForeignKey('PreleveMode', null=True, blank=True, on_delete=models.CASCADE)
@@ -262,14 +270,6 @@ class Echantillon(models.Model):
 
     def __str__(self):
         return f"{self.code_echantillon}- {self.patient}"
-
-
-class HealthRegion(models.Model):
-    name = models.CharField(max_length=100)
-    geom = models.MultiPolygonField()
-
-    def __str__(self):
-        return self.name
 
 
 class City(models.Model):

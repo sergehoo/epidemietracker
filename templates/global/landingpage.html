@@ -160,20 +160,7 @@
 
                                 </div><!-- .row -->
                             </div>
-                          <div class="nk-block">
-                                <div class="row g-gs">
-
-                                    <div class="col-xl-12">
-                                        <div class="card card-bordered card-full">
-                                       <div class="nk-cov-wg4-map">
-
-                                                        <div id="map"></div>
-                                        </div>
-                                    </div><!-- .col -->
-
-                                </div><!-- .row -->
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
                 <!-- content @e -->
@@ -291,66 +278,7 @@
 
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
-    <script>
-    var map = L.map('map').setView([7.54, -5.55], 7);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
-    }).addTo(map);
-
-    // Utilisation de Leaflet.markercluster pour regrouper les marqueurs
-    var markers = L.markerClusterGroup();
-
-    // Récupération des données agrégées par commune
-    fetch('dengue/api/communes_aggregated/')
-        .then(response => response.json())
-        .then(communes => {
-            communes.forEach(commune => {
-                if (commune.geom) {
-                    try {
-                        var cleanedWKT = commune.geom.replace(/^SRID=\d+;/, '');
-                        var geoJSON = Terraformer.WKT.parse(cleanedWKT);
-                        var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
-
-                        var myIcon = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div class='circle-marker'>${commune.total_patients}</div>`,
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 15]
-                        });
-
-                        var marker = L.marker(centroid, {icon: myIcon})
-                            .bindPopup(`<b>${commune.name}</b><br>Total Patients: ${commune.total_patients}`)
-                            .on('click', function() {
-                                // Lazy load des patients lors du clic
-                                fetch(`dengue/api/patient/?commune_id=${commune.id}`)
-                                    .then(response => response.json())
-                                    .then(patients => {
-                                        var popupContent = `<b>${commune.name}</b><br><br>`;
-                                        patients.forEach(patient => {
-                                            popupContent += `${patient.nom} ${patient.prenoms}<br>`;
-                                        });
-                                        this.getPopup().setContent(popupContent).openOn(map);
-                                    })
-                                    .catch(error => console.error('Erreur lors de la récupération des patients :', error));
-                            });
-
-                        markers.addLayer(marker);
-
-                    } catch (error) {
-                        console.error(`Erreur lors de l'analyse GeoJSON pour la commune : ${commune.name}`, error);
-                    }
-                } else {
-                    console.error(`Données de localisation invalides pour la commune : ${commune.name}`);
-                }
-            });
-
-            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group
-
-        })
-        .catch(error => console.error('Erreur lors de la récupération des données des communes :', error));
-</script>
 
 
 {#    <script>#}

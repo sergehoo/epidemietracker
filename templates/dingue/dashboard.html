@@ -157,14 +157,14 @@
                                                                     <li>
                                                                         <div class="title">
                                                                             <div class="dot dot-lg sq bg-purple"></div>
-                                                                            <span>En Etat stable </span>
+                                                                            <span>Etat stable </span>
                                                                         </div>
                                                                         <div class="count">27</div>
                                                                     </li>
                                                                     <li>
                                                                         <div class="title">
                                                                             <div class="dot dot-lg sq bg-success"></div>
-                                                                            <span>En etat Critic</span>
+                                                                            <span>Etat Critic</span>
                                                                         </div>
                                                                         <div class="count">01</div>
                                                                     </li>
@@ -554,68 +554,85 @@
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
     <script>
-    var map = L.map('map').setView([7.54, -5.55], 7);
+        {#var map = L.map('map').setView([7.54, -5.55], 7);#}
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
-    }).addTo(map);
+        {#L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {#}
+        {#    maxZoom: 18,#}
+        {#    attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'#}
+        {# }).addTo(map);#}
 
-    // Utilisation de Leaflet.markercluster pour regrouper les marqueurs
-    var markers = L.markerClusterGroup();
+        var coteDIvoireBounds = [
+            [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
+            [10.73, -2.51] // Nord-Est (Point le plus au nord)
+        ];
 
-    // Récupération des données agrégées par commune
-    fetch('dingue/api/communes_aggregated/')
-        .then(response => response.json())
-        .then(communes => {
-            communes.forEach(commune => {
-                if (commune.geom) {
-                    try {
-                        var cleanedWKT = commune.geom.replace(/^SRID=\d+;/, '');
-                        var geoJSON = Terraformer.WKT.parse(cleanedWKT);
-                        var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
+        var map = L.map('map', {
+            maxBounds: coteDIvoireBounds, // Définir les limites maximales
+            maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords
+            minZoom: 7, // Définir le zoom minimum
+        }).setView([7.54, -5.55], 7);
 
-                        var myIcon = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div class='circle-marker'>${commune.total_patients}</div>`,
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 15]
-                        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
+        }).addTo(map);
 
-                        var marker = L.marker(centroid, {icon: myIcon})
-                            .bindPopup(`<b>${commune.name}</b><br>Total Patients: ${commune.total_patients}`)
-                            .on('click', function() {
-                                // Lazy load des patients lors du clic
-                                fetch(`dingue/api/patient/?commune_id=${commune.id}`)
-                                    .then(response => response.json())
-                                    .then(patients => {
-                                        var popupContent = `<b>${commune.name}</b><br><br>`;
-                                        patients.forEach(patient => {
-                                            popupContent += `${patient.nom} ${patient.prenoms}<br>`;
-                                        });
-                                        this.getPopup().setContent(popupContent).openOn(map);
-                                    })
-                                    .catch(error => console.error('Erreur lors de la récupération des patients :', error));
+
+        // Utilisation de Leaflet.markercluster pour regrouper les marqueurs
+        var markers = L.markerClusterGroup();
+
+        // Récupération des données agrégées par commune
+        fetch('dengue/api/communes_aggregated/')
+            .then(response => response.json())
+            .then(communes => {
+                communes.forEach(commune => {
+                    if (commune.geom) {
+                        try {
+                            var cleanedWKT = commune.geom.replace(/^SRID=\d+;/, '');
+                            var geoJSON = Terraformer.WKT.parse(cleanedWKT);
+                            var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
+
+                            var myIcon = L.divIcon({
+                                className: 'custom-div-icon',
+                                html: `<div class='circle-marker'></div>`,
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 15]
                             });
 
-                        markers.addLayer(marker);
+                            var marker = L.marker(centroid, {icon: myIcon})
+                                .bindPopup(`<b>${commune.name}</b><br>Total Patients: ${commune.total_patients}`)
+                                .on('click', function () {
+                                    // Lazy load des patients lors du clic
+                                    fetch(`dengue/api/patient/?commune_id=${commune.id}`)
+                                        .then(response => response.json())
+                                        .then(patients => {
+                                            var popupContent = `<b>${commune.name}</b><br><br>`;
+                                            patients.forEach(patient => {
+                                                popupContent += `${patient.nom} ${patient.prenoms}<br>`;
+                                            });
+                                            this.getPopup().setContent(popupContent).openOn(map);
+                                        })
+                                        .catch(error => console.error('Erreur lors de la récupération des patients :', error));
+                                });
 
-                    } catch (error) {
-                        console.error(`Erreur lors de l'analyse GeoJSON pour la commune : ${commune.name}`, error);
+                            markers.addLayer(marker);
+
+                        } catch (error) {
+                            console.error(`Erreur lors de l'analyse GeoJSON pour la commune : ${commune.name}`, error);
+                        }
+                    } else {
+                        console.error(`Données de localisation invalides pour la commune : ${commune.name}`);
                     }
-                } else {
-                    console.error(`Données de localisation invalides pour la commune : ${commune.name}`);
-                }
-            });
+                });
 
-            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group
+                map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group
 
-        })
-        .catch(error => console.error('Erreur lors de la récupération des données des communes :', error));
-</script>
+            })
+            .catch(error => console.error('Erreur lors de la récupération des données des communes :', error));
+    </script>
 
 
-{#    <script>#}
+    {#    <script>#}
 {#        var map = L.map('map').setView([7.54, -5.55], 7);#}
 {##}
 {#        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {#}

@@ -5,9 +5,6 @@ from rest_framework.routers import DefaultRouter
 
 from dingue.views import HomePageView, PatientListView, EchantillonListView
 from ebola.views import EbolaHomeDash
-from epidemie.views import dashboard_view, HealthRegionViewSet, CityViewSet, EpidemicCaseViewSet, PatientViewSet, \
-    ServiceSanitaireViewSet, CommuneViewSet, CommuneAggregatedViewSet
-
 
 urlpatterns = [
 

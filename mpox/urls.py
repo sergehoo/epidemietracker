@@ -4,8 +4,6 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from dingue.views import HomePageView, PatientListView, EchantillonListView
-from epidemie.views import dashboard_view, HealthRegionViewSet, CityViewSet, EpidemicCaseViewSet, PatientViewSet, \
-    ServiceSanitaireViewSet, CommuneViewSet, CommuneAggregatedViewSet
 from mpox.views import MpoxHomeDash
 
 urlpatterns = [

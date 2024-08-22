@@ -34,9 +34,9 @@ DEBUG = True
 # ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
-ALLOWED_HOSTS = ['154.56.60.195:5191', 'localhost', '*','https://afriqconsulting.net:5191']
+ALLOWED_HOSTS = ['154.56.60.195:5191', 'localhost', '*', 'https://afriqconsulting.net:5191']
 CSRF_TRUSTED_ORIGINS = ['https://afriqconsulting.net:5191', 'https://afriqconsulting.net',
-                        'http://afriqconsulting.net' 'https://localhost', 'http://127.0.0.1', '*']
+                        'http://afriqconsulting.net' 'https://localhost', 'http://127.0.0.1']
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5191",  # Adresse de votre serveur local
     "http://localhost:5191",  # Alias localhost
@@ -67,6 +67,9 @@ INSTALLED_APPS = [
     'dingue',
     'epidemie',
     'import_data',
+    'tinymce',
+    'import_export',
+
 ]
 
 MIDDLEWARE = [
@@ -144,7 +147,7 @@ DATABASES = {
         'PORT': os.environ.get('DATABASE_PORT'),
     }
 }
-#local one
+# local one
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -235,3 +238,21 @@ LEAFLET_CONFIG = {
 SITE_ID = 1
 USE_L10N = True
 USE_THOUSAND_SEPARATOR = True
+
+# Broker URL pour RabbitMQ, Redis, etc.
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+# Backend pour stocker les résultats des tâches
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Liste des modules de tâches à découvrir
+CELERY_IMPORTS = ('epidemies.tasks',)
+
+# Autres configurations recommandées
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Abidjan'
+
+# Concurrence (nombre de workers)
+CELERY_WORKER_CONCURRENCY = 4

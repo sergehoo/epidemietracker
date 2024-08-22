@@ -5,6 +5,7 @@ from django.contrib.gis.db import models
 from django.utils.timezone import now
 from djgeojson.fields import PointField
 from simple_history.models import HistoricalRecords
+from tinymce.models import HTMLField
 
 Sexe_choices = [
     ('Homme', 'Homme'),
@@ -187,11 +188,46 @@ class Typeepidemie(models.Model):
 class Epidemie(models.Model):
     nom = models.CharField(max_length=100)
     type = models.ForeignKey('Typeepidemie', null=True, blank=True, on_delete=models.CASCADE)
-    description = models.TextField(blank=True, null=True)
-    date_debut = models.DateField()
+    description = HTMLField(blank=True, null=True)
+    date_debut = models.DateField(blank=True, null=True)
     date_fin = models.DateField(blank=True, null=True)
     thumbnails = models.ImageField(null=True, blank=True, upload_to='epidemie/thumbnails')
-    symptômes = models.ManyToManyField(Symptom, related_name='épidémies')
+    symptomes = models.ManyToManyField(Symptom, related_name='épidémies', blank=True, null=True)
+
+    @property
+    def regions_impactees(self):
+        # Récupère toutes les régions impactées par cette épidémie
+        regions = HealthRegion.objects.filter(city__commune__echantillons__maladie=self).distinct().count()
+        return regions
+
+    @property
+    def personnes_touchees(self):
+        # Compte le nombre de personnes ayant des échantillons positifs pour cette épidémie
+        nombre_personnes_touchees = Patient.objects.filter(
+            echantillons__maladie=self,
+            echantillons__resultat='POSITIF'
+        ).distinct().count()
+        return nombre_personnes_touchees
+
+    @property
+    def personnes_decedees(self):
+        # Compte le nombre de personnes décédées ayant des échantillons positifs pour cette épidémie
+        nombre_personnes_decedees = Patient.objects.filter(
+            echantillons__maladie=self,
+            echantillons__resultat='POSITIF',
+            decede=True
+        ).distinct().count()
+        return nombre_personnes_decedees
+
+    @property
+    def nombre_patients_positifs_ce_mois(self):
+        current_month = now().month
+        current_year = now().year
+        return self.echantillon_set.filter(
+            resultat='POSITIF',
+            date_collect__month=current_month,
+            date_collect__year=current_year
+        ).count()
 
     def __str__(self):
         return self.nom
@@ -210,8 +246,8 @@ class PreleveMode(models.Model):
 
 
 class Echantillon(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="echantillons")
-    code_echantillon = models.CharField(null=True, blank=True, max_length=10)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="echantillons", null=True, blank=True,)
+    code_echantillon = models.CharField(null=True, blank=True, max_length=10, unique=True)
     maladie = models.ForeignKey('Epidemie', null=True, blank=True, on_delete=models.CASCADE)
     mode_preleve = models.ForeignKey('PreleveMode', null=True, blank=True, on_delete=models.CASCADE)
     date_collect = models.DateTimeField(null=True, blank=True)

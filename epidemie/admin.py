@@ -6,6 +6,17 @@ from leaflet.forms.widgets import LeafletWidget
 from epidemie.models import HealthRegion, City, EpidemicCase, DistrictSanitaire, Epidemie, Echantillon, Patient, \
     Employee, Symptom, ServiceSanitaire, Commune
 
+admin.site.site_header = 'EPIDEMIE BACK-END CONTROLER'
+admin.site.site_title = 'EPIDEMIE Super Admin Pannel'
+admin.site.site_url = 'http://veillesanitaire.com/'
+admin.site.index_title = 'MSHP-CMU'
+admin.empty_value_display = '**Empty**'
+
+
+# admin.site.register(CustomUser, CustomUserAdmin)
+# admin.site.register(Patient)
+# admin.site.register(Employee)
+#
 
 # Register your models here.
 #
@@ -100,11 +111,6 @@ class PatientAdmin(ModelAdmin):
     pass
 
 
-@admin.register(Echantillon)
-class EchantillonAdmin(ModelAdmin):
-    pass
-
-
 @admin.register(Epidemie)
 class EpidemieAdmin(ModelAdmin):
     pass
@@ -114,9 +120,7 @@ class EpidemieAdmin(ModelAdmin):
 class ServiceSanitaireAdmin(ModelAdmin):
     pass
 
+
 @admin.register(Commune)
 class CommuneAdmin(ModelAdmin):
     pass
-
-
-

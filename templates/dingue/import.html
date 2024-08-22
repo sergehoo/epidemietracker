@@ -1,0 +1,201 @@
+ {% extends './layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+                 <div class="nk-content nk-content-fluid">
+                    <div class="container-xl">
+                        <div class="nk-content-body">
+                            <div class="nk-block-head nk-block-head-sm">
+                                <div class="nk-block-between">
+                                    <div class="nk-block-head-content">
+                                        <h3 class="nk-block-title page-title"> Import Data </h3>
+                                        <div class="nk-block-des text-soft">
+                                            <p> {{ patient_nbr }} Patients enregistrés</p>
+                                        </div>
+                                    </div><!-- .nk-block-head-content -->
+                                    <div class="nk-block-head-content">
+                                        <div class="toggle-wrap nk-block-tools-toggle">
+                                            <a href="#" class="btn btn-icon btn-trigger toggle-expand mr-n1" data-target="pageMenu"><em class="icon ni ni-menu-alt-r"></em></a>
+
+                                        </div><!-- .toggle-wrap -->
+                                    </div><!-- .nk-block-head-content -->
+                                </div><!-- .nk-block-between -->
+                            </div><!-- .nk-block-head -->
+                            <div class="nk-block">
+
+                                <div class="card align-center">
+                                    <h1 class="text-muted">Importation des donnees Epidemie </h1>
+                                    <div class=" col-6  card-inner-group mt-5">
+
+
+                                        <div class="card card-preview">
+                                            <img class="" src="{% static 'images/concept-telechargement-images-pour-page-destination_23-2148298503.jpg' %}" width="auto" height="auto">
+                                            <div class="card-inner">
+
+                                                <form method="POST" action="{% url 'import_echantillons' %}"
+                                                      enctype="multipart/form-data"
+                                                      onsubmit="return validateFileSelection()">
+                                                    {% csrf_token %}
+                                                    <div id="progress-container" style="display: none;">
+                                                        <div id="progress-bar"
+                                                             style="width: 0%; height: 20px; background-color: #009dff; text-align: center; color: white;">
+                                                            0%
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="file">Upload fichier format (xls, csv):</label>
+                                                        <input type="file" name="file" class="form-control"
+                                                               id="file-input" required>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Prévisualiser</button>
+                                                </form>
+
+                                                <script>
+                                                    function validateFileSelection() {
+                                                        var fileInput = document.getElementById('file-input');
+                                                        if (fileInput.files.length === 0) {
+                                                            alert('Veuillez sélectionner un fichier à importer.');
+                                                            return false;
+                                                        }
+                                                        // Affiche la barre de progression
+                                                        document.getElementById('progress-container').style.display = 'block';
+                                                        // Simule la progression
+                                                        simulateProgressBar();
+                                                        return true;
+                                                    }
+
+                                                    function simulateProgressBar() {
+                                                        var progressBar = document.getElementById('progress-bar');
+                                                        var width = 0;
+                                                        var interval = setInterval(function () {
+                                                            if (width >= 100) {
+                                                                clearInterval(interval);
+                                                            } else {
+                                                                width++;
+                                                                progressBar.style.width = width + '%';
+                                                                progressBar.innerHTML = width + '%';
+                                                            }
+                                                        }, 100);
+                                                    }
+                                                </script>
+                                            </div>
+                                        </div><!-- .card-preview -->
+
+
+
+                                        <!-- .card-inner -->
+                                    </div><!-- .card-inner-group -->
+
+
+                                </div><!-- .card -->
+
+
+                                <div class="card card-bordered card-stretch">
+                                    <div class="card-inner-group">
+
+                                        <div class="card card-preview">
+                                            <div class="card-inner">
+                                                <h3 class=" center">Prévisualisation des données importées</h3>
+                                                <form method="POST" action="{% url 'import_echantillons' %}" enctype="multipart/form-data">
+                                                    {% csrf_token %}
+                                                    <table class="table table-striped">
+                                                        <thead>
+                                                        <tr>
+                                                            {% for key in preview_data.0.keys %}
+                                                                <th>{{ key }}</th>
+                                                            {% endfor %}
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% for row in preview_data %}
+                                                            <tr>
+                                                                {% for key, value in row.items %}
+                                                                    <td>{{ value }}</td>
+                                                                {% endfor %}
+                                                            </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                    <button type="submit" name="confirm" class="btn btn-success">
+                                                        Confirmer l'importation
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary"
+                                                            onclick="window.history.back()">Annuler
+                                                    </button>
+                                                </form>
+{#                                                <table class="datatable-init table">#}
+{#                                                    <thead>#}
+{#                                                        <tr>#}
+{#                                                            <th>code echantillon</th>#}
+{#                                                            <th>patient</th>#}
+{#                                                            <th>created_at</th>#}
+{#                                                            <th>mode_preleve</th>#}
+{#                                                            <th>District</th>#}
+{#                                                            <th>resultat</th>#}
+{#                                                        </tr>#}
+{#                                                    </thead>#}
+{#                                                    <tbody>#}
+{#                                                    {% for enquete in echantillons %}#}
+{#                                                        <tr>#}
+{#                                                            <td>{{ enquete.code_echantillon }}</td>#}
+{#                                                            <td>{{ enquete.patient.nom }} {{ enquete.patient.prenoms }}</td>#}
+{#                                                            <td>{{ enquete.created_at}}</td>#}
+{#                                                            <td>{{ enquete.mode_preleve}}</td>#}
+{#                                                            <td>{{ enquete.patient.service}}</td>#}
+{#                                                            <td>#}
+{#                                                                {% if enquete.resultat == 'NEGATIF' %}#}
+{##}
+{#                                                                     <span class="badge badge-success">{{ enquete.resultat }}</span>#}
+{#                                                                    {% else %}#}
+{#                                                                    <span class="badge badge-danger">{{ enquete.resultat }}</span>#}
+{#                                                                {% endif %}#}
+{##}
+{#                                                            </td>#}
+{#                                                        </tr>#}
+{#                                                    {% endfor %}#}
+{##}
+{##}
+{#                                                    </tbody>#}
+{#                                                </table>#}
+                                            </div>
+                                        </div><!-- .card-preview -->
+
+
+
+                                        <!-- .card-inner -->
+                                    </div><!-- .card-inner-group -->
+
+
+                                </div><!-- .card -->
+
+
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                 </div>
+  <script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+        // Empêcher la soumission immédiate du formulaire pour simuler la progression
+        event.preventDefault();
+
+        // Afficher la barre de progression
+        var progressBar = document.getElementById('progress-bar');
+        var progressContainer = document.getElementById('progress-container');
+        progressContainer.style.display = 'block';
+
+        // Simulation de la progression
+        var width = 0;
+        var interval = setInterval(function() {
+            if (width >= 100) {
+                clearInterval(interval);
+                // Soumettre le formulaire une fois la barre de progression terminée
+                event.target.submit();
+            } else {
+                width += 10;  // Vous pouvez ajuster la vitesse en changeant cette valeur
+                progressBar.style.width = width + '%';
+                progressBar.textContent = width + '%';
+            }
+        }, 100);  // 100ms entre chaque incrément, ajustable selon vos besoins
+    });
+</script>
+            {% endblock %}

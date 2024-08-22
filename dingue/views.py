@@ -1,12 +1,153 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count
-from django.shortcuts import render
+from django.db.models import Count, Q
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, ListView, CreateView
+from rest_framework import viewsets
+from rest_framework.response import Response
+from tablib import Dataset
 
-from epidemie.models import Patient, Echantillon
+from dingue.admin import EchantillonResource
+from epidemie.tasks import sync_health_regions, process_city_data, generate_commune_report, alert_for_epidemic_cases
+
+from epidemie.models import Patient, Echantillon, HealthRegion, City, Commune, EpidemicCase, ServiceSanitaire
+from epidemie.serializers import HealthRegionSerializer, CitySerializer, EpidemicCaseSerializer, PatientSerializer, \
+    ServiceSanitaireSerializer, CommuneSerializer
 
 
 # Create your views here.
+class HealthRegionViewSet(viewsets.ModelViewSet):
+    queryset = HealthRegion.objects.all()
+    serializer_class = HealthRegionSerializer
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        sync_health_regions.delay()  # Appel de la tâche en arrière-plan
+
+
+class CityViewSet(viewsets.ModelViewSet):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        process_city_data.delay(instance.id)  # Appel de la tâche en arrière-plan avec l'ID de la ville
+
+
+class CommuneViewSet(viewsets.ModelViewSet):
+    queryset = Commune.objects.all()
+    serializer_class = CommuneSerializer
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        generate_commune_report.delay()  # Appel de la tâche en arrière-plan après suppression
+
+
+class EpidemicCaseViewSet(viewsets.ModelViewSet):
+    queryset = EpidemicCase.objects.all()
+    serializer_class = EpidemicCaseSerializer
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        alert_for_epidemic_cases.delay()
+
+
+# class HealthRegionViewSet(viewsets.ModelViewSet):
+#     queryset = HealthRegion.objects.all()
+#     serializer_class = HealthRegionSerializer
+#
+#
+# class CityViewSet(viewsets.ModelViewSet):
+#     queryset = City.objects.all()
+#     serializer_class = CitySerializer
+#
+#
+# class CommuneViewSet(viewsets.ModelViewSet):
+#     queryset = Commune.objects.all()
+#     serializer_class = CommuneSerializer
+#
+#
+# class EpidemicCaseViewSet(viewsets.ModelViewSet):
+#     queryset = EpidemicCase.objects.all()
+#     serializer_class = EpidemicCaseSerializer
+
+
+# class PatientViewSet(viewsets.ModelViewSet):
+#     queryset = Patient.objects.all()
+#     serializer_class = PatientSerializer
+
+class PatientViewSet(viewsets.ModelViewSet):
+    queryset = Patient.objects.all()  # Définir le queryset ici
+    serializer_class = PatientSerializer
+
+    def get_queryset(self):
+        # Filtrer les patients qui ont au moins un échantillon avec un résultat positif
+        queryset = self.queryset.filter(
+            Q(echantillons__resultat='POSITIF')
+        ).distinct()
+
+        return queryset
+
+
+class ServiceSanitaireViewSet(viewsets.ModelViewSet):
+    queryset = ServiceSanitaire.objects.all()
+    serializer_class = ServiceSanitaireSerializer
+
+
+class CommuneAggregatedViewSet(viewsets.ModelViewSet):
+    queryset = Commune.objects.all()
+    serializer_class = CommuneSerializer
+
+    def list(self, request, *args, **kwargs):
+        communes = self.queryset.annotate(
+            total_patients=Count('patient', filter=Q(patient__echantillons__resultat='POSITIF'))
+        )
+        serializer = self.get_serializer(communes, many=True)
+        return Response(serializer.data)
+
+
+# Register the new viewset
+
+
+def dashboard_view(request):
+    return render(request, 'dingue/home.html')
+
+
+def import_view(request):
+    return render(request, 'dingue/import.html')
+
+
+def import_echantillons(request):
+    if request.method == 'POST':
+        # Vérifie si le fichier est bien envoyé
+        if 'file' not in request.FILES:
+            messages.error(request, 'Veuillez sélectionner un fichier à importer.')
+            return render(request, 'dingue/import.html')
+
+        echantillon_resource = EchantillonResource()
+        dataset = Dataset()
+        new_echantillons = request.FILES['file']
+
+        try:
+            imported_data = dataset.load(new_echantillons.read(), format='xlsx')
+            result = echantillon_resource.import_data(dataset, dry_run=True)  # Dry run for preview
+
+            if not result.has_errors():
+                # Pour afficher un aperçu des données
+                preview_data = dataset.dict
+                if 'confirm' in request.POST:
+                    echantillon_resource.import_data(dataset, dry_run=False)  # Commit the import
+                    messages.success(request, 'Données importées avec succès')
+                    return redirect('nom_de_votre_vue_suivante')
+                return render(request, 'dingue/import.html', {'preview_data': preview_data})
+
+            messages.error(request, 'Erreur lors de l\'importation des données : vérifiez les données et réessayez.')
+
+        except Exception as e:
+            messages.error(request, f"Erreur lors de l'importation des données : {e}")
+            return render(request, 'dingue/import.html')
+
+    return render(request, 'dingue/import.html')
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
@@ -57,7 +198,6 @@ class HomePageView(LoginRequiredMixin, TemplateView):
     #         # return HttpResponseForbidden("You don't have permission to access this page.")
 
 
-
 class PatientListView(LoginRequiredMixin, ListView):
     model = Patient
     template_name = "dingue/patientlist.html"
@@ -71,6 +211,7 @@ class PatientListView(LoginRequiredMixin, ListView):
         context['patient_nbr'] = patient_nbr
 
         return context
+
 
 # class PatientCreateView(LoginRequiredMixin, CreateView):
 #     model = Patient

@@ -112,17 +112,17 @@
                                                   <div class="col-xl-6 mb-5">
 
                                                     <div class="card card-bordered">
-                                                        <div class="card-header border-bottom">{{ maladies.nom }} <span class="float-right"> <span class="badge badge-danger"  >98</span> Cas | Ce mois</span></div>
+                                                        <div class="card-header border-bottom">{{ maladies.nom }} <span class="float-right"> <span class="badge badge-danger"  >{{ maladies.nombre_patients_positifs_ce_mois }}</span> Cas | Ce mois</span></div>
 <div class="image-container">
 
         <img src="{{ maladies.thumbnails.url }}" alt="Dengue Image" class="dengue-image">
     </div>                                                        <div class="card-body">
 
-                                                            <p class="card-text mt-5">{{ maladies.description|truncatewords:30 }}</p>
+                                                            <p class="card-text mt-5">{{ maladies.description|truncatewords:30|safe }}</p>
                                                         <ul>
-                                                            <li>Regions Impactes <span class="badge badge-dark float-right">988</span></li>
-                                                            <li>Personnes touchees <span class="badge badge-dark float-right">988</span></li>
-                                                            <li>Personnes Décédées <span class="badge badge-dark float-right">988</span></li>
+{#                                                            <li>Regions Impactes <span class="badge badge-dark float-right">{{ maladies.regions_impactees }}</span></li>#}
+                                                            <li>Personnes touchees <span class="badge badge-dark float-right">{{ maladies.personnes_touchees }}</span></li>
+                                                            <li>Personnes Décédées <span class="badge badge-dark float-right">{{ maladies.personnes_decedees }}</span></li>
                                                         </ul>
 
                                                         </div>
@@ -146,6 +146,8 @@
 
 
                                                   </div>
+                                                          {% empty %}
+                                                          Aucune Maladie Enregistree pour l,Instant
                                                       {% endfor %}
 
 
@@ -301,7 +303,7 @@
     var markers = L.markerClusterGroup();
 
     // Récupération des données agrégées par commune
-    fetch('dingue/api/communes_aggregated/')
+    fetch('dengue/api/communes_aggregated/')
         .then(response => response.json())
         .then(communes => {
             communes.forEach(commune => {
@@ -322,7 +324,7 @@
                             .bindPopup(`<b>${commune.name}</b><br>Total Patients: ${commune.total_patients}`)
                             .on('click', function() {
                                 // Lazy load des patients lors du clic
-                                fetch(`dingue/api/patient/?commune_id=${commune.id}`)
+                                fetch(`dengue/api/patient/?commune_id=${commune.id}`)
                                     .then(response => response.json())
                                     .then(patients => {
                                         var popupContent = `<b>${commune.name}</b><br><br>`;

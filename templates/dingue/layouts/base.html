@@ -17,6 +17,7 @@
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         #map {
@@ -160,6 +161,46 @@
             })
             .catch(error => console.error(error));
     </script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        Swal.fire({
+                            title: "Félicitation ! ",
+                            text: " {{ message }}",
+                            icon: "success",
+
+                        })
+                    });
+                </script>
+            {% elif message.tags == 'warning' %}
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        Swal.fire({
+                            title: "Attention alert",
+                            text: " {{ message }}",
+                            icon: "warning",
+
+                        })
+                    });
+                </script>
+            {% elif message.tags == 'error' %}
+                <script type="text/javascript">
+
+                    $(document).ready(function () {
+                        Swal.fire({
+                            title: "Attention Erreur",
+                            text: " {{ message }}",
+                            icon: "error",
+
+                        })
+
+                    });
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 
 </body>
 

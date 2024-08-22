@@ -6,7 +6,7 @@ def dashboard(request):
     echantillons_nbrP = Echantillon.objects.filter(resultat='POSITIF').count()
     patients = Patient.objects.all().count()
     patients_gueris = Patient.objects.filter(gueris=True).count()
-    patients_decedes= Patient.objects.filter(decede=True).count()
+    patients_decedes = Patient.objects.filter(decede=True).count()
 
     # Nombre total de patients dont les échantillons ont été positifs
     echantillons_positifs = Echantillon.objects.filter(resultat='POSITIF')
@@ -14,26 +14,24 @@ def dashboard(request):
 
     total_patients_positifs = patients_avec_echantillons_positifs.count()
 
-    # Nombre de patients guéris parmi ceux dont les échantillons ont été positifs
+    # Nombre de patients guéris et décédés parmi ceux dont les échantillons ont été positifs
     patients_gueris_positifs = patients_avec_echantillons_positifs.filter(gueris=True).count()
     patients_decedes_positifs = patients_avec_echantillons_positifs.filter(decede=True).count()
 
-    # Calculer le pourcentage de patients guéris parmi les patients avec des échantillons positifs
+    # Calculer le pourcentage de patients guéris et décédés parmi les patients avec des échantillons positifs
     if total_patients_positifs > 0:
         pourcentage_gueris_positifs = (patients_gueris_positifs / total_patients_positifs) * 100
         pourcentage_decedes_positifs = (patients_decedes_positifs / total_patients_positifs) * 100
     else:
         pourcentage_gueris_positifs = 0
-
-
-
+        pourcentage_decedes_positifs = 0  # Définir la variable même si le total est 0
 
     if echantillons_nbr > 0:
         pourcentage_positifs = (echantillons_nbrP / echantillons_nbr) * 100
     else:
         pourcentage_positifs = 0
 
-        # Passer les données au template
+    # Passer les données au template
     context = {
         'echantillons_nbr': echantillons_nbr,
         'echantillons_nbrP': echantillons_nbrP,
@@ -41,14 +39,11 @@ def dashboard(request):
         'patients_gueris': patients_gueris,
         'patients_decedes': patients_decedes,
         'patients': patients,
-
         'total_patients_positifs': total_patients_positifs,
         'patients_gueris_positifs': patients_gueris_positifs,
         'patients_decede_positifs': patients_decedes_positifs,
         'pourcentage_gueris_positifs': pourcentage_gueris_positifs,
         'pourcentage_decedes_positifs': pourcentage_decedes_positifs,
-        'patients_decedes_positifs': patients_decedes_positifs,
-
     }
 
     return context

@@ -27,7 +27,6 @@ Markdown==3.6
 openpyxl==3.1.5
 pillow==10.4.0
 prompt_toolkit==3.0.47
-psycopg2==2.9.9
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 six==1.16.0
@@ -39,3 +38,5 @@ vine==5.1.0
 wcwidth==0.2.13
 whitenoise==6.7.0
 zipp==3.19.2
+gunicorn
+psycopg2-binary

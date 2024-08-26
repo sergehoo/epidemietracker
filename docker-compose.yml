@@ -72,6 +72,10 @@ services:
     depends_on:
       - epidemieDB
 
+networks:
+  web:
+    driver: bridge
+
   nginx_epi:
     image: nginx:latest
     volumes:
@@ -93,10 +97,10 @@ services:
         - ./nginx/ssl:/etc/letsencrypt
         - ./nginx/html:/usr/share/nginx/html
       entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'
-      depends_on:
-        - nginx_epi
-      networks:
-        - web
+#      depends_on:
+#        - nginx_epi
+#      networks:
+#        - web
 
   epidemieDB:
     image: postgis/postgis:16-3.4
@@ -122,9 +126,6 @@ services:
     ports:
       - 6080:8080
 
-networks:
-  web:
-    driver: bridge
 
 volumes:
   pgdata:

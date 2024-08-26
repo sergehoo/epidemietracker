@@ -80,16 +80,27 @@ services:
       - media_volume:/media/  # Remplacez par le chemin absolu
     ports:
       - "80:80"
-
-  certbot_epi:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./nginx/ssl:/etc/letsencrypt
-      - ./nginx/html:/usr/share/nginx/html
-    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'
+      - "443:443"
+    depends_on:
+      - epidemieweb
     networks:
       - web
+
+    certbot_epi:
+      image: certbot/certbot
+      container_name: certbot
+      volumes:
+        - ./nginx/ssl:/etc/letsencrypt
+        - ./nginx/html:/usr/share/nginx/html
+      entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'
+      depends_on:
+        - nginx_epi
+      networks:
+        - web
+
+networks:
+  web:
+    driver: bridge
 
   epidemieDB:
     image: postgis/postgis:16-3.4

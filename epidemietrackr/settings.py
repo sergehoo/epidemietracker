@@ -34,18 +34,16 @@ DEBUG = True
 # ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
-ALLOWED_HOSTS = ['154.56.60.195:5191', 'localhost', '*', 'https://afriqconsulting.net:5191']
-CSRF_TRUSTED_ORIGINS = ['https://afriqconsulting.net:5191', 'https://afriqconsulting.net',
-                        'http://afriqconsulting.net' 'https://localhost', 'http://127.0.0.1']
+ALLOWED_HOSTS = ['154.56.60.195:5191', 'localhost', '*', 'http://veillesanitaire.com','https://veillesanitaire.com']
+CSRF_TRUSTED_ORIGINS = ['http://veillesanitaire.com''https://veillesanitaire.com','https://localhost', 'http://127.0.0.1']
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5191",  # Adresse de votre serveur local
     "http://localhost:5191",  # Alias localhost
     "http://127.0.0.1",  # Autoriser également sans le port
     "http://localhost",
     '154.56.60.195:5191',
-    'https://afriqconsulting.net:5191',
-    'https://afriqconsulting.net',
-    'http://afriqconsulting.net',
+    'http://veillesanitaire.com',
+    'https://veillesanitaire.com',
     "*"
 ]
 # Application definition

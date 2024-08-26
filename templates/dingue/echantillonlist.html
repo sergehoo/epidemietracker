@@ -8,7 +8,7 @@
                             <div class="nk-block-head nk-block-head-sm">
                                 <div class="nk-block-between">
                                     <div class="nk-block-head-content">
-                                        <h3 class="nk-block-title page-title"> Liste des Enquetes Dengue</h3>
+                                        <h3 class="nk-block-title page-title"> Liste des Enquetes Epidemies</h3>
                                         <div class="nk-block-des text-soft">
                                             <p> {{ patient_nbr }} Patients enregistrés</p>
                                         </div>
@@ -186,7 +186,7 @@
                                                             <th>patient</th>
                                                             <th>created_at</th>
                                                             <th>mode_preleve</th>
-                                                            <th>District</th>
+                                                            <th>Epidemies</th>
                                                             <th>resultat</th>
                                                         </tr>
                                                     </thead>
@@ -197,7 +197,7 @@
                                                             <td>{{ enquete.patient.nom }} {{ enquete.patient.prenoms }}</td>
                                                             <td>{{ enquete.created_at}}</td>
                                                             <td>{{ enquete.mode_preleve}}</td>
-                                                            <td>{{ enquete.patient.service}}</td>
+                                                            <td>{{ enquete.maladie}}</td>
                                                             <td>
                                                                 {% if enquete.resultat == 'NEGATIF' %}
                                                                 

@@ -42,42 +42,65 @@
                                             <span class="nk-menu-tooltip" title="Echantillons"></span>
                                         </a>
                                     </li>
+{#                                    <li class="nk-menu-item">#}
+{#                                        <a href="html/symptoms.html" class="nk-menu-link">#}
+{#                                            <span class="nk-menu-icon"><em class="icon ni ni-sun"></em></span>#}
+{#                                            <span class="nk-menu-text">Symptoms</span>#}
+{#                                            <span class="nk-menu-tooltip" title="Symptoms"></span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    <li class="nk-menu-item">#}
+{#                                        <a href="html/prevention.html" class="nk-menu-link">#}
+{#                                            <span class="nk-menu-icon"><em class="icon ni ni-security"></em></span>#}
+{#                                            <span class="nk-menu-text">Prevention</span>#}
+{#                                            <span class="nk-menu-tooltip" title="Prevention"></span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                    <li class="nk-menu-item">#}
+{#                                        <a href="html/faqs.html" class="nk-menu-link">#}
+{#                                            <span class="nk-menu-icon"><em class="icon ni ni-help"></em></span>#}
+{#                                            <span class="nk-menu-text">FAQs</span>#}
+{#                                            <span class="nk-menu-tooltip" title="FAQs"></span>#}
+{#                                        </a>#}
+{#                                    </li>#}
+                                    {% for maladies in list_epidemie.all %}
                                     <li class="nk-menu-item">
-                                        <a href="html/symptoms.html" class="nk-menu-link">
-                                            <span class="nk-menu-icon"><em class="icon ni ni-sun"></em></span>
-                                            <span class="nk-menu-text">Symptoms</span>
-                                            <span class="nk-menu-tooltip" title="Symptoms"></span>
-                                        </a>
-                                    </li>
-                                    <li class="nk-menu-item">
-                                        <a href="html/prevention.html" class="nk-menu-link">
-                                            <span class="nk-menu-icon"><em class="icon ni ni-security"></em></span>
-                                            <span class="nk-menu-text">Prevention</span>
-                                            <span class="nk-menu-tooltip" title="Prevention"></span>
-                                        </a>
-                                    </li>
-                                    <li class="nk-menu-item">
-                                        <a href="html/faqs.html" class="nk-menu-link">
-                                            <span class="nk-menu-icon"><em class="icon ni ni-help"></em></span>
-                                            <span class="nk-menu-text">FAQs</span>
-                                            <span class="nk-menu-tooltip" title="FAQs"></span>
-                                        </a>
-                                    </li>
-                                    <li class="nk-menu-item">
-                                        <a href="{% url 'dingue-home' %}" class="nk-menu-link">
+                                    {% if maladies.nom == 'DENGUE' %}
+                                                                  
+                                         <a href="{% url 'dingue-home' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><em class="icon ni ni-virus"></em></span>
-                                            <span class="nk-menu-text">Dengue</span>
-                                            <span class="nk-menu-tooltip" title="Dengue"></span>
+                                            <span class="nk-menu-text">{{ maladies }}</span>
+                                            <span class="nk-menu-tooltip" title="{{ maladies }}"></span>
                                         </a>
-                                    </li>
-                                    
-                                    <li class="nk-menu-item">
-                                        <a href="#" class="nk-menu-link">
+                                        
+                                        
+                                                                  {% elif maladies.nom == 'MPOX' %}
+                                         <a href="{% url 'mpox-dashboard' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><em class="icon ni ni-virus"></em></span>
-                                            <span class="nk-menu-text">Maladies</span>
-                                            <span class="nk-menu-tooltip" title="Covid"></span>
+                                            <span class="nk-menu-text">{{ maladies }}</span>
+                                            <span class="nk-menu-tooltip" title="{{ maladies }}"></span>
                                         </a>
+                                                                  {% elif maladies.nom == 'EBOLA' %}
+                                         <a href="{% url 'ebola-dashboard' %}" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-virus"></em></span>
+                                            <span class="nk-menu-text">{{ maladies }}</span>
+                                            <span class="nk-menu-tooltip" title="{{ maladies }}"></span>
+                                        </a>
+                                                                  {% elif maladies.nom == 'COVID' %}
+                                         <a href="{% url 'covid-dashboard' %}" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-virus"></em></span>
+                                            <span class="nk-menu-text">{{ maladies }}</span>
+                                            <span class="nk-menu-tooltip" title="{{ maladies }}"></span>
+                                        </a>
+                                                                  {% else %}
+                                         <a href="#" class="nk-menu-link">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-virus"></em></span>
+                                            <span class="nk-menu-text">{{ maladies }}</span>
+                                            <span class="nk-menu-tooltip" title="{{ maladies }}"></span>
+                                        </a>
+                                                              {% endif %}
                                     </li>
+                                    {% endfor %}
                                 </ul><!-- .nk-menu -->
                             </div><!-- .nk-sidebar-menu -->
                           {% include 'dingue/layouts/footer.html' %}

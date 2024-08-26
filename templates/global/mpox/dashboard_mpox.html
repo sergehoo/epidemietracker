@@ -6,13 +6,13 @@
 <head>
     <base href="../">
     <meta charset="utf-8">
-    <meta name="author" content="Softnio">
+    <meta name="author">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="@@page-discription">
     <!-- Fav Icon  -->
     <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
     <!-- Page Title  -->
-    <title>Dengue Situation Tracker & Dashboard</title>
+    <title>MPOX Situation Tracker & Dashboard</title>
     <!-- StyleSheets  -->
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
@@ -62,10 +62,10 @@
                             <div class="nk-block-head">
                                 <div class=" ">
                                     <div class="">
-                                        <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoCI.png' %}" width="50"></span> MONKEYPOX Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"></h5>
+                                        <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoCI.png' %}" width="50"></span> MPOX Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"></h5>
                                     </div>
                                     <div class="nk-block-head-content">
-                                        <p class="note-text">Derniere mise  a jours : Lundi 19 Août 2024 10:00</p>
+                                        <p class="note-text">Derniere mise  a jours : {{ mpox_last_update }}</p>
                                     </div>
                                 </div>
                             </div><!-- .nk-block-head -->
@@ -82,13 +82,13 @@
                                                             </div>
                                                             <div class="nk-cov-data">
                                                                 <h6 class="overline-title">Total des cas confirmés</h6>
-                                                                <div class="amount">0</div>
+                                                                <div class="amount">{{ mpox_total_patients_positifs }} / {{ patients }}</div>
                                                             </div>
                                                             <div class="nk-cov-wg1-progress">
                                                                 <div class="progress progress-reverse progress-md progress-pill progress-bordered">
-                                                                    <div class="progress-bar bg-danger" data-progress="0" data-toggle="tooltip" title="Décédés : 0%"></div>
-                                                                    <div class="progress-bar bg-success" data-progress="0" data-toggle="tooltip" title="Gueris : 0%"></div>
-                                                                    <div class="progress-bar bg-primary" data-progress="0" data-toggle="tooltip" title="Cas Confirmés : 0%"></div>
+                                                                    <div class="progress-bar bg-danger" data-progress="{{ mpox_pourcentage_decedes_positifs|floatformat:0 }}" data-toggle="tooltip" title="Décédés : {{ mpox_pourcentage_decedes_positifs|floatformat:0 }}%"></div>
+                                                                    <div class="progress-bar bg-success" data-progress="{{ mpox_pourcentage_gueris_positifs|floatformat:0  }}" data-toggle="tooltip" title="Gueris : {{ mpox_pourcentage_gueris_positifs|floatformat:0  }}%"></div>
+                                                                    <div class="progress-bar bg-primary" data-progress="{{ mpox_pourcentage_positifs|floatformat:0 }}" data-toggle="tooltip" title="Cas Confirmés : {{ mpox_pourcentage_positifs|floatformat:0  }}%"></div>
                                                                 </div>
                                                             </div>
                                                             <ul class="nk-cov-wg1-data">
@@ -97,31 +97,31 @@
                                                                         <div class="dot dot-lg sq bg-secondary"></div>
                                                                         <span>Cas Diagnostoqués</span>
                                                                     </div>
-                                                                    <div class="count">0</div>
+                                                                    <div class="count">{{ patients }}</div>
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-primary"></div>
                                                                         <span>Cas confirmés</span>
                                                                     </div>
-                                                                    <div class="count">0</div>
+                                                                    <div class="count">{{ mpox_echantillons_nbrP }}</div>
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-success"></div>
                                                                         <span>Guéris</span>
                                                                     </div>
-                                                                    <div class="count">0</div>
+                                                                    <div class="count">{{ mpox_patients_gueris_positifs }}</div>
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-danger"></div>
                                                                         <span>Décès</span>
                                                                     </div>
-                                                                    <div class="count">0</div>
+                                                                    <div class="count">{{ mpox_patients_decede_positifs|floatformat:0 }}</div>
                                                                 </li>
                                                             </ul>
-                                                            <div class="nk-cov-wg-note">Taux de  <a href="#">guerisons (0)</a> &amp; <a href="#">Décès (0)</a>.</div>
+                                                            <div class="nk-cov-wg-note">Taux de  <a href="#">guerisons ({{ mpox_pourcentage_gueris_positifs|floatformat:2  }}%)</a> &amp; <a href="#">Décès ({{ mpox_pourcentage_decedes_positifs|floatformat:2 }}%)</a>.</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -136,37 +136,37 @@
                                                             <div class="nk-cov-group">
                                                                 <div class="nk-cov-data">
                                                                     <h6 class="overline-title">Confirmés</h6>
-                                                                    <div class="amount amount-sm">0</div>
+                                                                    <div class="amount amount-sm">48</div>
                                                                 </div>
                                                                 <div class="nk-cov-data">
                                                                     <h6 class="overline-title">Guéris</h6>
-                                                                    <div class="amount amount-sm text-success">0</div>
+                                                                    <div class="amount amount-sm text-success">15</div>
                                                                 </div>
                                                                 <div class="nk-cov-data">
                                                                     <h6 class="overline-title">Décès</h6>
-                                                                    <div class="amount amount-sm text-danger">0</div>
+                                                                    <div class="amount amount-sm text-danger">5</div>
                                                                 </div>
                                                             </div>
-                                                            <div class="nk-cov-wg-note">Taux de <a href="#">Guérisons (0%)</a> &amp; <a href="#">Décès (0%)</a>.</div>
+                                                            <div class="nk-cov-wg-note">Taux de <a href="#">Guérisons (31.3%)</a> &amp; <a href="#">Décès (10.5%)</a>.</div>
                                                             <div class="nk-cov-wg2-group">
                                                                 <div class="nk-cov-data">
                                                                     <h6 class="sub-text">Patients <br class="d-xxl-none">Infectés actuellement</h6>
-                                                                    <div class="amount amount-xs">0</div>
+                                                                    <div class="amount amount-xs">28</div>
                                                                 </div>
                                                                 <ul class="nk-cov-wg2-data">
                                                                     <li>
                                                                         <div class="title">
                                                                             <div class="dot dot-lg sq bg-purple"></div>
-                                                                            <span>En Etat stable </span>
+                                                                            <span>Etat stable </span>
                                                                         </div>
-                                                                        <div class="count">0</div>
+                                                                        <div class="count">27</div>
                                                                     </li>
                                                                     <li>
                                                                         <div class="title">
                                                                             <div class="dot dot-lg sq bg-success"></div>
-                                                                            <span>En etat Critic</span>
+                                                                            <span>Etat Critic</span>
                                                                         </div>
-                                                                        <div class="count">0</div>
+                                                                        <div class="count">01</div>
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -194,108 +194,40 @@
                                                         </div><!-- .search-wrap -->
                                                     </div>
                                                     <div class="nk-cov-wg4-aside-body" data-simplebar>
-                                                        <ul class="nk-cov-wg4-list">
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Abidjan 1 (Adjamé, Plateau, Attécoubé)</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Abidjan 2 (Yopougon)</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Abidjan 3 (Abobo Est, Abobo Ouest)</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Abidjan 4 (Treichville, Marcory, Koumassi)</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Abidjan 5 (Port-Bouët, Vridi)</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Bingerville</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <!-- Continuez à lister les districts sanitaires ici -->
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Songon</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Aboisso</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Adiaké</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-
-     <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Grand-Bassam</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-                                                             <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Agboville</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-                                                            <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Tiassalé</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-
-                                                            <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Sikensi</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-                                                            <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">N’douci</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-                                                            <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Alépé</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-                                                            <li>
-        <a class="nk-cov-wg4-list-item" href="#">
-            <span class="title">Akoupé</span>
-            <span class="count">00</span>
-        </a>
-    </li>
-    <!-- Ajoutez les autres districts sanitaires ici -->
+{% for region in cases_by_region %}
+        <li>
+            <span class="region-title" onclick="toggleDistricts('{{ region.commune__district__region__name|slugify }}')">
+                {{ region.commune__district__region__name }} ({{ region.total|intcomma }} cas )
+            </span>
+            <!-- Liste des districts associés à cette région -->
+            <ul class="district-list" id="{{ region.commune__district__region__name|slugify }}" style="display: none;">
+                {% for district in cases_by_district %}
+                    {% if district.commune__district__region__name == region.commune__district__region__name %}
+                        <li>
+                            <a class="nk-cov-wg4-list-item" href="#">
+                                <span class="title">{{ district.commune__district__nom }}</span>
+                                <span class="count">{{ district.total|intcomma }} cas </span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
 </ul>
+
+<script>
+function toggleDistricts(regionId) {
+    const districtList = document.getElementById(regionId);
+    if (districtList.style.display === "none") {
+        districtList.style.display = "block";
+    } else {
+        districtList.style.display = "none";
+    }
+}
+</script>
+
+
                                                     </div>
                                                     <div class="nk-cov-wg4-aside-foot text-center">
                                                         <a href="#" class="btn btn-round btn-outline-primary">Statistics des villes</a>
@@ -349,8 +281,8 @@
                                                                 <canvas class="covid-case-line-chart" id="confirmedCases"></canvas>
                                                             </div>
                                                             <div class="justify-between ml-5">
-                                                                <div class="chart-label small text-soft">22 Jan, 2024</div>
-                                                                <div class="chart-label small text-soft">28 Mar, 2024</div>
+                                                                <div class="chart-label small text-soft">22 Jan, 2020</div>
+                                                                <div class="chart-label small text-soft">28 Mar, 2020</div>
                                                             </div>
                                                         </div>
                                                         <div class="tab-pane" id="daily-increase">
@@ -371,8 +303,8 @@
                                                                 <canvas class="covid-case-bar-chart" id="dailyIncrease"></canvas>
                                                             </div>
                                                             <div class="justify-between ml-5">
-                                                                <div class="chart-label small text-soft">22 Jan, 2020</div>
-                                                                <div class="chart-label small text-soft">28 Mar, 2020</div>
+                                                                <div class="chart-label small text-soft">22 Aout, 2024</div>
+                                                                <div class="chart-label small text-soft">28 Aout, 2024</div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -385,11 +317,9 @@
                                             <div class="card-inner mb-n2">
                                                 <div class="card-title-group">
                                                     <div class="card-title mb-0">
-                                                        <h6 class="title">Districts Sanitaire les Plus Affectés </h6>
+                                                        <h6 class="title">Top 5 des Districts Sanitaire les Plus Affectés </h6>
                                                     </div>
-                                                    <div class="card-tools">
-                                                        <a href="#" class="link">View All</a>
-                                                    </div>
+
                                                 </div>
                                             </div>
                                             <div class="nk-tb-list is-medium nk-cov-wg5-table">
@@ -399,91 +329,32 @@
                                                     <div class="nk-tb-col text-right">Guéris</div>
                                                     <div class="nk-tb-col text-right">Décédés</div>
                                                 </div>
-                                                <div class="nk-tb-item">
+
+                                                {% for district in top_districts %}
+
+                                                    <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
                                                         <div class="tb-country">
                                                             <img class="flag" src="./images/flags/us.png" alt="">
-                                                            <div class="name">Abidjan 1</div>
+                                                            <div class="name">{{ district.nom }}</div>
                                                         </div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
+                                                        <div class="tb-lead tb-amount">{{ district.num_echantillons }}</div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
+                                                        <div class="tb-lead tb-amount">{{ district.num_gueris }}</div>
                                                     </div>
                                                     <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
+                                                        <div class="tb-lead tb-amount">{{ district.num_decedes }}</div>
                                                     </div>
                                                 </div>
-                                                <div class="nk-tb-item">
-                                                    <div class="nk-tb-col">
-                                                        <div class="tb-country">
-                                                            <img class="flag" src="./images/flags/it.png" alt="">
-                                                            <div class="name">Abidjan 2</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                </div>
-                                                <div class="nk-tb-item">
-                                                    <div class="nk-tb-col">
-                                                        <div class="tb-country">
-                                                            <img class="flag" src="./images/flags/cn.png" alt="">
-                                                            <div class="name">Bouake</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                </div>
-                                                <div class="nk-tb-item">
-                                                    <div class="nk-tb-col">
-                                                        <div class="tb-country">
-                                                            <img class="flag" src="./images/flags/es.png" alt="">
-                                                            <div class="name">Korhogo</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                </div>
-                                                <div class="nk-tb-item">
-                                                    <div class="nk-tb-col">
-                                                        <div class="tb-country">
-                                                            <img class="flag" src="./images/flags/de.png" alt="">
-                                                            <div class="name">Yamoussoukro</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                    <div class="nk-tb-col text-right">
-                                                        <div class="tb-lead tb-amount">0</div>
-                                                    </div>
-                                                </div>
+        {% empty %}
+            <li>Aucun district sanitaire trouvé.</li>
+        {% endfor %}
+
+
+
                                             </div>
                                         </div>
                                     </div><!-- .col -->
@@ -643,7 +514,16 @@
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
     <script>
-    var map = L.map('map').setView([7.54, -5.55], 7);
+    var coteDIvoireBounds = [
+        [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
+        [10.73, -2.51] // Nord-Est (Point le plus au nord)
+    ];
+
+    var map = L.map('map', {
+        maxBounds: coteDIvoireBounds, // Définir les limites maximales
+        maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords
+        minZoom: 7, // Définir le zoom minimum
+    }).setView([7.54, -5.55], 7);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
@@ -653,55 +533,129 @@
     // Utilisation de Leaflet.markercluster pour regrouper les marqueurs
     var markers = L.markerClusterGroup();
 
-    // Récupération des données agrégées par commune
-    {#fetch('dingue/api/communes_aggregated/')#}
-    {#    .then(response => response.json())#}
-    {#    .then(communes => {#}
-    {#        communes.forEach(commune => {#}
-    {#            if (commune.geom) {#}
-    {#                try {#}
-    {#                    var cleanedWKT = commune.geom.replace(/^SRID=\d+;/, '');#}
-    {#                    var geoJSON = Terraformer.WKT.parse(cleanedWKT);#}
-    {#                    var centroid = L.geoJSON(geoJSON).getBounds().getCenter();#}
-    {##}
-    {#                    var myIcon = L.divIcon({#}
-    {#                        className: 'custom-div-icon',#}
-    {#                        html: `<div class='circle-marker'>${commune.total_patients}</div>`,#}
-    {#                        iconSize: [30, 30],#}
-    {#                        iconAnchor: [15, 15]#}
-    {#                    });#}
-    {##}
-    {#                    var marker = L.marker(centroid, {icon: myIcon})#}
-    {#                        .bindPopup(`<b>${commune.name}</b><br>Total Patients: ${commune.total_patients}`)#}
-    {#                        .on('click', function() {#}
-    {#                            // Lazy load des patients lors du clic#}
-    {#                            fetch(`dingue/api/patient/?commune_id=${commune.id}`)#}
-    {#                                .then(response => response.json())#}
-    {#                                .then(patients => {#}
-    {#                                    var popupContent = `<b>${commune.name}</b><br><br>`;#}
-    {#                                    patients.forEach(patient => {#}
-    {#                                        popupContent += `${patient.nom} ${patient.prenoms}<br>`;#}
-    {#                                    });#}
-    {#                                    this.getPopup().setContent(popupContent).openOn(map);#}
-    {#                                })#}
-    {#                                .catch(error => console.error('Erreur lors de la récupération des patients :', error));#}
-    {#                        });#}
-    {##}
-    {#                    markers.addLayer(marker);#}
-    {##}
-    {#                } catch (error) {#}
-    {#                    console.error(`Erreur lors de l'analyse GeoJSON pour la commune : ${commune.name}`, error);#}
-    {#                }#}
-    {#            } else {#}
-    {#                console.error(`Données de localisation invalides pour la commune : ${commune.name}`);#}
-    {#            }#}
-    {#        });#}
-    {##}
-    {#        map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group#}
-    {##}
-    {#    })#}
-    {#    .catch(error => console.error('Erreur lors de la récupération des données des communes :', error));#}
+    // Fonction pour déterminer la couleur du marqueur en fonction du statut
+    function getMarkerColor(patient) {
+        if (patient.decede) {
+            return 'black'; // Décédé
+        } else if (patient.gueris) {
+            return 'green'; // Guéri
+        } else if (patient.echantillons && patient.echantillons.some(e => e.resultat === 'POSITIF')) {
+            return 'red'; // Positif
+        } else {
+            return 'orange'; // Autres
+        }
+    }
+
+    // Fonction pour ajouter un marqueur à la carte
+    function addMarker(patient) {
+        if (patient.commune && patient.commune.geom) {
+            try {
+                var cleanedWKT = patient.commune.geom.replace(/^SRID=\d+;/, '');
+                var geoJSON = Terraformer.WKT.parse(cleanedWKT);
+                var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
+
+                var markerColor = getMarkerColor(patient);
+
+                var myIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class='circle-marker' style='background-color: ${markerColor};'></div>`, // Couleur basée sur le statut
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';
+
+                var marker = L.marker(centroid, {icon: myIcon})
+                    .bindPopup(`<b>${patient.nom} ${patient.prenoms}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)
+                    .on('mouseover', function () {
+                        this.bindTooltip(`${patient.nom} ${patient.prenoms}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`, {
+                            direction: 'top',
+                            offset: [0, -10],
+                            opacity: 0.8
+                        }).openTooltip();
+                    })
+                    .on('mouseout', function () {
+                        this.closeTooltip();
+                    });
+
+                markers.addLayer(marker);
+
+            } catch (error) {
+                console.error(`Erreur lors de l'analyse GeoJSON pour le patient : ${patient.nom} ${patient.prenoms}`, error);
+            }
+        } else {
+            console.error(`Données de localisation invalides pour le patient : ${patient.nom} ${patient.prenoms}`);
+        }
+    }
+
+    // Fonction pour calculer l'âge
+    function calculateAge(date_naissance) {
+        var today = new Date();
+        var birthDate = new Date(date_naissance);
+        var age = today.getFullYear() - birthDate.getFullYear();
+        var monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    // Récupération des données des patients positifs
+    fetch('mpox/api/patient/')
+        .then(response => response.json())
+        .then(patients => {
+            // Groupement des patients par région, district, et commune
+            var regions = {};
+
+            patients.forEach(patient => {
+                var regionName = patient.commune && patient.commune.district && patient.commune.district.region ? patient.commune.district.region.name : 'Inconnu';
+                var districtName = patient.commune && patient.commune.district ? patient.commune.district.nom : 'Inconnu';
+                var communeName = patient.commune ? patient.commune.name : 'Inconnu';
+
+                if (!regions[regionName]) {
+                    regions[regionName] = {
+                        name: regionName,
+                        districts: {}
+                    };
+                }
+
+                if (!regions[regionName].districts[districtName]) {
+                    regions[regionName].districts[districtName] = {
+                        name: districtName,
+                        communes: {}
+                    };
+                }
+
+                if (!regions[regionName].districts[districtName].communes[communeName]) {
+                    regions[regionName].districts[districtName].communes[communeName] = {
+                        name: communeName,
+                        patients: []
+                    };
+                }
+
+                regions[regionName].districts[districtName].communes[communeName].patients.push(patient);
+            });
+
+            // Ajout des marqueurs à la carte
+            Object.values(regions).forEach(region => {
+                Object.values(region.districts).forEach(district => {
+                    Object.values(district.communes).forEach(commune => {
+                        commune.patients.forEach(patient => {
+                            addMarker(patient);
+                        });
+                    });
+                });
+            });
+
+            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group
+
+        })
+        .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));
 </script>
+
+
+
+
 
 
 

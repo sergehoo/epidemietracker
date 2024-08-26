@@ -32,31 +32,42 @@
                                             <img class="" src="{% static 'images/concept-telechargement-images-pour-page-destination_23-2148298503.jpg' %}" width="auto" height="auto">
                                             <div class="card-inner">
 
-                                                <form method="POST" action="{% url 'import_echantillons' %}"
-                                                      enctype="multipart/form-data"
-                                                      onsubmit="return validateFileSelection()">
-                                                    {% csrf_token %}
-                                                    <div id="progress-container" style="display: none;">
-                                                        <div id="progress-bar"
-                                                             style="width: 0%; height: 20px; background-color: #009dff; text-align: center; color: white;">
-                                                            0%
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="file">Upload fichier format (xls, csv):</label>
-                                                        <input type="file" name="file" class="form-control"
-                                                               id="file-input" required>
-                                                    </div>
-                                                    <button type="submit" class="btn btn-primary">Prévisualiser</button>
-                                                </form>
+                                                <form method="POST" action="{% url 'import_echantillons' %}" enctype="multipart/form-data" onsubmit="return validateFileSelection()">
+    {% csrf_token %}
+    {% if temp_file_name %}
+        <input type="hidden" name="temp_file_name" value="{{ temp_file_name }}">
+        <button type="submit" name="confirm" class="btn btn-success">Confirmer l'importation</button>
+    {% else %}
+        <div id="progress-container" style="display: none;">
+            <div id="progress-bar" style="width: 0%; height: 20px; background-color: #009dff; text-align: center; color: white;">
+                0%
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="file">Upload fichier format (xls, csv):</label>
+            <input type="file" name="file" class="form-control" id="file-input" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Prévisualiser</button>
+    {% endif %}
+</form>
 
                                                 <script>
                                                     function validateFileSelection() {
                                                         var fileInput = document.getElementById('file-input');
+                                                        var filePath = fileInput.value;
+                                                        var allowedExtensions = /(\.xlsx|\.xls|\.csv)$/i;
+
                                                         if (fileInput.files.length === 0) {
                                                             alert('Veuillez sélectionner un fichier à importer.');
                                                             return false;
                                                         }
+
+                                                        if (!allowedExtensions.exec(filePath)) {
+                                                            alert('Veuillez sélectionner un fichier valide avec une extension .xlsx, .xls ou .csv.');
+                                                            fileInput.value = '';
+                                                            return false;
+                                                        }
+
                                                         // Affiche la barre de progression
                                                         document.getElementById('progress-container').style.display = 'block';
                                                         // Simule la progression
@@ -173,29 +184,5 @@
                         </div>
                     </div>
                  </div>
-  <script>
-    document.querySelector('form').addEventListener('submit', function(event) {
-        // Empêcher la soumission immédiate du formulaire pour simuler la progression
-        event.preventDefault();
 
-        // Afficher la barre de progression
-        var progressBar = document.getElementById('progress-bar');
-        var progressContainer = document.getElementById('progress-container');
-        progressContainer.style.display = 'block';
-
-        // Simulation de la progression
-        var width = 0;
-        var interval = setInterval(function() {
-            if (width >= 100) {
-                clearInterval(interval);
-                // Soumettre le formulaire une fois la barre de progression terminée
-                event.target.submit();
-            } else {
-                width += 10;  // Vous pouvez ajuster la vitesse en changeant cette valeur
-                progressBar.style.width = width + '%';
-                progressBar.textContent = width + '%';
-            }
-        }, 100);  // 100ms entre chaque incrément, ajustable selon vos besoins
-    });
-</script>
             {% endblock %}

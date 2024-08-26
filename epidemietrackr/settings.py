@@ -101,7 +101,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
-                'dingue.context_processor.dashboard'
+                'dingue.context_processor.dashboard',
+                # 'mpox.mpox_context_processor.mpox_dashboard',
             ],
         },
     },
@@ -136,7 +137,7 @@ WSGI_APPLICATION = 'epidemietrackr.wsgi.application'
 #     }
 # }
 #Productionone
-
+#
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -202,6 +203,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

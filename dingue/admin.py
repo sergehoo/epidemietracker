@@ -6,8 +6,6 @@ from import_export.formats.base_formats import XLSX
 from epidemie.models import Echantillon
 
 
-# Register your models here.
-
 class EchantillonResource(resources.ModelResource):
     class Meta:
         model = Echantillon

@@ -71,6 +71,25 @@ class DistrictSanitaire(models.Model):
     nom = models.CharField(max_length=100, null=True, blank=True, )
     region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True, )
 
+    def __str__(self):
+        return f'{self.nom}---->{self.region}'
+
+
+class Commune(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    name_en = models.CharField(max_length=100, null=True, blank=True)
+    place = models.CharField(max_length=100, null=True, blank=True)
+    population = models.CharField(null=True, blank=True)
+    is_in = models.CharField(max_length=255, null=True, blank=True)
+    source = models.CharField(max_length=255, null=True, blank=True)
+    osm_id = models.BigIntegerField(null=True, blank=True)
+    osm_type = models.CharField(max_length=50, null=True, blank=True)
+    district = models.ForeignKey(DistrictSanitaire, on_delete=models.CASCADE, null=True, blank=True, )
+    geom = models.PointField()
+
+    def __str__(self):
+        return f"{self.name} - {self.place} ({self.geom})"
+
 
 class ServiceSanitaire(models.Model):
     nom = models.CharField(max_length=100, null=True, blank=True)
@@ -121,37 +140,22 @@ class Employee(models.Model):
         )
 
 
-class Commune(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True)
-    name_en = models.CharField(max_length=100, null=True, blank=True)
-    place = models.CharField(max_length=100, null=True, blank=True)
-    population = models.CharField(null=True, blank=True)
-    is_in = models.CharField(max_length=255, null=True, blank=True)
-    source = models.CharField(max_length=255, null=True, blank=True)
-    osm_id = models.BigIntegerField(null=True, blank=True)
-    osm_type = models.CharField(max_length=50, null=True, blank=True)
-    geom = models.PointField()
-
-    def __str__(self):
-        return f"{self.name} - {self.place} ({self.geom})"
-
-
 class Patient(models.Model):
     code_patient = models.CharField(max_length=225, blank=True, unique=True)
-    nom = models.CharField(max_length=225)
-    prenoms = models.CharField(max_length=225)
-    contact = models.CharField(max_length=225)
-    situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices)
+    nom = models.CharField(max_length=225, blank=True)
+    prenoms = models.CharField(max_length=225, blank=True)
+    contact = models.CharField(max_length=225, blank=True)
+    situation_matrimoniale = models.CharField(max_length=225, choices=situation_matrimoniales_choices, blank=True)
     lieu_naissance = models.CharField(max_length=200, blank=True, null=True)
     date_naissance = models.DateField(blank=True, null=True)
-    genre = models.CharField(max_length=10, choices=Sexe_choices)
-    nationalite = models.CharField(max_length=200)
+    genre = models.CharField(max_length=10, choices=Sexe_choices, blank=True, )
+    nationalite = models.CharField(max_length=200, blank=True, )
     profession = models.CharField(max_length=100, null=True, blank=True)
-    nbr_enfants = models.PositiveIntegerField(default=0)
+    nbr_enfants = models.PositiveIntegerField(default=0, blank=True)
     groupe_sanguin = models.CharField(choices=Goupe_sanguin_choices, max_length=20, null=True)
     niveau_etude = models.CharField(max_length=100, null=True, blank=True)
     employeur = models.CharField(max_length=100, null=True, blank=True)
-    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=now)
     commune = models.ForeignKey(Commune, on_delete=models.SET_NULL, null=True, blank=True)
     quartier = models.CharField(max_length=100, null=True, blank=True)
@@ -200,7 +204,7 @@ class Epidemie(models.Model):
     date_debut = models.DateField(blank=True, null=True)
     date_fin = models.DateField(blank=True, null=True)
     thumbnails = models.ImageField(null=True, blank=True, upload_to='epidemie/thumbnails')
-    symptomes = models.ManyToManyField(Symptom, related_name='épidémies', blank=True, null=True)
+    symptomes = models.ManyToManyField(Symptom, related_name='épidémies')
 
     @property
     def regions_impactees(self):

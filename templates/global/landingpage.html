@@ -129,9 +129,9 @@
 
                                                         <div class="card-footer border-top text-muted text-right">
                                                               {% if maladies.nom == 'DENGUE' %}
-                                                                  <a href="{% url 'dingue-home' %}" class="btn btn-primary ">Parcourir</a>
+                                                                  <a href="{% url 'dingue-home'  %}" class="btn btn-primary ">Parcourir</a>
                                                                   {% elif maladies.nom == 'MPOX' %}
-                                                                  <a href="{% url 'mpox-dashboard' %}" class="btn btn-primary ">Parcourir</a>
+                                                                  <a href="{% url 'mpox-dashboard'  %}" class="btn btn-primary ">Parcourir</a>
                                                                   {% elif maladies.nom == 'EBOLA' %}
                                                                   <a href="{% url 'ebola-dashboard' %}" class="btn btn-primary ">Parcourir</a>
                                                                   {% elif maladies.nom == 'COVID' %}

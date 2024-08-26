@@ -5,9 +5,10 @@ from django.views.generic import TemplateView
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from epidemie.models import HealthRegion, City, Commune, EpidemicCase, ServiceSanitaire
+from epidemie.models import HealthRegion, City, Commune, EpidemicCase, ServiceSanitaire, Epidemie, Echantillon, Patient, \
+    DistrictSanitaire
 from epidemie.serializers import HealthRegionSerializer, CitySerializer, CommuneSerializer, EpidemicCaseSerializer, \
-    ServiceSanitaireSerializer
+    ServiceSanitaireSerializer, PatientSerializer
 from epidemie.tasks import sync_health_regions, process_city_data, generate_commune_report, alert_for_epidemic_cases
 
 
@@ -51,66 +52,122 @@ class EpidemicCaseViewSet(viewsets.ModelViewSet):
         alert_for_epidemic_cases.delay()
 
 
-class MpoxHomeDash(LoginRequiredMixin, TemplateView):
-    login_url = '/accounts/login/'
-    # form_class = LoginForm
-    template_name = "global/mpox/dashboard_mpox.html"
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #
-    #     # Filtrer les patients ayant au moins un échantillon avec un résultat positif
-    #     positive_cases = (
-    #         Patient.objects.filter(echantillons__resultat='POSITIF')
-    #         .values('commune__name')
-    #         .annotate(total=Count('id'))
-    #         .order_by('-total')
-    #     )
-    #
-    #     # Passer les données au template
-    #     context['positive_cases'] = positive_cases
-    #
-    #     return context
-
-    # # Call the parent class's dispatch method for normal view processing.
-    #     return super().dispatch(request, *args, **kwargs)
-    #
-    # def dispatch(self, request, *args, **kwargs):
-    #     # Call the parent class's dispatch method for normal view processing.
-    #     response = super().dispatch(request, *args, **kwargs)
-    #
-    #     # Check if the user is authenticated. If not, redirect to the login page.
-    #     if not request.user.is_authenticated:
-    #         return redirect('login')
-    #
-    #     # Check if the user is a member of the RH Managers group
-    #     if request.user.groups.filter(name='ressources_humaines').exists():
-    #         # Redirect the user to the RH Managers dashboard
-    #         return redirect('rhdash')
-    #
-    #     # Check if the user is a member of the RH Employees group
-    #     elif request.user.groups.filter(name='project').exists():
-    #         # Redirect the user to the RH Employees dashboard
-    #         return redirect('rh_employee_dashboard')
-    #
-    #     # If the user is not a member of any specific group, return a forbidden response
-    #     else:
-    #         return redirect('page_not_found')
-    #         # return HttpResponseForbidden("You don't have permission to access this page.")
-
-
 # class PatientViewSet(viewsets.ModelViewSet):
-#     queryset = Patient.objects.all()  # Définir le queryset ici
+#     queryset = Patient.objects.all()
 #     serializer_class = PatientSerializer
 #
 #     def get_queryset(self):
 #         # Filtrer les patients qui ont au moins un échantillon avec un résultat positif
 #         queryset = self.queryset.filter(
-#             Q(echantillons__resultat='POSITIF')
+#             Q(echantillons__resultat='POSITIF', echantillons__maladie='MPOX')
 #         ).distinct()
 #
+#         # Annoter les informations de région, district et commune pour chaque patient
+#         queryset = queryset.select_related(
+#             'commune__district__region'
+#         )
 #         return queryset
-#
+class PatientViewSet(viewsets.ModelViewSet):
+    queryset = Patient.objects.all()  # Définir le queryset par défaut
+    serializer_class = PatientSerializer
+
+    def get_queryset(self):
+        # Obtenez l'ID de l'épidémie pour 'MPOX'
+        try:
+            moxp_epidemie = Epidemie.objects.get(nom='MPOX')
+        except Epidemie.DoesNotExist:
+            return Patient.objects.none()  # Retourne une queryset vide
+
+        # Filtrer les patients qui ont au moins un échantillon avec un résultat positif pour MPOX
+        queryset = Patient.objects.filter(
+            echantillons__resultat='POSITIF',
+            echantillons__maladie=moxp_epidemie
+        ).distinct()
+
+        # Annoter les informations de région, district et commune pour chaque patient
+        queryset = queryset.select_related(
+            'commune__district__region'
+        )
+        return queryset
+
+
+class MpoxHomeDash(LoginRequiredMixin, TemplateView):
+    login_url = '/accounts/login/'
+    # form_class = LoginForm
+    template_name = "global/mpox/dashboard_mpox.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Filtrer les échantillons et les patients pour la maladie MPOX
+        echantillons_mpox = Echantillon.objects.filter(maladie__nom='MPOX')
+        patients_mpox = Patient.objects.filter(echantillons__in=echantillons_mpox).distinct()
+
+        echantillons_nbr = echantillons_mpox.count()
+        echantillons_nbrP = echantillons_mpox.filter(resultat='POSITIF').count()
+        patients = patients_mpox.count()
+        patients_gueris = patients_mpox.filter(gueris=True).count()
+        patients_decedes = patients_mpox.filter(decede=True).count()
+
+        # Nombre total de patients dont les échantillons ont été positifs
+        echantillons_positifs = echantillons_mpox.filter(resultat='POSITIF')
+        patients_avec_echantillons_positifs = Patient.objects.filter(echantillons__in=echantillons_positifs).distinct()
+
+        total_patients_positifs = patients_avec_echantillons_positifs.count()
+
+        # Nombre de patients guéris et décédés parmi ceux dont les échantillons ont été positifs
+        patients_gueris_positifs = patients_avec_echantillons_positifs.filter(gueris=True).count()
+        patients_decedes_positifs = patients_avec_echantillons_positifs.filter(decede=True).count()
+
+        # Calculer le pourcentage de patients guéris et décédés parmi les patients avec des échantillons positifs
+        if total_patients_positifs > 0:
+            pourcentage_gueris_positifs = (patients_gueris_positifs / total_patients_positifs) * 100
+            pourcentage_decedes_positifs = (patients_decedes_positifs / total_patients_positifs) * 100
+        else:
+            pourcentage_gueris_positifs = 0
+            pourcentage_decedes_positifs = 0
+
+        if echantillons_nbr > 0:
+            pourcentage_positifs = (echantillons_nbrP / echantillons_nbr) * 100
+        else:
+            pourcentage_positifs = 0
+
+        last_update = echantillons_mpox.order_by('-created_at').values_list('created_at', flat=True).first()
+
+        top_districts = DistrictSanitaire.objects.annotate(
+            num_echantillons=Count('commune__patient__echantillons',
+                                   filter=Q(commune__patient__echantillons__maladie__nom='MPOX')),
+            num_gueris=Count('commune__patient__echantillons',
+                             filter=Q(commune__patient__echantillons__maladie__nom='MPOX',
+                                      commune__patient__gueris=True)),
+            num_decedes=Count('commune__patient__echantillons',
+                              filter=Q(commune__patient__echantillons__maladie__nom='MPOX',
+                                       commune__patient__decede=True))
+        ).order_by('-num_echantillons')[:5]
+
+        epidemies = Epidemie.objects.filter(nom='MPOX').order_by('id')
+
+        # Ajouter les données au contexte
+        context.update({
+            'mpox_top_districts': top_districts,
+            'mpox_list_epidemie': epidemies,
+
+            'mpox_last_update': last_update,
+            'mpox_echantillons_nbr': echantillons_nbr,
+            'mpox_echantillons_nbrP': echantillons_nbrP,
+            'mpox_pourcentage_positifs': pourcentage_positifs,
+            'mpox_patients_gueris': patients_gueris,
+            'mpox_patients_decedes': patients_decedes,
+            'mpox_patients': patients,
+            'mpox_total_patients_positifs': total_patients_positifs,
+            'mpox_patients_gueris_positifs': patients_gueris_positifs,
+            'mpox_patients_decede_positifs': patients_decedes_positifs,
+            'mpox_pourcentage_gueris_positifs': pourcentage_gueris_positifs,
+            'mpox_pourcentage_decedes_positifs': pourcentage_decedes_positifs,
+        })
+
+        return context
+
 
 class ServiceSanitaireViewSet(viewsets.ModelViewSet):
     queryset = ServiceSanitaire.objects.all()

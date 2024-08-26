@@ -123,8 +123,8 @@ networks:
   adminer:
     image: adminer
     restart: always
-    ports:
-      - 6080:8080
+#    ports:
+#      - 6080:8080
 
 
 volumes:

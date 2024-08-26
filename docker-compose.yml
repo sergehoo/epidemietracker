@@ -98,10 +98,6 @@ services:
       networks:
         - web
 
-networks:
-  web:
-    driver: bridge
-
   epidemieDB:
     image: postgis/postgis:16-3.4
     platform: linux/amd64
@@ -126,6 +122,9 @@ networks:
     ports:
       - 6080:8080
 
+networks:
+  web:
+    driver: bridge
 
 volumes:
   pgdata:

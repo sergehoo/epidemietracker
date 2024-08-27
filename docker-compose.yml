@@ -120,17 +120,20 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./certs:/etc/nginx/certs
+    networks:
+      - epidemietracker_default
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 6080:8080
+    networks:
+      - epidemietracker_default
 
 networks:
-  default:
-    external:
-      name: nginx-proxy-net
+  epidemietracker_default:
+    external: true
 
 volumes:
   pgdata:

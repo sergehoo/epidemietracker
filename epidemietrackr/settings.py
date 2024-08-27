@@ -34,10 +34,10 @@ DEBUG = True
 # ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
-ALLOWED_HOSTS = ['https://veillesanitaire.com',]
-CSRF_TRUSTED_ORIGINS = ['https://veillesanitaire.com']
+ALLOWED_HOSTS = ['https://veillesanitaire.com', 'veillesanitaire.com','www.veillesanitaire.com', 'http://veillesanitaire.com', '*']
+CSRF_TRUSTED_ORIGINS = ['https://veillesanitaire.com', 'veillesanitaire.com', 'www.veillesanitaire.com','https://veillesanitaire.com']
 CORS_ALLOWED_ORIGINS = [
-    'https://veillesanitaire.com',
+    'https://veillesanitaire.com', 'veillesanitaire.com','www.veillesanitaire.com', 'https://veillesanitaire.com'
 ]
 # Application definition
 

@@ -3,9 +3,9 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from dingue.views import HomePageView, PatientListView, EchantillonListView, import_view, import_echantillons
-from .views import dashboard_view, HealthRegionViewSet, CityViewSet, EpidemicCaseViewSet, PatientViewSet, \
-    ServiceSanitaireViewSet, CommuneViewSet, CommuneAggregatedViewSet
+from api.views import HealthRegionViewSet, CityViewSet, EpidemicCaseViewSet, PatientViewSet, CommuneAggregatedViewSet, \
+    ServiceSanitaireViewSet, dashboard_view
+from epidemie.views import import_view, import_echantillons, PatientListView, EchantillonListView, HomePageView
 
 router = DefaultRouter()
 router.register(r'healthregions', HealthRegionViewSet)
@@ -18,6 +18,7 @@ router.register(r'service_sanitaire', ServiceSanitaireViewSet)
 
 urlpatterns = [
                   path('api/', include(router.urls)),
+
                   path('dash/', dashboard_view, name='tethome'),
                   path('import_data/', import_view, name='import_view'),
 

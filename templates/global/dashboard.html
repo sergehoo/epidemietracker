@@ -8,11 +8,11 @@
     <meta charset="utf-8">
     <meta name="author">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="@@page-discription">
+    <meta name="description" content="">
     <!-- Fav Icon  -->
     <link rel="shortcut icon" href="{% static 'images/logoMSHPCMU.svg' %}">
     <!-- Page Title  -->
-    <title>Dengue Situation Tracker & Dashboard</title>
+    <title>EPIDEMIE Tracker & Dashboard</title>
     <!-- StyleSheets  -->
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
@@ -55,6 +55,7 @@
                     </div>
                 </div>
                 <!-- main header @e -->
+              {% include 'global/layouts/navhead.html' %}
                 <!-- content @s -->
                 <div class="nk-content ">
                     <div class="container-fluid">
@@ -62,7 +63,7 @@
                             <div class="nk-block-head">
                                 <div class=" ">
                                     <div class="">
-                                        <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoCI.png' %}" width="50"></span> Dengue Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"></h5>
+                                        <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"> </span> {{ epidemie.nom }} Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoCI.png' %}" width="50"></h5>
                                     </div>
                                     <div class="nk-block-head-content">
                                         <p class="note-text">Derniere mise  a jours : {{ last_update }}</p>
@@ -118,7 +119,7 @@
                                                                         <div class="dot dot-lg sq bg-danger"></div>
                                                                         <span>Décès</span>
                                                                     </div>
-                                                                    <div class="count">{{ patients_decede_positifs|floatformat:0 }}</div>
+                                                                    <div class="count">{{ patients_decede_positifs|floatformat:0 }}0</div>
                                                                 </li>
                                                             </ul>
                                                             <div class="nk-cov-wg-note">Taux de  <a href="#">guerisons ({{ pourcentage_gueris_positifs|floatformat:2  }}%)</a> &amp; <a href="#">Décès ({{ pourcentage_decedes_positifs|floatformat:2 }}%)</a>.</div>
@@ -127,53 +128,56 @@
                                                 </div>
                                             </div><!-- .col -->
                                             <div class="col-lg-6 col-xl-12">
-                                                <div class="card card-bordered card-full">
-                                                    <div class="card-inner">
-                                                        <div class="nk-cov-wg2">
-                                                            <div class="card-title">
-                                                                <h5 class="title">Taux de propagation - <small>Abidjan</small></h5>
-                                                            </div>
-                                                            <div class="nk-cov-group">
-                                                                <div class="nk-cov-data">
-                                                                    <h6 class="overline-title">Confirmés</h6>
-                                                                    <div class="amount amount-sm">48</div>
-                                                                </div>
-                                                                <div class="nk-cov-data">
-                                                                    <h6 class="overline-title">Guéris</h6>
-                                                                    <div class="amount amount-sm text-success">15</div>
-                                                                </div>
-                                                                <div class="nk-cov-data">
-                                                                    <h6 class="overline-title">Décès</h6>
-                                                                    <div class="amount amount-sm text-danger">5</div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="nk-cov-wg-note">Taux de <a href="#">Guérisons (31.3%)</a> &amp; <a href="#">Décès (10.5%)</a>.</div>
-                                                            <div class="nk-cov-wg2-group">
-                                                                <div class="nk-cov-data">
-                                                                    <h6 class="sub-text">Patients <br class="d-xxl-none">Infectés actuellement</h6>
-                                                                    <div class="amount amount-xs">28</div>
-                                                                </div>
-                                                                <ul class="nk-cov-wg2-data">
-                                                                    <li>
-                                                                        <div class="title">
-                                                                            <div class="dot dot-lg sq bg-purple"></div>
-                                                                            <span>Etat stable </span>
-                                                                        </div>
-                                                                        <div class="count">27</div>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="title">
-                                                                            <div class="dot dot-lg sq bg-success"></div>
-                                                                            <span>Etat Critic</span>
-                                                                        </div>
-                                                                        <div class="count">01</div>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div><!-- .col -->
+    <div class="card card-bordered card-full">
+        <div class="card-inner">
+            <div class="nk-cov-wg2">
+                <div class="card-title">
+                    <h5 class="title">Taux de propagation - <small>{{ epidemie.nom }}</small></h5>
+                </div>
+                <div class="nk-cov-group">
+                    <div class="nk-cov-data">
+                        <h6 class="overline-title">Confirmés</h6>
+                        <div class="amount amount-sm">{{ total_patients_positifs }}</div>
+                    </div>
+                    <div class="nk-cov-data">
+                        <h6 class="overline-title">Guéris</h6>
+                        <div class="amount amount-sm text-success">{{ patients_gueris_positifs }}</div>
+                    </div>
+                    <div class="nk-cov-data">
+                        <h6 class="overline-title">Décès</h6>
+                        <div class="amount amount-sm text-danger">{{ patients_decedes_positifs }}</div>
+                    </div>
+                </div>
+                <div class="nk-cov-wg-note">
+                    Taux de <a href="#">Guérisons ({{ pourcentage_gueris_positifs|floatformat:1 }}%)</a> &amp;
+                    <a href="#">Décès ({{ pourcentage_decedes_positifs|floatformat:1 }}%)</a>.
+                </div>
+                <div class="nk-cov-wg2-group">
+                    <div class="nk-cov-data">
+                        <h6 class="sub-text">Patients <br class="d-xxl-none">Infectés actuellement</h6>
+                        <div class="amount amount-xs">{{ total_patients_positifs|add:"-"|add:patients_gueris_positifs|add:patients_decedes_positifs }}</div>
+                    </div>
+                    <ul class="nk-cov-wg2-data">
+                        <li>
+                            <div class="title">
+                                <div class="dot dot-lg sq bg-purple"></div>
+                                <span>Etat stable</span>
+                            </div>
+                            <div class="count">{{ total_patients_positifs|add:"-"|add:patients_decedes_positifs }}</div>
+                        </li>
+                        <li>
+                            <div class="title">
+                                <div class="dot dot-lg sq bg-success"></div>
+                                <span>Etat Critic</span>
+                            </div>
+                            <div class="count">1</div> <!-- Nombre de patients en état critique -->
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
                                         </div><!-- .row -->
                                     </div><!-- .col -->
                                     <div class="col-xl-8">
@@ -367,31 +371,20 @@ function toggleDistricts(regionId) {
                                                 <div class="nk-cov-newswg">
                                                     <div class="nk-cov-newswg-item">
                                                         <div class="nk-cov-newswg-content">
-                                                            <h6 class="title"><a href="#">The rules of safe shopping under coronavirus: five tips for social distancing</a></h6>
+                                                            <h6 class="title"><a href="#">Arreter miniseriel du 08 Septembre</a></h6>
                                                             <ul class="nk-cov-newswg-meta">
-                                                                <li><a href="#">The Guardian</a></li>
+                                                                <li><a href="#">Note d'Information DGS N°: 00988</a></li>
                                                                 <li>1 day ago</li>
                                                             </ul>
                                                         </div>
                                                         <div class="nk-cov-newswg-image">
-                                                            <img src="./images/gfx/covid-news-a.jpg" alt="">
+                                                            <img src="{% static 'images/gfx/covid-news-a.jpg' %}" alt="">
                                                         </div>
                                                     </div>
-                                                    <div class="nk-cov-newswg-item">
-                                                        <div class="nk-cov-newswg-content">
-                                                            <h6 class="title"><a href="#">Japan’s relatively small coronavirus case count may be a mirage</a></h6>
-                                                            <ul class="nk-cov-newswg-meta">
-                                                                <li><a href="#">Vox</a></li>
-                                                                <li>1 day ago</li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="nk-cov-newswg-image">
-                                                            <img src="./images/gfx/covid-news-b.jpg" alt="">
-                                                        </div>
-                                                    </div>
+
                                                 </div>
                                                 <div class="mt-3">
-                                                    <a href="#" class="link link-sm"><span>More Stories</span> <em class="icon ni ni-arrow-long-right"></em></a>
+                                                    <a href="#" class="link link-sm"><span>Voir tout</span> <em class="icon ni ni-arrow-long-right"></em></a>
                                                 </div>
                                             </div>
                                         </div>
@@ -513,11 +506,154 @@ function toggleDistricts(regionId) {
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
+{#    <script>#}
+{#    var coteDIvoireBounds = [#}
+{#        [4.35, -8.60], // Sud-Ouest (Point le plus au sud)#}
+{#        [10.73, -2.51] // Nord-Est (Point le plus au nord)#}
+{#    ];#}
+{#    var epidemieId = '{{ epidemie_id }}';#}
+{#    var epidemieNom = '{{ epidemie_nom }}';#}
+{##}
+{#    var map = L.map('map', {#}
+{#        maxBounds: coteDIvoireBounds, // Définir les limites maximales#}
+{#        maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords#}
+{#        minZoom: 7, // Définir le zoom minimum#}
+{#    }).setView([7.54, -5.55], 7);#}
+{##}
+{#    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {#}
+{#        maxZoom: 18,#}
+{#        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'#}
+{#    }).addTo(map);#}
+{##}
+{#    // Utilisation de Leaflet.markercluster pour regrouper les marqueurs#}
+{#    var markers = L.markerClusterGroup();#}
+{##}
+{#    // Fonction pour déterminer la couleur du marqueur en fonction du statut#}
+{#    function getMarkerColor(patient) {#}
+{#        if (patient.decede) {#}
+{#            return 'black'; // Décédé#}
+{#        } else if (patient.gueris) {#}
+{#            return 'green'; // Guéri#}
+{#        } else if (patient.echantillons && patient.echantillons.some(e => e.resultat === 'POSITIF')) {#}
+{#            return 'red'; // Positif#}
+{#        } else {#}
+{#            return 'orange'; // Autres#}
+{#        }#}
+{#    }#}
+{##}
+{#    // Fonction pour ajouter un marqueur à la carte#}
+{#    function addMarker(patient) {#}
+{#        if (patient.commune && patient.commune.geom) {#}
+{#            try {#}
+{#                var cleanedWKT = patient.commune.geom.replace(/^SRID=\d+;/, '');#}
+{#                var geoJSON = Terraformer.WKT.parse(cleanedWKT);#}
+{#                var centroid = L.geoJSON(geoJSON).getBounds().getCenter();#}
+{##}
+{#                var markerColor = getMarkerColor(patient);#}
+{##}
+{#                var myIcon = L.divIcon({#}
+{#                    className: 'custom-div-icon',#}
+{#                    html: `<div class='circle-marker' style='background-color: ${markerColor};'></div>`, // Couleur basée sur le statut#}
+{#                    iconSize: [30, 30],#}
+{#                    iconAnchor: [15, 15]#}
+{#                });#}
+{##}
+{#                var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';#}
+{##}
+{#                var marker = L.marker(centroid, {icon: myIcon})#}
+{#                    .bindPopup(`<b>${patient.nom} ${patient.prenoms}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)#}
+{#                    .on('mouseover', function () {#}
+{#                        this.bindTooltip(`${patient.nom} ${patient.prenoms}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`, {#}
+{#                            direction: 'top',#}
+{#                            offset: [0, -10],#}
+{#                            opacity: 0.8#}
+{#                        }).openTooltip();#}
+{#                    })#}
+{#                    .on('mouseout', function () {#}
+{#                        this.closeTooltip();#}
+{#                    });#}
+{##}
+{#                markers.addLayer(marker);#}
+{##}
+{#            } catch (error) {#}
+{#                console.error(`Erreur lors de l'analyse GeoJSON pour le patient : ${patient.nom} ${patient.prenoms}`, error);#}
+{#            }#}
+{#        } else {#}
+{#            console.error(`Données de localisation invalides pour le patient : ${patient.nom} ${patient.prenoms}`);#}
+{#        }#}
+{#    }#}
+{##}
+{#    // Fonction pour calculer l'âge#}
+{#    function calculateAge(date_naissance) {#}
+{#        var today = new Date();#}
+{#        var birthDate = new Date(date_naissance);#}
+{#        var age = today.getFullYear() - birthDate.getFullYear();#}
+{#        var monthDifference = today.getMonth() - birthDate.getMonth();#}
+{#        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {#}
+{#            age--;#}
+{#        }#}
+{#        return age;#}
+{#    }#}
+{##}
+{#    // Récupération des données des patients positifs#}
+{#    fetch('/epidemie/api/patient/')#}
+{#        .then(response => response.json())#}
+{#        .then(patients => {#}
+{#            // Groupement des patients par région, district, et commune#}
+{#            var regions = {};#}
+{##}
+{#            patients.forEach(patient => {#}
+{#                var regionName = patient.commune && patient.commune.district && patient.commune.district.region ? patient.commune.district.region.name : 'Inconnu';#}
+{#                var districtName = patient.commune && patient.commune.district ? patient.commune.district.nom : 'Inconnu';#}
+{#                var communeName = patient.commune ? patient.commune.name : 'Inconnu';#}
+{##}
+{#                if (!regions[regionName]) {#}
+{#                    regions[regionName] = {#}
+{#                        name: regionName,#}
+{#                        districts: {}#}
+{#                    };#}
+{#                }#}
+{##}
+{#                if (!regions[regionName].districts[districtName]) {#}
+{#                    regions[regionName].districts[districtName] = {#}
+{#                        name: districtName,#}
+{#                        communes: {}#}
+{#                    };#}
+{#                }#}
+{##}
+{#                if (!regions[regionName].districts[districtName].communes[communeName]) {#}
+{#                    regions[regionName].districts[districtName].communes[communeName] = {#}
+{#                        name: communeName,#}
+{#                        patients: []#}
+{#                    };#}
+{#                }#}
+{##}
+{#                regions[regionName].districts[districtName].communes[communeName].patients.push(patient);#}
+{#            });#}
+{##}
+{#            // Ajout des marqueurs à la carte#}
+{#            Object.values(regions).forEach(region => {#}
+{#                Object.values(region.districts).forEach(district => {#}
+{#                    Object.values(district.communes).forEach(commune => {#}
+{#                        commune.patients.forEach(patient => {#}
+{#                            addMarker(patient);#}
+{#                        });#}
+{#                    });#}
+{#                });#}
+{#            });#}
+{##}
+{#            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group#}
+{##}
+{#        })#}
+{#        .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));#}
+{#</script>#}
     <script>
     var coteDIvoireBounds = [
         [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
         [10.73, -2.51] // Nord-Est (Point le plus au nord)
     ];
+    var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie
+    var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie
 
     var map = L.map('map', {
         maxBounds: coteDIvoireBounds, // Définir les limites maximales
@@ -530,10 +666,8 @@ function toggleDistricts(regionId) {
         attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
     }).addTo(map);
 
-    // Utilisation de Leaflet.markercluster pour regrouper les marqueurs
-    var markers = L.markerClusterGroup();
+    var markers = L.markerClusterGroup(); // Initialiser le groupe de clusters pour les marqueurs
 
-    // Fonction pour déterminer la couleur du marqueur en fonction du statut
     function getMarkerColor(patient) {
         if (patient.decede) {
             return 'black'; // Décédé
@@ -546,7 +680,6 @@ function toggleDistricts(regionId) {
         }
     }
 
-    // Fonction pour ajouter un marqueur à la carte
     function addMarker(patient) {
         if (patient.commune && patient.commune.geom) {
             try {
@@ -566,9 +699,9 @@ function toggleDistricts(regionId) {
                 var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';
 
                 var marker = L.marker(centroid, {icon: myIcon})
-                    .bindPopup(`<b>${patient.nom} ${patient.prenoms}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)
+                    .bindPopup(` Localite : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)
                     .on('mouseover', function () {
-                        this.bindTooltip(`${patient.nom} ${patient.prenoms}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`, {
+                        this.bindTooltip(` Localite : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu' }`, {
                             direction: 'top',
                             offset: [0, -10],
                             opacity: 0.8
@@ -588,7 +721,6 @@ function toggleDistricts(regionId) {
         }
     }
 
-    // Fonction pour calculer l'âge
     function calculateAge(date_naissance) {
         var today = new Date();
         var birthDate = new Date(date_naissance);
@@ -600,11 +732,10 @@ function toggleDistricts(regionId) {
         return age;
     }
 
-    // Récupération des données des patients positifs
-    fetch('dengue/api/patient/')
+    // Récupération des données des patients positifs en utilisant l'ID de l'épidémie
+    fetch(`/epidemie/api/patient/?epidemie_id=${epidemieId}`)
         .then(response => response.json())
         .then(patients => {
-            // Groupement des patients par région, district, et commune
             var regions = {};
 
             patients.forEach(patient => {
@@ -636,7 +767,6 @@ function toggleDistricts(regionId) {
                 regions[regionName].districts[districtName].communes[communeName].patients.push(patient);
             });
 
-            // Ajout des marqueurs à la carte
             Object.values(regions).forEach(region => {
                 Object.values(region.districts).forEach(district => {
                     Object.values(district.communes).forEach(commune => {
@@ -652,12 +782,6 @@ function toggleDistricts(regionId) {
         })
         .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));
 </script>
-
-
-
-
-
-
 
     <style>
         /* Style pour le marqueur circulaire */

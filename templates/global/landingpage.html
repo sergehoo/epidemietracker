@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="@@page-discription">
     <!-- Fav Icon  -->
-    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <link rel="shortcut icon" href="{% static 'images/logoMSHPCMU.svg' %}">
     <!-- Page Title  -->
     <title>Dengue Situation Tracker & Dashboard</title>
     <!-- StyleSheets  -->
@@ -38,7 +38,7 @@
 }
 
 .dengue-image {
-    width: 150px;
+    width: 100px;
     position: relative;
     z-index: 2;
     margin-bottom: -50px; /* Pour que l'image déborde partiellement */
@@ -52,19 +52,22 @@
 </style>
 <body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
     <div class="nk-app-root">
+
         <!-- main @s -->
         <div class="nk-main ">
             <!-- sidebar @s -->
 
              <!-- sidebar @e -->
             <!-- wrap @s -->
+
             <div class="nk-wrap ">
                 <!-- main header @s -->
+
                 <div class="nk-header nk-header-fluid nk-header-fixed nk-header-onlymobile is-light">
                     <div class="container-fluid">
                         <div class="nk-header-wrap">
                             <div class="nk-header-brand">
-                                <a href="index.html" class="logo-link">
+                                <a href="{% url 'landing' %}" class="logo-link">
                                     <img class="logo-light logo-img" src="./images/logo.png" srcset="./images/logo2x.png 2x" alt="logo">
                                     <img class="logo-dark logo-img" src="./images/logo-dark.png" srcset="./images/logo-dark2x.png 2x" alt="logo-dark">
                                 </a>
@@ -76,14 +79,15 @@
                     </div>
                 </div>
                 <!-- main header @e -->
+         {% include 'global/layouts/navhead.html' %}
                 <!-- content @s -->
                 <div class="nk-content ">
                     <div class="container-fluid">
                         <div class="nk-content-body">
                             <div class="nk-block-head nk-block-head-sm">
-                                <div class="">
+                                <div class="mb-20">
                                     <div class="">
-                                        <h5 class="" style="text-align: center"> <span class="mr-20"><img class="flex" src="{% static 'images/logoCI.png' %}" width="100"></span> Epidemie Tracker & Dashboard <img class="flex ml-20" src="{% static 'images/logoMSHPCMU.svg' %}" width="100"></h5>
+                                        <h5 class="" style="text-align: center"> <span class="m-20"><img class="flex mr-20" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"></span> Epidemie Tracker & Dashboard <img class="flex ml-20" src="{% static 'images/logoCI.png' %}" width="50">  </h5>
                                     </div>
 
                                 </div>
@@ -94,61 +98,42 @@
                                     <div class="col-xl-12">
                                         <div class="card card-bordered card-full">
                                             <div class="nk-cov-wg4">
-{#                                                <div class="nk-cov-wg4-aside bg-dark-dim">#}
-{##}
-{#                                              <div class="nk-ck-sm"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>#}
-{#                                                  <canvas class="doughnut-chart chartjs-render-monitor" id="doughnutChartData" width="1172" height="360" style="display: block; height: 180px; width: 586px;"></canvas>#}
-{#                                              </div>#}
-{#asside#}
-{#asside#}
-{#asside#}
-{##}
-{#                                                </div>#}
+
                                                 <div class="nk-cov-content">
 
                                                   <div class="row p-5">
-
-                                                      {% for maladies in list_epidemie.all %}
-                                                  <div class="col-xl-6 mb-5">
-
-                                                    <div class="card card-bordered">
-                                                        <div class="card-header border-bottom">{{ maladies.nom }} <span class="float-right"> <span class="badge badge-danger"  >{{ maladies.nombre_patients_positifs_ce_mois }}</span> Cas | Ce mois</span></div>
-<div class="image-container">
-
-        <img src="{{ maladies.thumbnails.url }}" alt="Dengue Image" class="dengue-image">
-    </div>                                                        <div class="card-body">
-
-                                                            <p class="card-text mt-5">{{ maladies.description|truncatewords:30|safe }}</p>
-                                                        <ul>
-{#                                                            <li>Regions Impactes <span class="badge badge-dark float-right">{{ maladies.regions_impactees }}</span></li>#}
-                                                            <li>Personnes touchees <span class="badge badge-dark float-right">{{ maladies.personnes_touchees }}</span></li>
-                                                            <li>Personnes Décédées <span class="badge badge-dark float-right">{{ maladies.personnes_decedees }}</span></li>
-                                                        </ul>
-
-                                                        </div>
-
-                                                        <div class="card-footer border-top text-muted text-right">
-                                                              {% if maladies.nom == 'DENGUE' %}
-                                                                  <a href="{% url 'dingue-home'  %}" class="btn btn-primary ">Parcourir</a>
-                                                                  {% elif maladies.nom == 'MPOX' %}
-                                                                  <a href="{% url 'mpox-dashboard'  %}" class="btn btn-primary ">Parcourir</a>
-                                                                  {% elif maladies.nom == 'EBOLA' %}
-                                                                  <a href="{% url 'ebola-dashboard' %}" class="btn btn-primary ">Parcourir</a>
-                                                                  {% elif maladies.nom == 'COVID' %}
-                                                                  <a href="{% url 'covid-dashboard' %}" class="btn btn-primary ">Parcourir</a>
-                                                                  {% else %}
-                                                                  <a href="#" class="btn btn-muted text-muted ">Parcourir</a>
-                                                              {% endif %}
-                                                        </div>
-
-
-                                                    </div>
-
-
-                                                  </div>
-                                                          {% empty %}
-                                                          Aucune Maladie Enregistree pour l,Instant
-                                                      {% endfor %}
+{% with list_epidemie.count as count %}
+    {% for maladie in list_epidemie %}
+    <div class="{% if count <= 4 %}col-xl-6{% else %}col-xl-3{% endif %} mb-5">
+        <div class="card card-bordered">
+            <div class="card-header border-bottom">{{ maladie.nom }}
+                <span class="float-right">
+                    <span class="badge badge-danger">{{ maladie.nombre_patients_positifs_ce_mois }}</span> Cas
+                </span>
+            </div>
+            <div class="image-container">
+                <img src="{{ maladie.thumbnails.url }}" alt="{{ maladie.nom }} Image" class="dengue-image">
+            </div>
+            <div class="card-body">
+                <p class="card-text mt-5">{{ maladie.description|truncatechars:80|safe }}</p>
+                <ul>
+                    <li>Personnes Confirmées
+                        <span class="badge badge-gray float-right">{{ maladie.personnes_touchees }}</span>
+                    </li>
+                    <li>Personnes Décédées
+                        <span class="badge badge-gray float-right">{{ maladie.personnes_decedees }}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer border-top text-muted text-right">
+                <a href="{% url 'epidemie-detail' maladie.pk %}" class="btn btn-muted text-muted">Parcourir</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Aucune Maladie Enregistrée pour l'Instant</p>
+    {% endfor %}
+{% endwith %}
 
 
                                                       </div>

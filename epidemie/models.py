@@ -1,4 +1,7 @@
 import datetime
+import random
+import string
+import uuid
 
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
@@ -141,7 +144,7 @@ class Employee(models.Model):
 
 
 class Patient(models.Model):
-    code_patient = models.CharField(max_length=225, blank=True, unique=True)
+    code_patient = models.CharField(max_length=225, blank=True, unique=True, editable=False)
     nom = models.CharField(max_length=225, blank=True)
     prenoms = models.CharField(max_length=225, blank=True)
     contact = models.CharField(max_length=225, blank=True)
@@ -150,20 +153,32 @@ class Patient(models.Model):
     date_naissance = models.DateField(blank=True, null=True)
     genre = models.CharField(max_length=10, choices=Sexe_choices, blank=True, )
     nationalite = models.CharField(max_length=200, blank=True, )
-    profession = models.CharField(max_length=100, null=True, blank=True)
+    profession = models.CharField(max_length=200, null=True, blank=True)
     nbr_enfants = models.PositiveIntegerField(default=0, blank=True)
     groupe_sanguin = models.CharField(choices=Goupe_sanguin_choices, max_length=20, null=True)
-    niveau_etude = models.CharField(max_length=100, null=True, blank=True)
-    employeur = models.CharField(max_length=100, null=True, blank=True)
+    niveau_etude = models.CharField(max_length=500, null=True, blank=True)
+    employeur = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=now)
     commune = models.ForeignKey(Commune, on_delete=models.SET_NULL, null=True, blank=True)
-    quartier = models.CharField(max_length=100, null=True, blank=True)
+    quartier = models.CharField(max_length=500, null=True, blank=True)
     # ville = models.ForeignKey('City', on_delete=models.SET_NULL, null=True)
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     gueris = models.BooleanField(default=False)
     decede = models.BooleanField(default=False)
     history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        # Générer un code_patient unique constitué de chiffres et de caractères alphabétiques
+        if not self.code_patient:
+            # Générer 16 chiffres à partir de l'UUID
+            digits = ''.join(filter(str.isdigit, str(uuid.uuid4().int)))[:8]
+            # Générer 4 caractères alphabétiques aléatoires
+            letters = ''.join(random.choices(string.ascii_uppercase, k=4))
+            # Combiner les chiffres et les lettres pour former le code_patient
+            self.code_patient = digits + letters
+
+        super(Patient, self).save(*args, **kwargs)
 
     @property
     def calculate_age(self):
@@ -203,7 +218,7 @@ class Epidemie(models.Model):
     description = HTMLField(blank=True, null=True)
     date_debut = models.DateField(blank=True, null=True)
     date_fin = models.DateField(blank=True, null=True)
-    thumbnails = models.ImageField(null=True, blank=True, upload_to='epidemie/thumbnails')
+    thumbnails = models.ImageField(null=True, blank=True, default='media/epidemie_thumbnails.png', upload_to='epidemie/thumbnails')
     symptomes = models.ManyToManyField(Symptom, related_name='épidémies')
 
     @property
@@ -259,21 +274,28 @@ class PreleveMode(models.Model):
 
 class Echantillon(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="echantillons", null=True, blank=True, )
-    code_echantillon = models.CharField(null=True, blank=True, max_length=10, unique=True)
+    code_echantillon = models.CharField(null=True, blank=True, max_length=12, unique=True)
     maladie = models.ForeignKey('Epidemie', null=True, blank=True, on_delete=models.CASCADE)
     mode_preleve = models.ForeignKey('PreleveMode', null=True, blank=True, on_delete=models.CASCADE)
     date_collect = models.DateTimeField(null=True, blank=True)
-    site_collect = models.CharField(null=True, blank=True, max_length=100)
+    site_collect = models.CharField(null=True, blank=True, max_length=500)
     agent_collect = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.CASCADE)
     status_echantillons = models.CharField(null=True, blank=True, max_length=10)
-    resultat = models.CharField(choices=Resultat_choices, max_length=100, null=True, blank=True)
+    resultat = models.CharField(choices=Resultat_choices, max_length=300, null=True, blank=True)
     linked = models.BooleanField(default=False, null=True, blank=True)
     used = models.BooleanField(default=False, null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     history = HistoricalRecords()
 
+    def save(self, *args, **kwargs):
+        # Générer un code_patient unique uniquement avec des chiffres
+        if not self.code_echantillon:
+            # Utiliser uuid4 pour générer un identifiant unique et extraire les chiffres
+            self.code_echantillon = ''.join(filter(str.isdigit, str(uuid.uuid4().int)))[:12]  # Limiter à 20 chiffres maximum
+        super(Echantillon, self).save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.code_echantillon}- {self.patient}"
+        return f"{self.code_echantillon}- {self.patient}-{self.maladie}"
 
 
 class City(models.Model):

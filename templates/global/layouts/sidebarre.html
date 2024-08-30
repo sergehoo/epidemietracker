@@ -16,34 +16,27 @@
                     </div>
                 </div><!-- .nk-sidebar-element -->
                 <div class="nk-sidebar-element">
-                    <div class="nk-sidebar-body">
+                    <div class="nk-sidebar-body" data-simplebar>
                         <div class="nk-sidebar-content">
                             <div class="nk-sidebar-menu nk-sidebar-menu-middle">
                                 <!-- Menu -->
                                 <ul class="nk-menu short-menu">
                                      <li class="nk-menu-item">
-                                        <a href="{% url 'landing' %}" class="nk-menu mb-3">
+                                        <a href="{% url 'landing' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><em class="icon ni ni-home-fill"></em></span>
-                                            <span class="nk-menu-text">Landing</span>
-                                            <span class="nk-menu-tooltip" title="Landing"></span>
-                                        </a>
-                                    </li>
-                                 <li class="nk-menu-item">
-                                        <a href="/" class="nk-menu mb-3">
-                                            <span class="nk-menu-icon"><em class="icon ni ni-dashboard-fill"></em></span>
                                             <span class="nk-menu-text">Home</span>
-                                            <span class="nk-menu-tooltip" title="Dashboard"></span>
+                                            <span class="nk-menu-tooltip" title="Patients"></span>
                                         </a>
                                     </li>
                                     <li class="nk-menu-item">
-                                        <a href="{% url 'patientlist' %}" class="nk-menu mb-3">
+                                        <a href="{% url 'patientlist' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><em class="icon ni ni-users-fill"></em></span>
                                             <span class="nk-menu-text">Patients</span>
                                             <span class="nk-menu-tooltip" title="Patients"></span>
                                         </a>
                                     </li>
                                     <li class="nk-menu-item">
-                                        <a href="{% url 'echantillons' %}" class="nk-menu mb-3">
+                                        <a href="{% url 'echantillons' %}" class="nk-menu-link">
                                             <span class="nk-menu-icon"><em class="icon ni ni-archive-fill"></em></span>
                                             <span class="nk-menu-text">Echantillons</span>
                                             <span class="nk-menu-tooltip" title="Echantillons"></span>

@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zxx" class="js">
+
+<head>
+    <base href="../">
+    <meta charset="utf-8">
+    <meta name="author" content="Softnio">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="@@page-discription">
+    <!-- Fav Icon  -->
+    <link rel="shortcut icon" href="{% static 'images/favicon.png' %}">
+    <!-- Page Title  -->
+    <title>Dengue Situation Tracker & Dashboard</title>
+    <!-- StyleSheets  -->
+    <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
+    <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+</head>
+
+<body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
+    <div class="nk-app-root">
+        <!-- main @s -->
+        <div class="nk-main ">
+            <!-- sidebar @s -->
+            {% include 'dingue/layouts/sidebarre.html' %}
+             <!-- sidebar @e -->
+            <!-- wrap @s -->
+            {% block content %}
+              
+            {% endblock %}
+            <!-- wrap @e -->
+        </div>
+        <!-- main @e -->
+    </div>
+    <!-- app-root @e -->
+    <!-- Modal About -->
+    <div class="modal fade" tabindex="-1" id="covid-about">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                    <em class="icon ni ni-cross"></em>
+                </a>
+                <div class="modal-body">
+                    <h5 class="title mb-3">About this data</h5>
+                    <h6 class="lead-text text-primary">It changes rapidly</h6>
+                    <p>This data changes rapidly, so what’s shown may be out of date. Table totals may not always represent an accurate sum. Information about reported cases is also available on the <a href="#">World Health Organization</a> & <a href="#">WorldoMeters.info</a> site.</p>
+                    <h6 class="lead-text text-primary">It doesn’t include all cases</h6>
+                    <p>Confirmed cases aren’t all cases. They only include people who tested positive. Testing rules and availability vary by country.</p>
+                    <div class="note-text">Updated: March 27, 2020 12:30 (GMT +6)</div>
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Feedback -->
+    <div class="modal fade" tabindex="-1" id="covid-feedback">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="justify-between gx-5 mb-3">
+                        <div>
+                            <h6 class="modal-title text-primary">What kind of feedback do you have about this tool?</h6>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-icon btn-trigger mr-n2 mt-n1" data-dismiss="modal" aria-label="Close">
+                                <em class="icon ni ni-cross"></em>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="btn-list-vr g-2">
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-report"></em> <span>Report an issue</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-bulb"></em> <span>Share an idea</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-question-alt"></em> <span>Give a compliment</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-policy"></em> <span>Legal or privacy concern</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Feedback Form -->
+    <div class="modal fade" tabindex="-1" id="covid-feedback-form">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="justify-between gx-5 mb-1">
+                        <div>
+                            <h6 class="modal-title text-primary">Tell us about the issue</h6>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-icon btn-trigger mr-n2 mt-n1" data-dismiss="modal" aria-label="Close">
+                                <em class="icon ni ni-cross"></em>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JavaScript -->
+    <script src="{% static 'assets/js/bundle.js' %}"></script>
+    <script src="{% static 'assets/js/scripts.js' %}"></script>
+    <script src="{% static 'assets/js/libs/jqvmap.js' %}"></script>
+    <script src="{% static 'assets/js/chart-covid.js' %}"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([7.54, -5.55], 6);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
+        }).addTo(map);
+
+        // Charger les régions sanitaires
+        fetch('/api/healthregions/')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data).addTo(map);
+            })
+            .catch(error => console.error(error));
+
+        // Charger les villes et les cas d'épidémies
+        fetch('/api/epidemiccases/')
+            .then(response => response.json())
+            .then(cases => {
+                cases.forEach(c => {
+                    fetch(`/api/cities/${c.city}/`)
+                        .then(response => response.json())
+                        .then(city => {
+                            L.marker([city.location.coordinates[1], city.location.coordinates[0]])
+                                .addTo(map)
+                                .bindPopup(`<b>${city.name}</b><br>${c.disease_name}: ${c.num_cases} cases`);
+                        });
+                });
+            })
+            .catch(error => console.error(error));
+    </script>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        Swal.fire({
+                            title: "Félicitation ! ",
+                            text: " {{ message }}",
+                            icon: "success",
+
+                        })
+                    });
+                </script>
+            {% elif message.tags == 'warning' %}
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        Swal.fire({
+                            title: "Attention alert",
+                            text: " {{ message }}",
+                            icon: "warning",
+
+                        })
+                    });
+                </script>
+            {% elif message.tags == 'error' %}
+                <script type="text/javascript">
+
+                    $(document).ready(function () {
+                        Swal.fire({
+                            title: "Attention Erreur",
+                            text: " {{ message }}",
+                            icon: "error",
+
+                        })
+
+                    });
+                </script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+</body>
+
+</html>

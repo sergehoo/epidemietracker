@@ -27,10 +27,10 @@ class Command(BaseCommand):
 
         employee = Employee.objects.first()
 
-        for _ in range(1000):
+        for _ in range(10):
             commune = random.choice(communes)
             patient = Patient.objects.create(
-                code_patient=f'HU{random.randrange(0, 99999999, 2) + int(datetime.now().microsecond)}',
+                # code_patient=f'HU{random.randrange(0, 99999999, 2) + int(datetime.now().microsecond)}',
                 nom=fake.last_name(),
                 prenoms=fake.first_name(),
                 contact=fake.phone_number(),
@@ -53,12 +53,12 @@ class Command(BaseCommand):
             )
 
             # Créer des données factices pour Echantillon
-            dengue = Epidemie.objects.get(nom="DENGUE")
+            dengue = Epidemie.objects.get(nom="FIEVRE")
             mode_preleve = PreleveMode.objects.first()
 
             Echantillon.objects.create(
                 patient=patient,
-                code_echantillon=f'ECH{random.randint(1000, 9999)}',
+                # code_echantillon=f'ECH{random.randint(1000, 9999)}',
                 maladie=dengue,
                 mode_preleve=mode_preleve,
                 date_collect=fake.date_time_this_year(),

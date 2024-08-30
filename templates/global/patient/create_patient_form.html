@@ -1,0 +1,62 @@
+ {% extends '../layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+                 <div class="nk-content nk-content-fluid">
+                    <div class="container-xl">
+                        <div class="nk-content-body">
+                            <div class="nk-block-head nk-block-head-sm">
+                                <div class="nk-block-between">
+                                    <div class="nk-block-head-content">
+                                        <h3 class="nk-block-title page-title"> Ajout Nouveau Patients</h3>
+                                        <div class="nk-block-des text-soft">
+                                            <p> {{ patient_nbr }} Patients enregistrés</p>
+                                        </div>
+                                    </div><!-- .nk-block-head-content -->
+                                </div><!-- .nk-block-between -->
+                            </div><!-- .nk-block-head -->
+                            <div class="nk-block">
+                                <div class="card card-bordered card-stretch ">
+                                    <div class="card-inner-group">
+
+                                        <div class="card-inner p-0">
+                                            <div class="nk-tb-list nk-tb-ulist is-compact">
+                                         <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="alert-text bg-light-dark mb-5"><i class="flaticon-warning text-primary"></i>  Les champs précédés d'un (<span class="text-danger">*</span>) sont obligatoires.</div>
+                            <div class="col-xl-12">
+                                <div class="row">
+                                    {% for field in form %}
+                                        <div class="col-xl-3">
+                                            <div class="form-group">
+
+                                                {{ field.label_tag }}
+                                             <span class="text-danger">{{ field.errors }}</span>{{ field }}
+                                                {% if field.help_text %}
+                                                    <p style="color: red" class="help text-danger danger" id="{{ field.auto_id }}_helptext">
+                                                        {{ field.help_text }}
+                                                    </p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+
+                                    {% endfor %}</div>
+                            </div>
+                        </div>
+                            <button type="submit" class="btn btn-primary mr-2 float-right">Enregistrer</button>
+                            <button type="reset" class="btn btn-secondary mr-5 float-right ">Annuler</button>
+                                         </form>
+                                            </div><!-- .nk-tb-list -->
+                                        </div><!-- .card-inner -->
+
+                                        <!-- .card-inner -->
+                                    </div><!-- .card-inner-group -->
+                                </div><!-- .card -->
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+

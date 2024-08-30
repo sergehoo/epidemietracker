@@ -17,7 +17,6 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from tablib import Dataset
 from unidecode import unidecode
-from dingue.admin import EchantillonResource
 from epidemie.tasks import sync_health_regions, process_city_data, generate_commune_report, alert_for_epidemic_cases
 
 from epidemie.models import Patient, Echantillon, HealthRegion, City, Commune, EpidemicCase, ServiceSanitaire, \
@@ -87,22 +86,46 @@ class EpidemicCaseViewSet(viewsets.ModelViewSet):
 #     queryset = Patient.objects.all()
 #     serializer_class = PatientSerializer
 
+# class PatientViewSet(viewsets.ModelViewSet):
+#     queryset = Patient.objects.all()
+#     serializer_class = PatientSerializer
+#
+#     def get_queryset(self):
+#         # Filtrer les patients qui ont au moins un échantillon avec un résultat positif
+#         queryset = self.queryset.filter(
+#             Q(echantillons__resultat='POSITIF')
+#         ).distinct()
+#
+#         # Annoter les informations de région, district et commune pour chaque patient
+#         queryset = queryset.select_related(
+#             'commune__district__region'
+#         )
+#         return queryset
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
 
     def get_queryset(self):
+        # Obtenez l'ID de l'épidémie à partir des paramètres de l'URL
+        epidemie_id = self.request.query_params.get('epidemie_id', None)
+
         # Filtrer les patients qui ont au moins un échantillon avec un résultat positif
         queryset = self.queryset.filter(
             Q(echantillons__resultat='POSITIF')
         ).distinct()
 
+        # Si un ID d'épidémie est fourni, filtrer les patients en fonction de l'épidémie
+        if epidemie_id:
+            queryset = queryset.filter(
+                echantillons__maladie_id=epidemie_id
+            )
+
         # Annoter les informations de région, district et commune pour chaque patient
         queryset = queryset.select_related(
             'commune__district__region'
         )
-        return queryset
 
+        return queryset
 
 class ServiceSanitaireViewSet(viewsets.ModelViewSet):
     queryset = ServiceSanitaire.objects.all()
@@ -139,12 +162,6 @@ class CommuneAggregatedViewSet(viewsets.ModelViewSet):
 def dashboard_view(request):
     return render(request, 'dingue/home.html')
 
-
-def import_view(request):
-    return render(request, 'dingue/import.html')
-
-
-logger = logging.getLogger(__name__)
 
 
 # def import_echantillons(request):
@@ -256,183 +273,7 @@ logger = logging.getLogger(__name__)
 #                 return render(request, 'dingue/import.html')
 #
 #     return render(request, 'dingue/import.html')
-def import_echantillons(request):
-    if request.method == 'POST':
-        if 'file' not in request.FILES and 'temp_file_name' not in request.POST:
-            messages.error(request, 'Veuillez sélectionner un fichier à importer.')
-            return render(request, 'dingue/import.html')
 
-        echantillon_resource = EchantillonResource()
-        dataset = Dataset()
-
-        if 'file' in request.FILES:
-            new_echantillons = request.FILES['file']
-            temp_file_name = default_storage.save(os.path.join('temp', new_echantillons.name),
-                                                  ContentFile(new_echantillons.read()))
-            temp_file_path = os.path.join(settings.MEDIA_ROOT, temp_file_name)
-
-            try:
-                imported_data = dataset.load(open(temp_file_path, 'rb').read(), format='xlsx')
-
-                for row in dataset.dict:
-                    # Recherche de la région sanitaire en ignorant la casse et les accents
-                    region_name = unidecode(row['Region_Sanitaire']).lower()
-                    region = HealthRegion.objects.annotate(
-                        similarity=TrigramSimilarity('name', region_name)
-                    ).filter(similarity__gt=0.3).order_by('-similarity').first()
-
-                    if not region:
-                        messages.error(request, f"Région sanitaire '{row['Region_Sanitaire']}' introuvable.")
-                        continue
-
-                    # Recherche du district sanitaire en ignorant la casse et les accents
-                    district_name = unidecode(row['DistrictSanitaire']).lower()
-                    district = DistrictSanitaire.objects.annotate(
-                        similarity=TrigramSimilarity('nom', district_name)
-                    ).filter(similarity__gt=0.3).order_by('-similarity').first()
-
-                    if not district:
-                        messages.error(request, f"District sanitaire '{row['DistrictSanitaire']}' introuvable.")
-                        continue
-
-                    # Recherche de la commune sans filtrer par district
-                    commune_name = unidecode(row['patient__commune']).lower()
-                    commune = Commune.objects.annotate(
-                        similarity=TrigramSimilarity('name', commune_name)
-                    ).filter(similarity__gt=0.3).order_by('-similarity').first()
-
-                    if not commune:
-                        messages.error(request, f"Commune '{row['patient__commune']}' introuvable.")
-                        continue
-
-                    maladie_name = row['maladie__nom']
-                    maladie, _ = Epidemie.objects.get_or_create(nom=maladie_name)
-
-                    # Création ou mise à jour du patient
-                    patient, created = Patient.objects.update_or_create(
-                        code_patient=row['code_echantillon'],
-                        defaults={
-                            'nom': row['patient__nom'],
-                            'prenoms': row['patient__prenoms'],
-                            'date_naissance': row['patient__datenaissance'],
-                            'genre': row['patient_sexe'],
-                            'commune': commune,
-                            'contact': 'N/A'  # Remplacez par la colonne appropriée si elle existe
-                        }
-                    )
-
-                    # Création ou mise à jour de l'échantillon
-                    Echantillon.objects.update_or_create(
-                        code_echantillon=row['code_echantillon'],
-                        defaults={
-                            'patient': patient,
-                            'maladie': maladie,  # Assurez-vous que l'ID de l'épidémie est correct
-                            'date_collect': row['date_collect'],
-                            'site_collect': row['site_collect'],
-                            'resultat': row['resultat'],
-                        }
-                    )
-
-                result = echantillon_resource.import_data(dataset, dry_run=True)
-
-                if not result.has_errors():
-                    preview_data = dataset.dict
-                    return render(request, 'dingue/import.html',
-                                  {'preview_data': preview_data, 'temp_file_name': temp_file_name})
-
-                messages.error(request,
-                               'Erreur lors de l\'importation des données : vérifiez les données et réessayez.')
-
-            except Exception as e:
-                messages.error(request, f"Erreur lors de l'importation des données : {e}")
-                return render(request, 'dingue/import.html')
-
-        elif 'temp_file_name' in request.POST:
-            temp_file_name = request.POST['temp_file_name']
-            temp_file_path = os.path.join(settings.MEDIA_ROOT, temp_file_name)
-
-            if os.path.exists(temp_file_path):
-                imported_data = dataset.load(open(temp_file_path, 'rb').read(), format='xlsx')
-                echantillon_resource.import_data(dataset, dry_run=False)
-                messages.success(request, 'Données importées avec succès')
-                return redirect('echantillons')
-            else:
-                messages.error(request, 'Fichier temporaire introuvable.')
-                return render(request, 'dingue/import.html')
-
-    return render(request, 'dingue/import.html')
-
-
-class HomePageView(LoginRequiredMixin, TemplateView):
-    login_url = '/accounts/login/'
-    # form_class = LoginForm
-    template_name = "dingue/dashboard.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # Obtenez le nombre de cas par région
-        cases_by_region = (
-            Patient.objects.filter(echantillons__resultat='POSITIF')
-            .values('commune__district__region__name')
-            .annotate(total=Count('id'))
-            .order_by('-total')
-        )
-
-        # Obtenez le nombre de cas par district
-        cases_by_district = (
-            Patient.objects.filter(echantillons__resultat='POSITIF')
-            .values('commune__district__region__name', 'commune__district__nom')
-            .annotate(total=Count('id'))
-            .order_by('-total')
-        )
-
-        # Passer les données au template
-        context['cases_by_region'] = cases_by_region
-        context['cases_by_district'] = cases_by_district
-
-        return context
-
-    # # Call the parent class's dispatch method for normal view processing.
-    #     return super().dispatch(request, *args, **kwargs)
-    #
-    # def dispatch(self, request, *args, **kwargs):
-    #     # Call the parent class's dispatch method for normal view processing.
-    #     response = super().dispatch(request, *args, **kwargs)
-    #
-    #     # Check if the user is authenticated. If not, redirect to the login page.
-    #     if not request.user.is_authenticated:
-    #         return redirect('login')
-    #
-    #     # Check if the user is a member of the RH Managers group
-    #     if request.user.groups.filter(name='ressources_humaines').exists():
-    #         # Redirect the user to the RH Managers dashboard
-    #         return redirect('rhdash')
-    #
-    #     # Check if the user is a member of the RH Employees group
-    #     elif request.user.groups.filter(name='project').exists():
-    #         # Redirect the user to the RH Employees dashboard
-    #         return redirect('rh_employee_dashboard')
-    #
-    #     # If the user is not a member of any specific group, return a forbidden response
-    #     else:
-    #         return redirect('page_not_found')
-    #         # return HttpResponseForbidden("You don't have permission to access this page.")
-
-
-class PatientListView(LoginRequiredMixin, ListView):
-    model = Patient
-    template_name = "dingue/patientlist.html"
-    context_object_name = "patients"
-    paginate_by = 10
-    ordering = ['-id']
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        patient_nbr = Patient.objects.all().count()
-        context['patient_nbr'] = patient_nbr
-
-        return context
 
 
 # class PatientCreateView(LoginRequiredMixin, CreateView):
@@ -474,16 +315,3 @@ class PatientListView(LoginRequiredMixin, ListView):
 #         return redirect(self.success_url)
 
 
-class EchantillonListView(LoginRequiredMixin, ListView):
-    model = Echantillon
-    template_name = "dingue/echantillonlist.html"
-    context_object_name = "echantillons"
-    paginate_by = 1000
-    ordering = ['-id']
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        patient_nbr = Patient.objects.all().count()
-        context['patient_nbr'] = patient_nbr
-
-        return context

@@ -2,6 +2,15 @@
 {% load static %}
 
 {% block content %}
+    <style>
+        .name-hidden {
+            visibility: hidden;
+        }
+
+        .name-visible {
+            visibility: visible;
+        }
+    </style>
                  <div class="nk-content nk-content-fluid">
                     <div class="container-xl">
                         <div class="nk-content-body">
@@ -24,7 +33,7 @@
                                                             <a href="" class="dropdown-toggle btn btn-icon btn-primary" data-toggle="dropdown"><em class="icon ni ni-plus"></em></a>
                                                             <div class="dropdown-menu dropdown-menu-right">
                                                                 <ul class="link-list-opt no-bdr">
-                                                                    <li><a href=""><span>Nouveau Patient</span></a></li>
+                                                                    <li><a href="{% url 'patient-create' %}"><span>Nouveau Patient</span></a></li>
                                                                     <li><a href="#"><span>Rendez-vous</span></a></li>
                                                                     <li><a href="#"><span>Consultation</span></a></li>
                                                                 </ul>
@@ -56,7 +65,10 @@
                                                         <div class="btn-wrap">
                                                             <span class="d-none d-md-block"><button class="btn btn-dim btn-outline-light disabled">Apply</button></span>
                                                             <span class="d-md-none"><button class="btn btn-dim btn-outline-light btn-icon disabled"><em class="icon ni ni-arrow-right"></em></button></span>
+
                                                         </div>
+                                                        
+                                                        <button id="toggle-names" class="btn btn-primary"><i class="icon ni ni-eye-alt-fill toggle-visibility"></i></button>
                                                     </div><!-- .form-inline -->
                                                 </div><!-- .card-tools -->
                                                 <div class="card-tools mr-n1">
@@ -182,8 +194,8 @@
 
 
                                                     <div class="nk-tb-col"><span class="sub-text">Code Patient</span></div>
-                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Nom</span></div>
-                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Prenom</span></div>
+                                                    <div class="nk-tb-col tb-col-md"><span class="sub-text">Nom </span></div>
+                                                    <div class="nk-tb-col tb-col-sm"><span class="sub-text">Prenom </span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Date Naissance</span></div>
                                                     <div class="nk-tb-col tb-col-lg"><span class="sub-text">Age</span></div>
                                                     <div class="nk-tb-col tb-col-md"><span class="sub-text">Genre</span></div>
@@ -235,16 +247,18 @@
                                                     <div class="nk-tb-col">
                                                         <div class="user-card">
                                                             <div class="user-avatar xs">
-                                                                <span><em class="icon ni ni-user-fill"></em></span>
+
                                                             </div>
                                                             <div class="user-name">
-                                                                <span class="tb-lead">{{ patient.nom|upper }}</span>
+                                                 <span class="masked-name">*****</span>
+                <span class="real-name d-none">{{ patient.nom }}</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div class="nk-tb-col tb-col-sm">
-                                                        <span>{{ patient.prenoms|upper }}</span>
+                                                        <span class="masked-name">*****</span>
+        <span class="real-name d-none">{{ patient.prenoms }}</span>
                                                     </div>
                                                     <div class="nk-tb-col tb-col-md">
                                                         <span>{{ patient.date_naissance }}</span>
@@ -265,26 +279,15 @@
                                                     </div>
 
                                                     <div class="nk-tb-col tb-col-lg">
-                                                        <span>{{ patient.contact }}</span>
+                                                      
+                                                        <span class="masked-name">*****</span>
+                                                        <span class="real-name d-none">{{ patient.contact }}</span>
+
                                                     </div>
 
                                                     <div class="nk-tb-col nk-tb-col-tools">
                                                         <ul class="nk-tb-actions gx-2">
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Wallet">
-                                                                    <em class="icon ni ni-wallet-fill"></em>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Send Email">
-                                                                    <em class="icon ni ni-mail-fill"></em>
-                                                                </a>
-                                                            </li>
-                                                            <li class="nk-tb-action-hidden">
-                                                                <a href="#" class="btn btn-sm btn-icon btn-trigger" data-toggle="tooltip" data-placement="top" title="Suspend">
-                                                                    <em class="icon ni ni-user-cross-fill"></em>
-                                                                </a>
-                                                            </li>
+
                                                             <li>
                                                                 <div class="drodown">
                                                                     <a href="#" class="btn btn-sm btn-icon btn-trigger dropdown-toggle" data-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
@@ -336,5 +339,44 @@
                             </div><!-- .nk-block -->
                         </div>
                     </div>
-                </div>
+                 </div>
+    <script>
+        document.getElementById('toggle-names').addEventListener('click', function () {
+            var isMasked = this.textContent.includes('Afficher');
+            var maskedNames = document.querySelectorAll('.masked-name');
+            var realNames = document.querySelectorAll('.real-name');
+
+            maskedNames.forEach(function (span) {
+                span.classList.toggle('d-none', !isMasked); // Masque ou montre les noms masqués
+            });
+
+            realNames.forEach(function (span) {
+                span.classList.toggle('d-none', isMasked); // Masque ou montre les noms réels
+            });
+
+            // Mettre à jour le texte du bouton
+            this.textContent = isMasked ? 'Masquer les Noms' : 'Afficher les Noms';
+        });
+    </script>
+{#    <script>#}
+{#        document.addEventListener('DOMContentLoaded', function () {#}
+{#            // Sélectionne toutes les icônes de visibilité#}
+{#            var icons = document.querySelectorAll('.toggle-visibility');#}
+{##}
+{#            // Ajoute un écouteur d'événements à chaque icône#}
+{#            icons.forEach(function (icon) {#}
+{#                icon.addEventListener('click', function () {#}
+{#                    // Sélectionne l'élément suivant qui contient le texte masqué#}
+{#                    var maskedText = this.previousElementSibling;#}
+{##}
+{#                    // Bascule entre le texte masqué et visible#}
+{#                    if (maskedText.textContent === '*****') {#}
+{#                        maskedText.textContent = maskedText.getAttribute('data-full');#}
+{#                    } else {#}
+{#                        maskedText.textContent = '*****';#}
+{#                    }#}
+{#                });#}
+{#            });#}
+{#        });#}
+{#    </script>#}
             {% endblock %}

@@ -2,21 +2,30 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 
-from dingue.views import HomePageView
-from epidemie.views import LandinguePageView
+from epidemie.views import LandinguePageView, EpidemieDetailView, PatientCreateView, PatientUpdateView, \
+    PatientDeleteView, EchantillonCreateView, EchantillonUpdateView, EchantillonDeleteView
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('api-auth/', include('rest_framework.urls')),
                   path('tinymce/', include('tinymce.urls')),
                   path('accounts/', include('allauth.urls')),
-                  path('dengue/', include('dingue.urls')),
+                  path('epidemie/', include('api.urls')),
                   path('mpox/', include('mpox.urls')),
                   path('covid/', include('covid.urls')),
                   path('ebola/', include('ebola.urls')),
                   path('', LandinguePageView.as_view(), name='landing'),
+                  path('epidemie/<int:pk>/', EpidemieDetailView.as_view(), name='epidemie-detail'),
+
+                  path('patient/create/', PatientCreateView.as_view(), name='patient-create'),
+                  path('patient/<int:pk>/update/', PatientUpdateView.as_view(), name='patient-update'),
+                  path('patient/<int:pk>/delete/', PatientDeleteView.as_view(), name='patient-delete'),
+
+                  # URLs pour les vues de Echantillon
+                  path('echantillon/create/', EchantillonCreateView.as_view(), name='echantillon-create'),
+                  path('echantillon/<int:pk>/update/', EchantillonUpdateView.as_view(), name='echantillon-update'),
+                  path('echantillon/<int:pk>/delete/', EchantillonDeleteView.as_view(), name='echantillon-delete'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:

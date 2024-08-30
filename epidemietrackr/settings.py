@@ -92,7 +92,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
-                'dingue.context_processor.dashboard',
+                # 'dingue.context_processor.dashboard',
                 # 'mpox.mpox_context_processor.mpox_dashboard',
             ],
         },

@@ -263,7 +263,46 @@
 
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
-
+         {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                Swal.fire({
+                                    title: "Félicitation ! ",
+                                    text: " {{ message }}",
+                                    icon: "success",
+        
+                                })
+                            });
+                        </script>
+                    {% elif message.tags == 'warning' %}
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                Swal.fire({
+                                    title: "Attention alert",
+                                    text: " {{ message }}",
+                                    icon: "warning",
+        
+                                })
+                            });
+                        </script>
+                    {% elif message.tags == 'error' %}
+                        <script type="text/javascript">
+        
+                            $(document).ready(function () {
+                                Swal.fire({
+                                    title: "Attention Erreur",
+                                    text: " {{ message }}",
+                                    icon: "error",
+        
+                                })
+        
+                            });
+                        </script>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
 
 
 {#    <script>#}

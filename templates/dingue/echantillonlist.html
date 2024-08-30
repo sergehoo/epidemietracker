@@ -183,7 +183,7 @@
                                                     <thead>
                                                         <tr>
                                                             <th>code echantillon</th>
-                                                            <th>patient</th>
+                                                            <th>Code patient</th>
                                                             <th>created_at</th>
                                                             <th>mode_preleve</th>
                                                             <th>Epidemies</th>
@@ -194,7 +194,7 @@
                                                     {% for enquete in echantillons %}
                                                         <tr>
                                                             <td>{{ enquete.code_echantillon }}</td>
-                                                            <td>{{ enquete.patient.nom }} {{ enquete.patient.prenoms }}</td>
+                                                            <td>{{ enquete.patient.code_patient }}</td>
                                                             <td>{{ enquete.created_at}}</td>
                                                             <td>{{ enquete.mode_preleve}}</td>
                                                             <td>{{ enquete.maladie}}</td>

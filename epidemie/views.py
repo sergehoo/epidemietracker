@@ -183,6 +183,7 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
         # Filtrer les échantillons et les patients par épidémie
         echantillons_nbr = Echantillon.objects.filter(maladie=epidemie).count()
         echantillons_nbrP = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF').count()
+
         patients = Patient.objects.filter(echantillons__maladie=epidemie).distinct().count()
         patients_gueris = Patient.objects.filter(echantillons__maladie=epidemie, gueris=True).distinct().count()
         patients_decedes = Patient.objects.filter(echantillons__maladie=epidemie, decede=True).distinct().count()

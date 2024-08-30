@@ -87,22 +87,22 @@
                                                             </div>
                                                             <div class="nk-cov-wg1-progress">
                                                                 <div class="progress progress-reverse progress-md progress-pill progress-bordered">
-                                                                    <div class="progress-bar bg-danger" data-progress="{{ pourcentage_decedes_positifs|floatformat:0 }}" data-toggle="tooltip" title="Décédés : {{ pourcentage_decedes_positifs|floatformat:0 }}%"></div>
+                                                                    <div class="progress-bar bg-dark" data-progress="{{ pourcentage_decedes_positifs|floatformat:0 }}" data-toggle="tooltip" title="Décédés : {{ pourcentage_decedes_positifs|floatformat:0 }}%"></div>
                                                                     <div class="progress-bar bg-success" data-progress="{{ pourcentage_gueris_positifs|floatformat:0  }}" data-toggle="tooltip" title="Gueris : {{ pourcentage_gueris_positifs|floatformat:0  }}%"></div>
-                                                                    <div class="progress-bar bg-primary" data-progress="{{ pourcentage_positifs|floatformat:0 }}" data-toggle="tooltip" title="Cas Confirmés : {{ pourcentage_positifs|floatformat:0  }}%"></div>
+                                                                    <div class="progress-bar bg-danger" data-progress="{{ pourcentage_positifs|floatformat:0 }}" data-toggle="tooltip" title="Cas Confirmés : {{ pourcentage_positifs|floatformat:0  }}%"></div>
                                                                 </div>
                                                             </div>
                                                             <ul class="nk-cov-wg1-data">
                                                                 <li>
                                                                     <div class="title">
-                                                                        <div class="dot dot-lg sq bg-secondary"></div>
+                                                                        <div class="dot dot-lg sq bg-primary"></div>
                                                                         <span>Cas Diagnostoqués</span>
                                                                     </div>
                                                                     <div class="count">{{ patients }}</div>
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
-                                                                        <div class="dot dot-lg sq bg-primary"></div>
+                                                                        <div class="dot dot-lg sq bg-danger"></div>
                                                                         <span>Cas confirmés</span>
                                                                     </div>
                                                                     <div class="count">{{ echantillons_nbrP }}</div>
@@ -116,10 +116,10 @@
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
-                                                                        <div class="dot dot-lg sq bg-danger"></div>
+                                                                        <div class="dot dot-lg sq bg-dark"></div>
                                                                         <span>Décès</span>
                                                                     </div>
-                                                                    <div class="count">{{ patients_decede_positifs|floatformat:0 }}0</div>
+                                                                    <div class="count">{{ pourcentage_decedes_positifs|floatformat:0 }}</div>
                                                                 </li>
                                                             </ul>
                                                             <div class="nk-cov-wg-note">Taux de  <a href="#">guerisons ({{ pourcentage_gueris_positifs|floatformat:2  }}%)</a> &amp; <a href="#">Décès ({{ pourcentage_decedes_positifs|floatformat:2 }}%)</a>.</div>
@@ -132,12 +132,12 @@
         <div class="card-inner">
             <div class="nk-cov-wg2">
                 <div class="card-title">
-                    <h5 class="title">Taux de propagation - <small>{{ epidemie.nom }}</small></h5>
+                    <h5 class="title">Taux d'evolution - <small>Abidjan</small></h5>
                 </div>
                 <div class="nk-cov-group">
                     <div class="nk-cov-data">
                         <h6 class="overline-title">Confirmés</h6>
-                        <div class="amount amount-sm">{{ total_patients_positifs }}</div>
+                        <div class="amount amount-sm text-danger">{{ total_patients_positifs }}</div>
                     </div>
                     <div class="nk-cov-data">
                         <h6 class="overline-title">Guéris</h6>
@@ -145,7 +145,7 @@
                     </div>
                     <div class="nk-cov-data">
                         <h6 class="overline-title">Décès</h6>
-                        <div class="amount amount-sm text-danger">{{ patients_decedes_positifs }}</div>
+                        <div class="amount amount-sm text-dark">{{ patients_decedes_positifs }}</div>
                     </div>
                 </div>
                 <div class="nk-cov-wg-note">
@@ -154,23 +154,23 @@
                 </div>
                 <div class="nk-cov-wg2-group">
                     <div class="nk-cov-data">
-                        <h6 class="sub-text">Patients <br class="d-xxl-none">Infectés actuellement</h6>
+                        <h6 class="sub-text">Cas  <br class="d-xxl-none">Contacts</h6>
                         <div class="amount amount-xs">{{ total_patients_positifs|add:"-"|add:patients_gueris_positifs|add:patients_decedes_positifs }}</div>
                     </div>
                     <ul class="nk-cov-wg2-data">
                         <li>
                             <div class="title">
-                                <div class="dot dot-lg sq bg-purple"></div>
-                                <span>Etat stable</span>
+                                <div class="dot dot-lg sq bg-danger"></div>
+                                <span>Exposés</span>
                             </div>
-                            <div class="count">{{ total_patients_positifs|add:"-"|add:patients_decedes_positifs }}</div>
+                            <div class="count">{{ total_patients_positifs|add:"-"|add:patients_decedes_positifs }}222</div>
                         </li>
                         <li>
                             <div class="title">
-                                <div class="dot dot-lg sq bg-success"></div>
-                                <span>Etat Critic</span>
+                                <div class="dot dot-lg sq bg-dark"></div>
+                                <span>Potentiel</span>
                             </div>
-                            <div class="count">1</div> <!-- Nombre de patients en état critique -->
+                            <div class="count">1111</div> <!-- Nombre de patients en état critique -->
                         </li>
                     </ul>
                 </div>
@@ -241,6 +241,9 @@ function toggleDistricts(regionId) {
                                                     <div class="nk-cov-wg4-map">
 {#                                                        <button onclick="toggleFullScreen()">Plein écran</button>#}
                                                         <div id="map"></div>
+                                                        <div class="dot dot-lg sq bg-orange"> </div> Patient positif mais en etat de suivi
+                                                        <div class="dot dot-lg sq bg-dark ml-3"></div> Patient décedé
+                                                        <div class="dot dot-lg sq bg-success ml-3"></div> Patient guéris
                                                     </div>
 
 
@@ -272,11 +275,11 @@ function toggleDistricts(regionId) {
                                                                 <h6 class="title">Evolution des cas</h6>
                                                                 <ul class="nk-cov-wg3-legend">
                                                                     <li>
-                                                                        <div class="dot dot-md sq bg-purple"></div>
+                                                                        <div class="dot dot-md sq bg-danger"></div>
                                                                         <span>Infectés</span>
                                                                     </li>
                                                                     <li>
-                                                                        <div class="dot dot-md sq bg-danger"></div>
+                                                                        <div class="dot dot-md sq bg-dark"></div>
                                                                         <span>Décédés</span>
                                                                     </li>
                                                                 </ul>
@@ -294,12 +297,12 @@ function toggleDistricts(regionId) {
                                                                 <h6 class="title">Flow of Cases</h6>
                                                                 <ul class="nk-cov-wg3-legend">
                                                                     <li>
-                                                                        <div class="dot dot-md sq bg-purple"></div>
-                                                                        <span>Infected</span>
+                                                                        <div class="dot dot-md sq bg-danger"></div>
+                                                                        <span>Infecté</span>
                                                                     </li>
                                                                     <li>
-                                                                        <div class="dot dot-md sq bg-danger"></div>
-                                                                        <span>Deaths</span>
+                                                                        <div class="dot dot-md sq bg-dark"></div>
+                                                                        <span>Décedé</span>
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -400,12 +403,9 @@ function toggleDistricts(regionId) {
                     <div class="container-fluid">
                         <div class="nk-footer-wrap gy-1 gx-4">
                             <div class="nk-footer-links">
-                                <ul class="nav nav-sm">
-                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">Feedback</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-about">About Data</a></li>
-                                </ul>
+                                
                             </div>
-                            <div class="nk-footer-copyright"> &copy; Copyright 2020, <a href="#">Softnio</a>
+                            <div class="nk-footer-copyright"> &copy; Copyright 2024, <a href="www.afriqconsulting.com">Afriqconsulting</a>
                             </div>
                         </div>
                     </div>
@@ -651,6 +651,7 @@ function toggleDistricts(regionId) {
     var coteDIvoireBounds = [
         [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
         [10.73, -2.51] // Nord-Est (Point le plus au nord)
+        
     ];
     var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie
     var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie
@@ -659,6 +660,8 @@ function toggleDistricts(regionId) {
         maxBounds: coteDIvoireBounds, // Définir les limites maximales
         maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords
         minZoom: 7, // Définir le zoom minimum
+        
+        
     }).setView([7.54, -5.55], 7);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

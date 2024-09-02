@@ -218,7 +218,7 @@ class Epidemie(models.Model):
     description = HTMLField(blank=True, null=True)
     date_debut = models.DateField(blank=True, null=True)
     date_fin = models.DateField(blank=True, null=True)
-    thumbnails = models.ImageField(null=True, blank=True, default='media/epidemie/epidemie_thumbnails.png', upload_to='epidemie/thumbnails')
+    thumbnails = models.ImageField(null=True, blank=True, upload_to='epidemie/thumbnails')
     symptomes = models.ManyToManyField(Symptom, related_name='épidémies')
 
     @property

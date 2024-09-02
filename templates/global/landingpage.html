@@ -18,7 +18,6 @@
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
     <style>
@@ -93,87 +92,44 @@
                                 </div>
                             </div><!-- .nk-block-head -->
                             <div class="nk-block">
-                                <div class="row g-gs">
 
-                                    <div class="col-xl-12">
+
+
                                         <div class="card card-bordered card-full">
                                             <div class="nk-cov-wg4">
 
                                                 <div class="nk-cov-content">
 
                                                   <div class="row p-5">
-{% with list_epidemie.count as count %}
-    {% for maladie in list_epidemie %}
-    <div class="{% if count <= 4 %}col-xl-6{% else %}col-xl-3{% endif %} mb-5">
-        <div class="card card-bordered">
-            <div class="card-header border-bottom">{{ maladie.nom }}
-                <span class="float-right">
+{#                                                      {% with list_epidemie.count as count %}#}
+                                                          {% for maladie in list_epidemie %}
+                                                              <div class="{% if count <= 4 %}col-xl-6{% else %}col-xl-3{% endif %} mb-5">
+                                                                  <div class="card card-bordered">
+                                                                      <div class="card-header border-bottom">{{ maladie.nom }}
+                                                                          <span class="float-right">
                     <span class="badge badge-danger">{{ maladie.nombre_patients_positifs_ce_mois }}</span> Cas
                 </span>
-            </div>
-            <div class="image-container">
-                <img src="{{ maladie.thumbnails.url }}" alt="{{ maladie.nom }} Image" class="dengue-image">
-            </div>
-            <div class="card-body">
-                <p class="card-text mt-5">{{ maladie.description|truncatechars:80|safe }}</p>
-                <ul>
-                    <li>Personnes Confirmées
-                        <span class="badge badge-gray float-right">{{ maladie.personnes_touchees }}</span>
-                    </li>
-                    <li>Personnes Décédées
-                        <span class="badge badge-gray float-right">{{ maladie.personnes_decedees }}</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-footer border-top text-muted text-right">
-                <a href="{% url 'epidemie-detail' maladie.pk %}" class="btn btn-muted text-muted">Parcourir</a>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <p>Aucune Maladie Enregistrée pour l'Instant</p>
-    {% endfor %}
-{% endwith %}
-
-
-                                                      </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!-- .col -->
-
-                                </div><!-- .row -->
-                            </div>
-                        
-                    </div>
-                </div>
-                <!-- content @e -->
-                <!-- footer @s -->
-                <div class="nk-footer d-md-none">
-                    <div class="container-fluid">
-                        <div class="nk-footer-wrap gy-1 gx-4">
-                            <div class="nk-footer-links">
-                                <ul class="nav nav-sm">
-                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">Feedback</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-about">About Data</a></li>
-                                </ul>
-                            </div>
-                            <div class="nk-footer-copyright"> &copy; Copyright 2020, <a href="#">Softnio</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- footer @e -->
-            </div>
-            <!-- wrap @e -->
-        </div>
-        <!-- main @e -->
-    </div>
-    <!-- app-root @e -->
-    <!-- Modal About -->
-    <div class="modal fade" tabindex="-1" id="covid-about">
-        <div class="modal-dialog modal-sm" role="document">
+                                                                      </div>
+                                                                      <div class="image-container">
+                                                                          {% if maladie.thumbnails %}
+                                                                          <img src="{{ maladie.thumbnails.url }}" alt="{{ maladie.nom }} Image" class="dengue-image">
+                                                                              {% else %}
+                                                                                <img src="{% static 'images/epidemie_thumbnails.png' %}" alt="{{ maladie.nom }} Image" class="dengue-image">
+                                                                          {% endif %}
+                                                                      </div>
+                                                                      <div class="card-body">
+                                                                          <p class="card-text mt-5">{{ maladie.description|truncatechars:80|safe }}</p>
+                                                                          
+                                                                          <ul>
+                                                                              <li>Personnes Confirmées
+                                                                                  <span class="badge badge-gray float-right">{{ maladie.personnes_touchees }}</span>
+                                                                              </li>
+                                                                              <li>Personnes Décédées
+                                                                                  <span class="badge badge-gray float-right">{{ maladie.personnes_decedees }}</span>
+                                                                              </li>
+                                                                          </ul>
+                                                                           <div class="modal fade" tabindex="-1" id="covid-about">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <a href="#" class="close" data-dismiss="modal" aria-label="Close">
                     <em class="icon ni ni-cross"></em>
@@ -187,11 +143,63 @@
                     <div class="note-text">Updated: March 27, 2020 12:30 (GMT +6)</div>
                 </div>
                 <div class="modal-footer bg-light justify-content-center py-1">
-                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                    <div class="sub-text">Copyright by <a href="https://afriqconsulting.com.com">Afriqconsulting</a></div>
                 </div>
             </div>
         </div>
     </div>
+                                                                      </div>
+                                                                     
+                                                                      <div class="card-footer border-top text-muted text-right">
+                                                                          <a href="{% url 'epidemie-detail' maladie.pk %}"
+                                                                             class="btn btn-muted text-muted">Parcourir</a>
+                                                                      </div>
+                                                                  </div>
+                                                              </div>
+                                                          {% empty %}
+                                                              <p>Aucune Maladie Enregistrée pour l'Instant</p>
+
+                                                          {% endfor %}
+{#                                                      {% endwith %}#}
+
+
+
+
+
+                                            </div>
+                                        </div>
+                                    </div><!-- .col -->
+
+                                </div><!-- .row -->
+                            </div>
+
+                    </div>
+                </div>
+                <!-- content @e -->
+                <!-- footer @s -->
+                <div class="nk-footer d-md-none">
+                    <div class="container-fluid">
+                        <div class="nk-footer-wrap gy-1 gx-4">
+                            <div class="nk-footer-links">
+                                <ul class="nav nav-sm">
+{#                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">Feedback</a></li>#}
+{#                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-about">About Data</a></li>#}
+                                </ul>
+                            </div>
+                            <div class="nk-footer-copyright"> &copy; Copyright 2024, <a href="#">afriqconsulting</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- footer @e -->
+            </div>
+            <!-- wrap @e -->
+        </div>
+        <!-- main @e -->
+    </div>
+    <!-- app-root @e -->
+    <!-- Modal About -->
+
     <!-- Modal Feedback -->
     <div class="modal fade" tabindex="-1" id="covid-feedback">
         <div class="modal-dialog modal-sm" role="document">
@@ -257,10 +265,7 @@
     <script src="{% static 'assets/js/libs/jqvmap.js' %}"></script>
     <script src="{% static 'assets/js/chart-covid.js' %}"></script>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
-
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
          {% if messages %}

@@ -4,7 +4,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from api.views import HealthRegionViewSet, CityViewSet, EpidemicCaseViewSet, PatientViewSet, CommuneAggregatedViewSet, \
-    ServiceSanitaireViewSet, dashboard_view
+    ServiceSanitaireViewSet, dashboard_view, CasSyntheseViewSet, SyntheseDistrictViewSet
 from epidemie.views import import_view, import_echantillons, PatientListView, EchantillonListView, HomePageView
 
 router = DefaultRouter()
@@ -15,6 +15,8 @@ router.register(r'patient', PatientViewSet)
 # router.register(r'commune', CommuneViewSet)
 router.register(r'communes_aggregated', CommuneAggregatedViewSet)
 router.register(r'service_sanitaire', ServiceSanitaireViewSet)
+router.register(r'cas-synthese', CasSyntheseViewSet)
+router.register(r'synthese-district', SyntheseDistrictViewSet)
 
 urlpatterns = [
                   path('api/', include(router.urls)),

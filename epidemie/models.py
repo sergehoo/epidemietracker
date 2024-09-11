@@ -73,6 +73,8 @@ class HealthRegion(models.Model):
 class DistrictSanitaire(models.Model):
     nom = models.CharField(max_length=100, null=True, blank=True, )
     region = models.ForeignKey(HealthRegion, on_delete=models.CASCADE, null=True, blank=True, )
+    geom = models.PointField(null=True, blank=True, )
+    geojson = models.JSONField(null=True, blank=True, )
 
     def __str__(self):
         return f'{self.nom}---->{self.region}'
@@ -82,7 +84,7 @@ class Commune(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     name_en = models.CharField(max_length=100, null=True, blank=True)
     place = models.CharField(max_length=100, null=True, blank=True)
-    population = models.CharField(null=True, blank=True)
+    population = models.CharField(max_length=100, null=True, blank=True)
     is_in = models.CharField(max_length=255, null=True, blank=True)
     source = models.CharField(max_length=255, null=True, blank=True)
     osm_id = models.BigIntegerField(null=True, blank=True)
@@ -291,7 +293,8 @@ class Echantillon(models.Model):
         # Générer un code_patient unique uniquement avec des chiffres
         if not self.code_echantillon:
             # Utiliser uuid4 pour générer un identifiant unique et extraire les chiffres
-            self.code_echantillon = ''.join(filter(str.isdigit, str(uuid.uuid4().int)))[:12]  # Limiter à 20 chiffres maximum
+            self.code_echantillon = ''.join(filter(str.isdigit, str(uuid.uuid4().int)))[
+                                    :12]  # Limiter à 20 chiffres maximum
         super(Echantillon, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -315,3 +318,71 @@ class EpidemicCase(models.Model):
 
     def __str__(self):
         return f"{self.disease_name} in {self.city.name} on {self.date_reported}"
+
+
+class StructureProvenance(models.Model):
+    nom = models.CharField(max_length=100, unique=True)
+    district = models.ForeignKey(DistrictSanitaire, on_delete=models.CASCADE, related_name='structures')
+
+    def __str__(self):
+        return self.nom
+
+
+class CasSynthese(models.Model):
+    district_sanitaire = models.ForeignKey(DistrictSanitaire, on_delete=models.CASCADE, related_name='cas')
+    structure_provenance = models.ForeignKey(ServiceSanitaire, on_delete=models.CASCADE, related_name='cas', null=True,
+                                             blank=True)
+    nbre_cas_suspects = models.IntegerField(default=0, help_text="Nombre de cas suspects.")
+    date_enregistrement = models.DateField(help_text="Date d'enregistrement des cas suspects.")
+
+    # Informations sur le cas suspect
+    nom_prenoms_cas = models.CharField(max_length=200, blank=True, null=True,
+                                       help_text="Nom et prénoms du cas suspect.")
+    age = models.IntegerField(blank=True, null=True, help_text="Âge du cas suspect.")
+    sexe = models.CharField(max_length=10, choices=[('Homme', 'Homme'), ('Femme', 'Femme')], blank=True, null=True)
+    cas_positif = models.BooleanField(default=False, help_text="Indique si le cas est positif.")
+    cas_negatif = models.BooleanField(default=False, help_text="Indique si le cas est négatif.")
+    evacue = models.BooleanField(default=False, help_text="Indique si le cas a été évacué.")
+
+    # Dates et suivi médical
+    date_prelevement = models.DateField(blank=True, null=True, help_text="Date du prélèvement.")
+    decede = models.BooleanField(default=False, help_text="Indique si le cas est décédé.")
+    gueri = models.BooleanField(default=False, help_text="Indique si le cas est guéri.")
+    suivi_en_cours = models.BooleanField(default=True, help_text="Indique si le suivi est en cours.")
+
+    # Suivi des contacts
+    nbre_sujets_contacts = models.IntegerField(default=0, help_text="Nombre de sujets contacts.")
+    contacts_en_cours_suivi = models.IntegerField(default=0, help_text="Nombre de contacts en cours de suivi.")
+    contacts_sorti_suivi = models.IntegerField(default=0, help_text="Nombre de contacts sortis du suivi.")
+    devenu_suspect = models.IntegerField(default=0, help_text="Nombre de contacts devenus suspects.")
+    devenu_positif = models.IntegerField(default=0, help_text="Nombre de contacts devenus positifs.")
+
+    observations = models.TextField(blank=True, null=True, help_text="Observations sur le cas et son suivi.")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Cas en provenance de {self.structure_provenance} enregistré le {self.date_enregistrement}"
+
+
+class SyntheseDistrict(models.Model):
+    maladie = models.ForeignKey(Epidemie, on_delete=models.CASCADE, related_name='maladiesdesynthese')
+    district_sanitaire = models.ForeignKey(DistrictSanitaire, on_delete=models.CASCADE, related_name='syntheses')
+    nbre_cas_suspects = models.IntegerField(default=0, help_text="Nombre de cas suspects.")
+    cas_positif = models.IntegerField(default=0, help_text="Indique si le cas est positif.")
+    cas_negatif = models.IntegerField(default=0, help_text="Indique si le cas est négatif.")
+    evacue = models.IntegerField(default=0, help_text="Indique si le cas a été évacué.")
+    decede = models.IntegerField(default=0, help_text="Indique si le cas est décédé.")
+    gueri = models.IntegerField(default=0, help_text="Indique si le cas est guéri.")
+    suivi_en_cours = models.IntegerField(default=0, help_text="Indique si le suivi est en cours.")
+    nbre_sujets_contacts = models.IntegerField(default=0, help_text="Nombre de sujets contacts.")
+    contacts_en_cours_suivi = models.IntegerField(default=0, help_text="Nombre de contacts en cours de suivi.")
+    contacts_sorti_suivi = models.IntegerField(default=0, help_text="Nombre de contacts sortis du suivi.")
+    devenu_suspect = models.IntegerField(default=0, help_text="Nombre de contacts devenus suspects.")
+    devenu_positif = models.IntegerField(default=0, help_text="Nombre de contacts devenus positifs.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Cas en provenance de {self.district_sanitaire} enregistré "

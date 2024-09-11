@@ -163,14 +163,14 @@
                                 <div class="dot dot-lg sq bg-danger"></div>
                                 <span>Exposés</span>
                             </div>
-                            <div class="count">{{ total_patients_positifs|add:"-"|add:patients_decedes_positifs }}222</div>
+                            <div class="count">{{ total_patients_positifs|add:"-"|add:patients_decedes_positifs }}</div>
                         </li>
                         <li>
                             <div class="title">
                                 <div class="dot dot-lg sq bg-dark"></div>
                                 <span>Potentiel</span>
                             </div>
-                            <div class="count">1111</div> <!-- Nombre de patients en état critique -->
+                            <div class="count">0</div> <!-- Nombre de patients en état critique -->
                         </li>
                     </ul>
                 </div>
@@ -500,35 +500,41 @@ function toggleDistricts(regionId) {
     <!-- JavaScript -->
     <script src="{% static 'assets/js/bundle.js' %}"></script>
     <script src="{% static 'assets/js/scripts.js' %}"></script>
-    <script src="{% static 'assets/js/libs/jqvmap.js' %}"></script>
-    <script src="{% static 'assets/js/chart-covid.js' %}"></script>
+{#    <script src="{% static 'assets/js/libs/jqvmap.js' %}"></script>#}
+{#    <script src="{% static 'assets/js/chart-covid.js' %}"></script>#}
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
+
 {#    <script>#}
 {#    var coteDIvoireBounds = [#}
 {#        [4.35, -8.60], // Sud-Ouest (Point le plus au sud)#}
 {#        [10.73, -2.51] // Nord-Est (Point le plus au nord)#}
+{##}
 {#    ];#}
-{#    var epidemieId = '{{ epidemie_id }}';#}
-{#    var epidemieNom = '{{ epidemie_nom }}';#}
+{#    var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie#}
+{#    var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie#}
 {##}
 {#    var map = L.map('map', {#}
 {#        maxBounds: coteDIvoireBounds, // Définir les limites maximales#}
 {#        maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords#}
 {#        minZoom: 7, // Définir le zoom minimum#}
+{##}
+{##}
 {#    }).setView([7.54, -5.55], 7);#}
+{##}
+{##}
+{##}
+{##}
 {##}
 {#    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {#}
 {#        maxZoom: 18,#}
 {#        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'#}
 {#    }).addTo(map);#}
 {##}
-{#    // Utilisation de Leaflet.markercluster pour regrouper les marqueurs#}
-{#    var markers = L.markerClusterGroup();#}
+{#    var markers = L.markerClusterGroup(); // Initialiser le groupe de clusters pour les marqueurs#}
 {##}
-{#    // Fonction pour déterminer la couleur du marqueur en fonction du statut#}
 {#    function getMarkerColor(patient) {#}
 {#        if (patient.decede) {#}
 {#            return 'black'; // Décédé#}
@@ -540,8 +546,7 @@ function toggleDistricts(regionId) {
 {#            return 'orange'; // Autres#}
 {#        }#}
 {#    }#}
-{##}
-{#    // Fonction pour ajouter un marqueur à la carte#}
+{#    let markers_points = []#}
 {#    function addMarker(patient) {#}
 {#        if (patient.commune && patient.commune.geom) {#}
 {#            try {#}
@@ -561,9 +566,9 @@ function toggleDistricts(regionId) {
 {#                var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';#}
 {##}
 {#                var marker = L.marker(centroid, {icon: myIcon})#}
-{#                    .bindPopup(`<b>${patient.nom} ${patient.prenoms}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)#}
+{#                    .bindPopup(` Localite : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)#}
 {#                    .on('mouseover', function () {#}
-{#                        this.bindTooltip(`${patient.nom} ${patient.prenoms}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`, {#}
+{#                        this.bindTooltip(` Localite : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu' }`, {#}
 {#                            direction: 'top',#}
 {#                            offset: [0, -10],#}
 {#                            opacity: 0.8#}
@@ -575,6 +580,7 @@ function toggleDistricts(regionId) {
 {##}
 {#                markers.addLayer(marker);#}
 {##}
+{##}
 {#            } catch (error) {#}
 {#                console.error(`Erreur lors de l'analyse GeoJSON pour le patient : ${patient.nom} ${patient.prenoms}`, error);#}
 {#            }#}
@@ -583,7 +589,8 @@ function toggleDistricts(regionId) {
 {#        }#}
 {#    }#}
 {##}
-{#    // Fonction pour calculer l'âge#}
+{##}
+{##}
 {#    function calculateAge(date_naissance) {#}
 {#        var today = new Date();#}
 {#        var birthDate = new Date(date_naissance);#}
@@ -595,11 +602,48 @@ function toggleDistricts(regionId) {
 {#        return age;#}
 {#    }#}
 {##}
-{#    // Récupération des données des patients positifs#}
-{#    fetch('/epidemie/api/patient/')#}
+{##}
+{#    let patientgroup = L.layerGroup()#}
+{#    let district = L.layerGroup()#}
+{#    var geoLayer = L.geoJSON().addTo(district);#}
+{#    var myStyle = {#}
+{#        "color": "red",#}
+{#        "weight": 1,#}
+{#        "opacity": 0.80,#}
+{#        fillColor:'#FF6347',#}
+{#    };#}
+{#    geoLayer.setStyle(myStyle)#}
+{##}
+{##}
+{##}
+{##}
+{#    fetch("/epidemie/api/synthese-district/")#}
+{#        .then(response => response.json())#}
+{#        .then(synthese => {#}
+{#            console.log(synthese)#}
+{#            synthese.forEach((s)=>{#}
+{#                console.log(s.district_geojson)#}
+                {#geoLayer.addData(s.district_geojson)#}
+{#                L.geoJSON(s.district_geojson, {#}
+{#                    style: {#}
+{#                        "color": "#ff0014",#}
+{#                        "weight": 1,#}
+{#                        "opacity": 1#}
+{#                    }#}
+{#                }).bindPopup(` District: ${s.nom_district} <br> Cas suspect: ${s.nbre_cas_suspects} <br> Cas positifs : ${s.cas_positif} <br> Cas Negatifs : ${s.cas_negatif}`)#}
+{#                    .addTo(district);#}
+{#                let center = L.polygon(s.district_geojson.geometry.coordinates).getBounds().getCenter()#}
+{#            #}
+{#            })#}
+{##}
+{#            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group#}
+{##}
+{#        })#}
+{#    #}
+{#        // Récupération des données des patients positifs en utilisant l'ID de l'épidémie#}
+{#    fetch(`/epidemie/api/patient/?epidemie_id=${epidemieId}`)#}
 {#        .then(response => response.json())#}
 {#        .then(patients => {#}
-{#            // Groupement des patients par région, district, et commune#}
 {#            var regions = {};#}
 {##}
 {#            patients.forEach(patient => {#}
@@ -631,7 +675,6 @@ function toggleDistricts(regionId) {
 {#                regions[regionName].districts[districtName].communes[communeName].patients.push(patient);#}
 {#            });#}
 {##}
-{#            // Ajout des marqueurs à la carte#}
 {#            Object.values(regions).forEach(region => {#}
 {#                Object.values(region.districts).forEach(district => {#}
 {#                    Object.values(district.communes).forEach(commune => {#}
@@ -643,25 +686,40 @@ function toggleDistricts(regionId) {
 {#            });#}
 {##}
 {#            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group#}
+{#            patientgroup.addLayer(markers)#}
+{##}
 {##}
 {#        })#}
 {#        .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));#}
+{#    #}
+{#    #}
+{#        map.addLayer(district)#}
+{#        map.addLayer(patientgroup)#}
+{#        var overlayMaps = {#}
+{#            "Patients": patientgroup,#}
+{#            "District": district,#}
+{#        };#}
+{##}
+{##}
+{#    var layerControl = L.control.layers(overlayMaps).addTo(map);#}
+{##}
+{##}
+{##}
+{##}
 {#</script>#}
-    <script>
+<script>
     var coteDIvoireBounds = [
         [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
         [10.73, -2.51] // Nord-Est (Point le plus au nord)
-        
     ];
+
     var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie
     var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie
 
     var map = L.map('map', {
         maxBounds: coteDIvoireBounds, // Définir les limites maximales
         maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords
-        minZoom: 7, // Définir le zoom minimum
-        
-        
+        minZoom: 7 // Définir le zoom minimum
     }).setView([7.54, -5.55], 7);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -683,6 +741,8 @@ function toggleDistricts(regionId) {
         }
     }
 
+    let markers_points = [];
+
     function addMarker(patient) {
         if (patient.commune && patient.commune.geom) {
             try {
@@ -701,10 +761,10 @@ function toggleDistricts(regionId) {
 
                 var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';
 
-                var marker = L.marker(centroid, {icon: myIcon})
-                    .bindPopup(` Localite : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)
+                var marker = L.marker(centroid, { icon: myIcon })
+                    .bindPopup(` Localité : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Âge: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`)
                     .on('mouseover', function () {
-                        this.bindTooltip(` Localite : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu' }`, {
+                        this.bindTooltip(` Localité : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Âge: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`, {
                             direction: 'top',
                             offset: [0, -10],
                             opacity: 0.8
@@ -734,6 +794,41 @@ function toggleDistricts(regionId) {
         }
         return age;
     }
+
+    let patientgroup = L.layerGroup();
+    let district = L.layerGroup(); // Groupement des polygones des districts
+    var geoLayer = L.geoJSON().addTo(district);
+
+    // Style par défaut pour les polygones
+    var myStyle = {
+        color: "red",
+        weight: 1,
+        opacity: 0.80,
+        fillColor: '#FF6347'
+    };
+
+    geoLayer.setStyle(myStyle);
+
+    // Récupération des données de synthèse des districts et ajout à la carte
+    fetch("/epidemie/api/synthese-district/?maladie_id={{ epidemie_id }}")
+        .then(response => response.json())
+        .then(synthese => {
+            console.log(synthese);
+            synthese.forEach((s) => {
+                console.log(s.district_geojson);
+                L.geoJSON(s.district_geojson, {
+                    style: {
+                        color: "#ff0014",
+                        weight: 1,
+                        opacity: 1
+                    }
+                }).bindPopup(`District: ${s.nom_district} <br> Cas suspect: ${s.nbre_cas_suspects} <br> Cas positifs : ${s.cas_positif} <br> Cas Négatifs : ${s.cas_negatif}`)
+                    .addTo(district);
+            });
+
+            map.addLayer(district); // Ajouter les districts par défaut
+        })
+        .catch(error => console.error('Erreur lors de la récupération des données des districts :', error));
 
     // Récupération des données des patients positifs en utilisant l'ID de l'épidémie
     fetch(`/epidemie/api/patient/?epidemie_id=${epidemieId}`)
@@ -780,10 +875,21 @@ function toggleDistricts(regionId) {
                 });
             });
 
-            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group
-
+            map.addLayer(markers); // Ajouter les marqueurs au cluster group
+            patientgroup.addLayer(markers);
         })
         .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));
+
+    map.addLayer(district); // Afficher les districts par défaut
+    map.addLayer(patientgroup);
+
+    var overlayMaps = {
+        "District": district,
+        "Patients": patientgroup
+    };
+
+    var layerControl = L.control.layers(overlayMaps).addTo(map);
+
 </script>
 
     <style>

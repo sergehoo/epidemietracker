@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.timezone import now
@@ -20,7 +20,7 @@ from unidecode import unidecode
 from epidemie.admin import EchantillonResource
 from epidemie.forms import PatientForm
 from epidemie.models import HealthRegion, City, EpidemicCase, Patient, ServiceSanitaire, Commune, Epidemie, Echantillon, \
-    DistrictSanitaire
+    DistrictSanitaire, SyntheseDistrict
 from epidemie.serializers import HealthRegionSerializer, CitySerializer, EpidemicCaseSerializer, CommuneSerializer, \
     PatientSerializer, ServiceSanitaireSerializer
 
@@ -191,14 +191,33 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
         # Nombre total de patients dont les échantillons ont été positifs
         echantillons_positifs = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF')
         patients_avec_echantillons_positifs = Patient.objects.filter(echantillons__in=echantillons_positifs).distinct()
-
         total_patients_positifs = patients_avec_echantillons_positifs.count()
 
         # Nombre de patients guéris et décédés parmi ceux dont les échantillons ont été positifs
         patients_gueris_positifs = patients_avec_echantillons_positifs.filter(gueris=True).count()
         patients_decedes_positifs = patients_avec_echantillons_positifs.filter(decede=True).count()
 
-        # Calculer le pourcentage de patients guéris et décédés parmi les patients avec des échantillons positifs
+        # Récupérer les données de synthèse des districts pour l'épidémie en cours
+        synthesedistrict = SyntheseDistrict.objects.filter(maladie_id=epidemie.pk)
+
+        # Calculer les statistiques de SyntheseDistrict
+        total_cas_suspects = synthesedistrict.aggregate(Sum('nbre_cas_suspects'))['nbre_cas_suspects__sum'] or 0
+        total_cas_positif = synthesedistrict.aggregate(Sum('cas_positif'))['cas_positif__sum'] or 0
+        total_cas_negatif = synthesedistrict.aggregate(Sum('cas_negatif'))['cas_negatif__sum'] or 0
+        total_evacue = synthesedistrict.aggregate(Sum('evacue'))['evacue__sum'] or 0
+        total_decede = synthesedistrict.aggregate(Sum('decede'))['decede__sum'] or 0
+        total_gueri = synthesedistrict.aggregate(Sum('gueri'))['gueri__sum'] or 0
+        total_suivi_en_cours = synthesedistrict.aggregate(Sum('suivi_en_cours'))['suivi_en_cours__sum'] or 0
+        total_sujets_contacts = synthesedistrict.aggregate(Sum('nbre_sujets_contacts'))[
+                                    'nbre_sujets_contacts__sum'] or 0
+        total_contacts_en_cours_suivi = synthesedistrict.aggregate(Sum('contacts_en_cours_suivi'))[
+                                            'contacts_en_cours_suivi__sum'] or 0
+        total_contacts_sorti_suivi = synthesedistrict.aggregate(Sum('contacts_sorti_suivi'))[
+                                         'contacts_sorti_suivi__sum'] or 0
+        total_devenu_suspect = synthesedistrict.aggregate(Sum('devenu_suspect'))['devenu_suspect__sum'] or 0
+        total_devenu_positif = synthesedistrict.aggregate(Sum('devenu_positif'))['devenu_positif__sum'] or 0
+
+        # Calculer les pourcentages
         if total_patients_positifs > 0:
             pourcentage_gueris_positifs = (patients_gueris_positifs / total_patients_positifs) * 100
             pourcentage_decedes_positifs = (patients_decedes_positifs / total_patients_positifs) * 100
@@ -230,7 +249,6 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
             .order_by('-total')
         )
 
-        # Obtenez le nombre de cas par district
         cases_by_district = (
             Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat='POSITIF')
             .values('commune__district__region__name', 'commune__district__nom')
@@ -238,33 +256,133 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
             .order_by('-total')
         )
 
-        # Passer les données au template
-
-        # Passer les données au template
         context = {
             'cases_by_region': cases_by_region,
             'cases_by_district': cases_by_district,
-
             'epidemie': epidemie,
-            'epidemie_id': epidemie.pk,  # Passer l'ID de l'épidémie
-            'epidemie_nom': epidemie.nom,  # Passer le nom de l'épidémie
-
+            'epidemie_id': epidemie.pk,
+            'epidemie_nom': epidemie.nom,
             'top_districts': top_districts,
             'last_update': last_update,
             'echantillons_nbr': echantillons_nbr,
             'echantillons_nbrP': echantillons_nbrP,
             'pourcentage_positifs': pourcentage_positifs,
-            'patients_gueris': patients_gueris,
+            'patients_gueris': patients_gueris + total_gueri,
             'patients_decedes': patients_decedes,
-            'patients': patients,
-            'total_patients_positifs': total_patients_positifs,
+            'patients': patients + total_cas_negatif,
+            'total_patients_positifs': total_patients_positifs + total_cas_positif ,
             'patients_gueris_positifs': patients_gueris_positifs,
             'patients_decedes_positifs': patients_decedes_positifs,
             'pourcentage_gueris_positifs': pourcentage_gueris_positifs,
             'pourcentage_decedes_positifs': pourcentage_decedes_positifs,
+            'total_cas_suspects': total_cas_suspects,
+            'total_cas_positif': total_cas_positif,
+            'total_cas_negatif': total_cas_negatif,
+            'total_evacue': total_evacue,
+            'total_decede': total_decede,
+            'total_gueri': total_gueri,
+            'total_suivi_en_cours': total_suivi_en_cours,
+            'total_sujets_contacts': total_sujets_contacts,
+            'total_contacts_en_cours_suivi': total_contacts_en_cours_suivi,
+            'total_contacts_sorti_suivi': total_contacts_sorti_suivi,
+            'total_devenu_suspect': total_devenu_suspect,
+            'total_devenu_positif': total_devenu_positif,
         }
 
         return render(request, self.template_name, context)
+
+    # def get(self, request, pk):
+    #     epidemie = get_object_or_404(Epidemie, pk=pk)
+    #
+    #     # Filtrer les échantillons et les patients par épidémie
+    #     echantillons_nbr = Echantillon.objects.filter(maladie=epidemie).count()
+    #     echantillons_nbrP = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF').count()
+    #
+    #     patients = Patient.objects.filter(echantillons__maladie=epidemie).distinct().count()
+    #     patients_gueris = Patient.objects.filter(echantillons__maladie=epidemie, gueris=True).distinct().count()
+    #     patients_decedes = Patient.objects.filter(echantillons__maladie=epidemie, decede=True).distinct().count()
+    #
+    #     # Nombre total de patients dont les échantillons ont été positifs
+    #     echantillons_positifs = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF')
+    #     patients_avec_echantillons_positifs = Patient.objects.filter(echantillons__in=echantillons_positifs).distinct()
+    #
+    #     total_patients_positifs = patients_avec_echantillons_positifs.count()
+    #
+    #     # Nombre de patients guéris et décédés parmi ceux dont les échantillons ont été positifs
+    #     patients_gueris_positifs = patients_avec_echantillons_positifs.filter(gueris=True).count()
+    #     patients_decedes_positifs = patients_avec_echantillons_positifs.filter(decede=True).count()
+    #
+    #     synthesedistrict = SyntheseDistrict.objects.filter(maladie_id=epidemie.pk).annotate(
+    #         tcas_positif=Sum('cas_positif')
+    #     )
+    #
+    #     # Calculer le pourcentage de patients guéris et décédés parmi les patients avec des échantillons positifs
+    #     if total_patients_positifs > 0:
+    #         pourcentage_gueris_positifs = (patients_gueris_positifs / total_patients_positifs) * 100
+    #         pourcentage_decedes_positifs = (patients_decedes_positifs / total_patients_positifs) * 100
+    #     else:
+    #         pourcentage_gueris_positifs = 0
+    #         pourcentage_decedes_positifs = 0
+    #
+    #     if echantillons_nbr > 0:
+    #         pourcentage_positifs = (echantillons_nbrP / echantillons_nbr) * 100
+    #     else:
+    #         pourcentage_positifs = 0
+    #
+    #     last_update = Echantillon.objects.filter(maladie=epidemie).order_by('-created_at').values_list('created_at',
+    #                                                                                                    flat=True).first()
+    #
+    #     top_districts = DistrictSanitaire.objects.annotate(
+    #         num_echantillons=Count('commune__patient__echantillons',
+    #                                filter=Q(commune__patient__echantillons__maladie=epidemie)),
+    #         num_gueris=Count('commune__patient__echantillons',
+    #                          filter=Q(commune__patient__gueris=True, commune__patient__echantillons__maladie=epidemie)),
+    #         num_decedes=Count('commune__patient__echantillons',
+    #                           filter=Q(commune__patient__decede=True, commune__patient__echantillons__maladie=epidemie))
+    #     ).order_by('-num_echantillons')[:5] + SyntheseDistrict
+    #
+    #     cases_by_region = (
+    #         Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat='POSITIF')
+    #         .values('commune__district__region__name')
+    #         .annotate(total=Count('id'))
+    #         .order_by('-total')
+    #     )
+    #
+    #     # Obtenez le nombre de cas par district
+    #     cases_by_district = (
+    #         Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat='POSITIF')
+    #         .values('commune__district__region__name', 'commune__district__nom')
+    #         .annotate(total=Count('id'))
+    #         .order_by('-total')
+    #     )
+    #
+    #     # Passer les données au template
+    #
+    #     # Passer les données au template
+    #     context = {
+    #         'cases_by_region': cases_by_region,
+    #         'cases_by_district': cases_by_district,
+    #
+    #         'epidemie': epidemie,
+    #         'epidemie_id': epidemie.pk,  # Passer l'ID de l'épidémie
+    #         'epidemie_nom': epidemie.nom,  # Passer le nom de l'épidémie
+    #
+    #         'top_districts': top_districts,
+    #         'last_update': last_update,
+    #         'echantillons_nbr': echantillons_nbr,
+    #         'echantillons_nbrP': echantillons_nbrP,
+    #         'pourcentage_positifs': pourcentage_positifs,
+    #         'patients_gueris': patients_gueris,
+    #         'patients_decedes': patients_decedes,
+    #         'patients': patients,
+    #         'total_patients_positifs': total_patients_positifs,
+    #         'patients_gueris_positifs': patients_gueris_positifs,
+    #         'patients_decedes_positifs': patients_decedes_positifs,
+    #         'pourcentage_gueris_positifs': pourcentage_gueris_positifs,
+    #         'pourcentage_decedes_positifs': pourcentage_decedes_positifs,
+    #     }
+    #
+    #     return render(request, self.template_name, context)
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):

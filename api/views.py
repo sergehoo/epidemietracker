@@ -20,9 +20,9 @@ from unidecode import unidecode
 from epidemie.tasks import sync_health_regions, process_city_data, generate_commune_report, alert_for_epidemic_cases
 
 from epidemie.models import Patient, Echantillon, HealthRegion, City, Commune, EpidemicCase, ServiceSanitaire, \
-    DistrictSanitaire, Epidemie
+    DistrictSanitaire, Epidemie, CasSynthese, SyntheseDistrict
 from epidemie.serializers import HealthRegionSerializer, CitySerializer, EpidemicCaseSerializer, PatientSerializer, \
-    ServiceSanitaireSerializer, CommuneSerializer
+    ServiceSanitaireSerializer, CommuneSerializer, CasSyntheseSerializer, SyntheseDistrictSerializer
 
 
 # Create your views here.
@@ -127,6 +127,7 @@ class PatientViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+
 class ServiceSanitaireViewSet(viewsets.ModelViewSet):
     queryset = ServiceSanitaire.objects.all()
     serializer_class = ServiceSanitaireSerializer
@@ -161,7 +162,6 @@ class CommuneAggregatedViewSet(viewsets.ModelViewSet):
 
 def dashboard_view(request):
     return render(request, 'dingue/home.html')
-
 
 
 # def import_echantillons(request):
@@ -275,7 +275,6 @@ def dashboard_view(request):
 #     return render(request, 'dingue/import.html')
 
 
-
 # class PatientCreateView(LoginRequiredMixin, CreateView):
 #     model = Patient
 #     form_class = PatientCreateForm
@@ -314,4 +313,14 @@ def dashboard_view(request):
 #         messages.success(self.request, 'Patient créé avec succès!')
 #         return redirect(self.success_url)
 
+class CasSyntheseViewSet(viewsets.ModelViewSet):
+    queryset = CasSynthese.objects.all()
+    serializer_class = CasSyntheseSerializer
 
+
+class SyntheseDistrictViewSet(viewsets.ModelViewSet):
+    queryset = SyntheseDistrict.objects.all()
+    serializer_class = SyntheseDistrictSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(maladie_id=self.request.query_params.get('maladie_id'))

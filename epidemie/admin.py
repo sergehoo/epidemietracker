@@ -7,9 +7,8 @@ from import_export.formats.base_formats import XLSX
 from import_export.widgets import ForeignKeyWidget
 from leaflet.forms.widgets import LeafletWidget
 
-
 from epidemie.models import HealthRegion, City, EpidemicCase, DistrictSanitaire, Epidemie, Echantillon, Patient, \
-    Employee, Symptom, ServiceSanitaire, Commune
+    Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict
 
 admin.site.site_header = 'EPIDEMIE BACK-END CONTROLER'
 admin.site.site_title = 'EPIDEMIE Super Admin Pannel'
@@ -152,7 +151,6 @@ class CommuneAdmin(admin.ModelAdmin):
         return queryset, use_distinct
 
 
-
 class EchantillonResource(resources.ModelResource):
     class Meta:
         model = Echantillon
@@ -166,6 +164,15 @@ class EchantillonResource(resources.ModelResource):
         return [fmt for fmt in formats if fmt.is_available()]
 
 
+@admin.register(CasSynthese)
+class CasSyntheseAdmin(ImportExportModelAdmin):
+    pass
+    # resource_class = EchantillonResource
+
+@admin.register(SyntheseDistrict)
+class SyntheseDistrictAdmin(ImportExportModelAdmin):
+    pass
+
 @admin.register(Echantillon)
 class EchantillonAdmin(ImportExportModelAdmin):
-    resource_class = EchantillonResource
+    resource_class = (EchantillonResource)

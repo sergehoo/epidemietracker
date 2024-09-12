@@ -5,6 +5,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
+from django.db.models import Sum
 from django.utils.timezone import now
 from djgeojson.fields import PointField
 from simple_history.models import HistoricalRecords
@@ -237,6 +238,22 @@ class Epidemie(models.Model):
             echantillons__resultat='POSITIF'
         ).distinct().count()
         return nombre_personnes_touchees
+
+    @property
+    def personnes_touchees_agreges(self):
+        # Compte le nombre de personnes ayant des échantillons positifs pour cette épidémie
+        synthesedistrict = SyntheseDistrict.objects.filter(maladie_id=self)
+        total_cas_positif = synthesedistrict.aggregate(Sum('cas_positif'))['cas_positif__sum'] or 0
+
+        return total_cas_positif
+
+    @property
+    def personnes_decedes_agreges(self):
+        # Compte le nombre de personnes ayant des échantillons positifs pour cette épidémie
+        synthesedistrict = SyntheseDistrict.objects.filter(maladie_id=self)
+        total_decede = synthesedistrict.aggregate(Sum('decede'))['decede__sum'] or 0
+
+        return total_decede
 
     @property
     def personnes_decedees(self):

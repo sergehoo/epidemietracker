@@ -83,7 +83,7 @@
                                                             </div>
                                                             <div class="nk-cov-data">
                                                                 <h6 class="overline-title">Total des cas confirmés</h6>
-                                                                <div class="amount">{{ total_patients_positifs }} / {{ patients }}</div>
+                                                                <div class="amount">{{ total_cas_positif }} / {{ total_cas_suspects }}</div>
                                                             </div>
                                                             <div class="nk-cov-wg1-progress">
                                                                 <div class="progress progress-reverse progress-md progress-pill progress-bordered">
@@ -98,28 +98,28 @@
                                                                         <div class="dot dot-lg sq bg-primary"></div>
                                                                         <span>Cas Diagnostoqués</span>
                                                                     </div>
-                                                                    <div class="count">{{ patients }}</div>
+                                                                    <div class="count">{{ total_cas_suspects }}</div>
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-danger"></div>
                                                                         <span>Cas confirmés</span>
                                                                     </div>
-                                                                    <div class="count">{{ echantillons_nbrP }}</div>
+                                                                    <div class="count">{{ total_cas_positif }}</div>
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-success"></div>
                                                                         <span>Guéris</span>
                                                                     </div>
-                                                                    <div class="count">{{ patients_gueris_positifs }}</div>
+                                                                    <div class="count">{{ total_gueri }}</div>
                                                                 </li>
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-dark"></div>
                                                                         <span>Décès</span>
                                                                     </div>
-                                                                    <div class="count">{{ pourcentage_decedes_positifs|floatformat:0 }}</div>
+                                                                    <div class="count">{{ total_decede|floatformat:0 }}</div>
                                                                 </li>
                                                             </ul>
                                                             <div class="nk-cov-wg-note">Taux de  <a href="#">guerisons ({{ pourcentage_gueris_positifs|floatformat:2  }}%)</a> &amp; <a href="#">Décès ({{ pourcentage_decedes_positifs|floatformat:2 }}%)</a>.</div>
@@ -141,7 +141,7 @@
                     </div>
                     <div class="nk-cov-data">
                         <h6 class="overline-title">Guéris</h6>
-                        <div class="amount amount-sm text-success">{{ patients_gueris_positifs }}</div>
+                        <div class="amount amount-sm text-success">{{ total_gueri }}</div>
                     </div>
                     <div class="nk-cov-data">
                         <h6 class="overline-title">Décès</h6>

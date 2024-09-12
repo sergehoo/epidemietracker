@@ -9,6 +9,7 @@ from leaflet.forms.widgets import LeafletWidget
 
 from epidemie.models import HealthRegion, City, EpidemicCase, DistrictSanitaire, Epidemie, Echantillon, Patient, \
     Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict
+from epidemie.ressources import SyntheseDistrictResource
 
 admin.site.site_header = 'EPIDEMIE BACK-END CONTROLER'
 admin.site.site_title = 'EPIDEMIE Super Admin Pannel'
@@ -169,9 +170,16 @@ class CasSyntheseAdmin(ImportExportModelAdmin):
     pass
     # resource_class = EchantillonResource
 
+
+# @admin.register(SyntheseDistrict)
+# class SyntheseDistrictAdmin(ImportExportModelAdmin):
+#     pass
+
 @admin.register(SyntheseDistrict)
 class SyntheseDistrictAdmin(ImportExportModelAdmin):
-    pass
+    resource_class = SyntheseDistrictResource
+    list_display = ('district_sanitaire', 'maladie', 'nbre_cas_suspects', 'cas_positif', 'cas_negatif', 'evacue')
+
 
 @admin.register(Echantillon)
 class EchantillonAdmin(ImportExportModelAdmin):

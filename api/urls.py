@@ -4,8 +4,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from api.views import HealthRegionViewSet, CityViewSet, EpidemicCaseViewSet, PatientViewSet, CommuneAggregatedViewSet, \
-    ServiceSanitaireViewSet, dashboard_view, CasSyntheseViewSet, SyntheseDistrictViewSet
-from epidemie.views import import_view, import_echantillons, PatientListView, EchantillonListView, HomePageView
+    ServiceSanitaireViewSet, dashboard_view, CasSyntheseViewSet, SyntheseDistrictViewSet, get_infected_cases_data
+from epidemie.views import import_view, import_echantillons, PatientListView, EchantillonListView, HomePageView, \
+    import_excel
 
 router = DefaultRouter()
 router.register(r'healthregions', HealthRegionViewSet)
@@ -25,9 +26,13 @@ urlpatterns = [
                   path('import_data/', import_view, name='import_view'),
 
                   path('import-echantillons/', import_echantillons, name='import_echantillons'),
+                  path('import-excel/', import_excel, name='import_excel'),
 
                   path('patients/liste/', PatientListView.as_view(), name='patientlist'),
                   path('enquete/liste/', EchantillonListView.as_view(), name='echantillons'),
+                  path('api/epidemie/<int:epidemie_id>/cases/', get_infected_cases_data,
+                       name='infected_cases_data'),
+
                   path('', HomePageView.as_view(), name='dingue-home'),
 
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

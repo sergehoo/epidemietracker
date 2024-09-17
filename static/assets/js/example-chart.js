@@ -193,7 +193,7 @@
       label: "Total Received",
       color: "#798bff",
       background: NioApp.hexRGB('#798bff', .3),
-      data: [110, 80, 125, 55, 95, 75, 90, 110, 80, 125, 55, 95]
+      data: [180, 80, 125, 55, 95, 75, 90, 110, 80, 125, 55, 95]
     }]
   };
 
@@ -310,13 +310,13 @@
   // datasets: [{label : string, color: string (color code with # or other format), data: array}]
 
   var pieChartData = {
-    labels: ["Send", "Receive", "Withdraw"],
-    dataUnit: 'BTC',
+    labels: ["Homme", "Non défini", "Femme"],
+    dataUnit: 'Infectés',
     legend: false,
     datasets: [{
       borderColor: "#fff",
-      background: ["#9cabff", "#f4aaa4", "#8feac5"],
-      data: [110, 80, 125]
+      background: ["#617bff", "rgba(138,138,138,0.15)", "#ea80ff"],
+      data: [910, 200, 525]
     }]
   };
 
@@ -384,8 +384,8 @@
     });
   } // init pie chart
 
-
   pieChart();
+
   var doughnutChartData = {
     labels: ["Send", "Receive", "Withdraw"],
     dataUnit: 'BTC',

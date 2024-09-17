@@ -4,12 +4,19 @@ from django.contrib import admin
 from django.urls import path, include
 
 from epidemie.views import LandinguePageView, EpidemieDetailView, PatientCreateView, PatientUpdateView, \
-    PatientDeleteView, EchantillonCreateView, EchantillonUpdateView, EchantillonDeleteView
+    PatientDeleteView, EchantillonCreateView, EchantillonUpdateView, EchantillonDeleteView, InformationDetailView, \
+    InformationCreateView, import_data, import_synthese_view
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('api-auth/', include('rest_framework.urls')),
+
+
                   path('tinymce/', include('tinymce.urls')),
+                  path("unicorn/", include("django_unicorn.urls")),
+                  path('import-data/', import_data, name='import_data'),
+
+
                   path('accounts/', include('allauth.urls')),
                   path('epidemie/', include('api.urls')),
                   path('mpox/', include('mpox.urls')),
@@ -18,9 +25,16 @@ urlpatterns = [
                   path('', LandinguePageView.as_view(), name='landing'),
                   path('epidemie/<int:pk>/', EpidemieDetailView.as_view(), name='epidemie-detail'),
 
+                  path('information/create/', InformationCreateView.as_view(), name='infos-create'),
+                  path('information/<int:pk>/', InformationDetailView.as_view(), name='infos-detail'),
+
                   path('patient/create/', PatientCreateView.as_view(), name='patient-create'),
                   path('patient/<int:pk>/update/', PatientUpdateView.as_view(), name='patient-update'),
                   path('patient/<int:pk>/delete/', PatientDeleteView.as_view(), name='patient-delete'),
+
+                  path('synthese/import/', import_synthese_view, name='import_synthese'),
+
+
 
                   # URLs pour les vues de Echantillon
                   path('echantillon/create/', EchantillonCreateView.as_view(), name='echantillon-create'),

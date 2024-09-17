@@ -1,0 +1,74 @@
+<style>
+    .typewriter {
+        display: inline-block;
+        overflow: hidden;
+        border-right: 0.15em solid orange; /* Barre clignotante */
+        white-space: nowrap;
+        margin: 0 auto;
+        animation: blink-caret 0.75s step-end infinite;
+        font-family: 'Arial', "Arial Narrow", monospace; /* Effet machine à écrire */
+        font-size: 1.2em;
+        color: #333; /* Couleur du texte */
+    }
+
+    .text-link {
+        text-decoration: none;
+        color: #007bff; /* Couleur du lien */
+        transition: color 0.3s;
+    }
+
+    .text-link:hover {
+        color: #0056b3; /* Couleur du lien au survol */
+    }
+
+    @keyframes blink-caret {
+        from, to {
+            border-color: transparent;
+        }
+        50% {
+            border-color: orange;
+        }
+    }
+</style>
+
+<div class="typewriter">
+    <a href="#" id="text-display" class="text-link">Aucune information disponible.</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Messages list with URLs
+    const messages = [
+        {% for message in messages %}
+            { title: "{{ message.titre }}", url: "{% url 'infos-detail' message.pk %}" },
+        {% empty %}
+            { title: "Aucune information disponible.", url: "#" }
+        {% endfor %}
+    ];
+
+    let currentIndex = 0;
+    const textDisplay = document.getElementById('text-display');
+
+    function typeEffect(message, index) {
+        if (index < message.title.length) {
+            textDisplay.textContent += message.title[index];
+            setTimeout(() => typeEffect(message, index + 1), 150); // Adjust speed here
+        } else {
+            // Add icon after text and set link URL
+            textDisplay.innerHTML += ' <em class="icon ni ni-external"></em>';
+            textDisplay.setAttribute('href', message.url); // Set the link URL
+
+            // Wait before moving to the next message
+            setTimeout(() => {
+                textDisplay.textContent = ''; // Clear the text
+                currentIndex = (currentIndex + 1) % messages.length; // Move to the next message
+                typeEffect(messages[currentIndex], 0); // Start typing the next message
+            }, 2000); // Time before the next message starts
+        }
+    }
+
+    if (messages.length > 0) {
+        typeEffect(messages[currentIndex], 0); // Start typing the first message
+    }
+});
+</script>

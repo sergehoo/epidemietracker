@@ -64,6 +64,16 @@ Patient_statut_choices = [
 ]
 
 
+class Information(models.Model):
+    titre = models.CharField(max_length=255)
+    message = HTMLField(blank=True, null=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+    auteur = models.ForeignKey('Employee', on_delete=models.CASCADE, blank=True, null=True)
+
+    def __str__(self):
+        return self.titre
+
+
 class HealthRegion(models.Model):
     name = models.CharField(max_length=100)
 
@@ -115,6 +125,13 @@ class ServiceSanitaire(models.Model):
         return f"{self.nom}- {self.district} {self.geom}"
 
 
+ROLE_CHOICES = (
+    ('National', 'National'),
+    ('Region', 'Region'),
+    ('District', 'District'),
+)
+
+
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="employee", )
     gender = models.CharField(choices=Sexe_choices, max_length=100, null=True, blank=True, )
@@ -131,6 +148,8 @@ class Employee(models.Model):
 
     slug = models.SlugField(null=True, blank=True, help_text="slug field", verbose_name="slug ", unique=True,
                             editable=False)
+
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='District')
     created_at = models.DateTimeField(auto_now_add=now, )
 
     history = HistoricalRecords()
@@ -140,9 +159,15 @@ class Employee(models.Model):
 
     class Meta:
         permissions = (
-            ("can_edit_employee", "Can edit employee"),
-            ("can_create_employee", "Can create employee"),
-            ("can_view_salary", "can view salary"),
+            ("access_all", "access all"),
+            ("access_region", "access region"),
+            ("access_district", "access district"),
+            # ("can_view_district", "Can view district"),
+            # ("can_view_region", "Can view region"),
+            # ("can_view_national", "Can view national"),
+            # ("can_edit_employee", "Can edit employee details"),
+            # ("can_delete_employee", "Can delete employee"),
+            ("can_assign_roles", "Can assign roles to employees"),
         )
 
 
@@ -158,18 +183,24 @@ class Patient(models.Model):
     nationalite = models.CharField(max_length=200, blank=True, )
     profession = models.CharField(max_length=200, null=True, blank=True)
     nbr_enfants = models.PositiveIntegerField(default=0, blank=True)
-    groupe_sanguin = models.CharField(choices=Goupe_sanguin_choices, max_length=20, null=True)
+    groupe_sanguin = models.CharField(choices=Goupe_sanguin_choices, max_length=20, blank=True, null=True)
     niveau_etude = models.CharField(max_length=500, null=True, blank=True)
     employeur = models.CharField(max_length=500, null=True, blank=True)
     created_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=now)
     commune = models.ForeignKey(Commune, on_delete=models.SET_NULL, null=True, blank=True)
+    hopital = models.ForeignKey(ServiceSanitaire, on_delete=models.SET_NULL, null=True, blank=True)
     quartier = models.CharField(max_length=500, null=True, blank=True)
     # ville = models.ForeignKey('City', on_delete=models.SET_NULL, null=True)
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     gueris = models.BooleanField(default=False)
     decede = models.BooleanField(default=False)
+    cascontact = models.ManyToManyField('self', blank=True)
     history = HistoricalRecords()
+
+    class Meta:
+        ordering = ['-created_at']
+        permissions = (('voir_patient', 'Peut voir patient'),)
 
     def save(self, *args, **kwargs):
         # Générer un code_patient unique constitué de chiffres et de caractères alphabétiques
@@ -197,18 +228,15 @@ class Patient(models.Model):
     def latest_constante(self):
         return self.constantes.order_by('-created_at').first()
 
-    class Meta:
-        ordering = ['-created_at']
-
     def __str__(self):
-        return f'{self.prenoms} {self.nom}'
+        return f'{self.prenoms} {self.nom} -- {self.commune}--{self.genre}'
 
 
 class Symptom(models.Model):
     nom = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.nom
+        return f'{self.nom}'
 
 
 class Typeepidemie(models.Model):
@@ -224,6 +252,9 @@ class Epidemie(models.Model):
     thumbnails = models.ImageField(null=True, blank=True, upload_to='epidemie/thumbnails')
     symptomes = models.ManyToManyField(Symptom, related_name='épidémies')
 
+    class Meta:
+        permissions = (('voir_epidemie', 'peut voir epidemie'),)
+
     @property
     def regions_impactees(self):
         # Récupère toutes les régions impactées par cette épidémie
@@ -235,7 +266,7 @@ class Epidemie(models.Model):
         # Compte le nombre de personnes ayant des échantillons positifs pour cette épidémie
         nombre_personnes_touchees = Patient.objects.filter(
             echantillons__maladie=self,
-            echantillons__resultat='POSITIF'
+            echantillons__resultat=True
         ).distinct().count()
         return nombre_personnes_touchees
 
@@ -260,7 +291,7 @@ class Epidemie(models.Model):
         # Compte le nombre de personnes décédées ayant des échantillons positifs pour cette épidémie
         nombre_personnes_decedees = Patient.objects.filter(
             echantillons__maladie=self,
-            echantillons__resultat='POSITIF',
+            echantillons__resultat=True,
             decede=True
         ).distinct().count()
         return nombre_personnes_decedees
@@ -270,18 +301,18 @@ class Epidemie(models.Model):
         current_month = now().month
         current_year = now().year
         return self.echantillon_set.filter(
-            resultat='POSITIF',
+            resultat=True,
             date_collect__month=current_month,
             date_collect__year=current_year
         ).count()
-
-    def __str__(self):
-        return self.nom
 
     def is_active(self):
         from django.utils import timezone
         today = timezone.now().date()
         return self.date_debut <= today and (self.date_fin is None or self.date_fin >= today)
+
+    def __str__(self):
+        return self.nom
 
 
 class PreleveMode(models.Model):
@@ -300,9 +331,9 @@ class Echantillon(models.Model):
     site_collect = models.CharField(null=True, blank=True, max_length=500)
     agent_collect = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.CASCADE)
     status_echantillons = models.CharField(null=True, blank=True, max_length=10)
-    resultat = models.CharField(choices=Resultat_choices, max_length=300, null=True, blank=True)
-    linked = models.BooleanField(default=False, null=True, blank=True)
-    used = models.BooleanField(default=False, null=True, blank=True)
+    resultat = models.BooleanField(default=False)
+    linked = models.BooleanField(default=False)
+    used = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     history = HistoricalRecords()
 
@@ -381,6 +412,14 @@ class CasSynthese(models.Model):
 
     def __str__(self):
         return f"Cas en provenance de {self.structure_provenance} enregistré le {self.date_enregistrement}"
+
+
+class Alert(models.Model):
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.message
 
 
 class SyntheseDistrict(models.Model):

@@ -11,7 +11,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage, default_storage
 from django.db.models import Count, Q
 from django.db.models.functions import Lower
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, ListView, CreateView
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -111,7 +111,7 @@ class PatientViewSet(viewsets.ModelViewSet):
 
         # Filtrer les patients qui ont au moins un échantillon avec un résultat positif
         queryset = self.queryset.filter(
-            Q(echantillons__resultat='POSITIF')
+            Q(echantillons__resultat=True)
         ).distinct()
 
         # Si un ID d'épidémie est fourni, filtrer les patients en fonction de l'épidémie
@@ -324,3 +324,20 @@ class SyntheseDistrictViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(maladie_id=self.request.query_params.get('maladie_id'))
+
+
+def get_infected_cases_data(request, epidemie_id):
+    epidemie = get_object_or_404(Epidemie, pk=epidemie_id)
+
+    # Count male and female cases
+    male_cases = Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat=True,
+                                        genre='Male').count()
+    female_cases = Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat=True,
+                                          genre='Female').count()
+
+    data = {
+        'male_cases': male_cases,
+        'female_cases': female_cases,
+    }
+
+    return JsonResponse(data)

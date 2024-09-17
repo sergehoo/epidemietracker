@@ -1,5 +1,8 @@
 {% load static %}
 {% load humanize %}
+{% load unicorn %}
+{% load mathfilters %}
+
 <!DOCTYPE html>
 <html lang="zxx" class="js">
 
@@ -32,9 +35,9 @@
 <body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
     <div class="nk-app-root">
         <!-- main @s -->
-        <div class="nk-main ">
+        <div class="nk-main bg-gray-100">
             <!-- sidebar @s -->
-            {% include 'dingue/layouts/sidebarre.html' %}
+           
              <!-- sidebar @e -->
             <!-- wrap @s -->
             <div class="nk-wrap ">
@@ -43,7 +46,7 @@
                     <div class="container-fluid">
                         <div class="nk-header-wrap">
                             <div class="nk-header-brand">
-                                <a href="index.html" class="logo-link">
+                                <a href="#" class="logo-link">
                                     <img class="logo-light logo-img" src="./images/logo.png" srcset="./images/logo2x.png 2x" alt="logo">
                                     <img class="logo-dark logo-img" src="./images/logo-dark.png" srcset="./images/logo-dark2x.png 2x" alt="logo-dark">
                                 </a>
@@ -66,6 +69,7 @@
                                         <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"> </span> {{ epidemie.nom }} Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoCI.png' %}" width="50"></h5>
                                     </div>
                                     <div class="nk-block-head-content">
+                                        
                                         <p class="note-text">Derniere mise  a jours : {{ last_update }}</p>
                                     </div>
                                 </div>
@@ -96,7 +100,7 @@
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-primary"></div>
-                                                                        <span>Cas Diagnostoqués</span>
+                                                                        <span>Cas Suspects</span>
                                                                     </div>
                                                                     <div class="count">{{ total_cas_suspects }}</div>
                                                                 </li>
@@ -117,7 +121,7 @@
                                                                 <li>
                                                                     <div class="title">
                                                                         <div class="dot dot-lg sq bg-dark"></div>
-                                                                        <span>Décès</span>
+                                                                        <span>Décédés</span>
                                                                     </div>
                                                                     <div class="count">{{ total_decede|floatformat:0 }}</div>
                                                                 </li>
@@ -127,57 +131,28 @@
                                                     </div>
                                                 </div>
                                             </div><!-- .col -->
+
                                             <div class="col-lg-6 col-xl-12">
-    <div class="card card-bordered card-full">
-        <div class="card-inner">
-            <div class="nk-cov-wg2">
-                <div class="card-title">
-                    <h5 class="title">Taux d'evolution - <small>Abidjan</small></h5>
-                </div>
-                <div class="nk-cov-group">
-                    <div class="nk-cov-data">
-                        <h6 class="overline-title">Confirmés</h6>
-                        <div class="amount amount-sm text-danger">{{ total_patients_positifs }}</div>
-                    </div>
-                    <div class="nk-cov-data">
-                        <h6 class="overline-title">Guéris</h6>
-                        <div class="amount amount-sm text-success">{{ total_gueri }}</div>
-                    </div>
-                    <div class="nk-cov-data">
-                        <h6 class="overline-title">Décès</h6>
-                        <div class="amount amount-sm text-dark">{{ patients_decedes_positifs }}</div>
-                    </div>
-                </div>
-                <div class="nk-cov-wg-note">
-                    Taux de <a href="#">Guérisons ({{ pourcentage_gueris_positifs|floatformat:1 }}%)</a> &amp;
-                    <a href="#">Décès ({{ pourcentage_decedes_positifs|floatformat:1 }}%)</a>.
-                </div>
-                <div class="nk-cov-wg2-group">
-                    <div class="nk-cov-data">
-                        <h6 class="sub-text">Cas  <br class="d-xxl-none">Contacts</h6>
-                        <div class="amount amount-xs">{{ total_patients_positifs|add:"-"|add:patients_gueris_positifs|add:patients_decedes_positifs }}</div>
-                    </div>
-                    <ul class="nk-cov-wg2-data">
-                        <li>
-                            <div class="title">
-                                <div class="dot dot-lg sq bg-danger"></div>
-                                <span>Exposés</span>
-                            </div>
-                            <div class="count">{{ total_patients_positifs|add:"-"|add:patients_decedes_positifs }}</div>
-                        </li>
-                        <li>
-                            <div class="title">
-                                <div class="dot dot-lg sq bg-dark"></div>
-                                <span>Potentiel</span>
-                            </div>
-                            <div class="count">0</div> <!-- Nombre de patients en état critique -->
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+                                        <div class="card card-bordered card-full">
+                                            <div class="card-inner">
+                                                <div class="card-title-group mb-1">
+                                                    <div class="card-title">
+                                                        <h6 class="title">Evolution des cas par période</h6>
+                                                        <p>Quelques statistiques de l'évolution des cas</p>
+
+                                                    </div>
+                                                </div>
+
+{#                                                    <div class="nk-ck-sm">#}
+{#                                                            <canvas class="line-chart" id="straightLineChart"></canvas>#}
+{#                                                        </div>#}
+                                                    <div style="width: 100%; margin: auto;">
+        <canvas id="evolutionLineChart"></canvas>
     </div>
-</div>
+
+                                            </div>
+                                        </div>
+                                    </div><!-- .col -->
                                         </div><!-- .row -->
                                     </div><!-- .col -->
                                     <div class="col-xl-8">
@@ -251,74 +226,26 @@ function toggleDistricts(regionId) {
                                             </div>
                                         </div>
                                     </div><!-- .col -->
-                                    <div class="col-xl-4 col-md-6">
-                                        <div class="card card-bordered card-full">
-                                            <div class="card-inner">
-                                                <div class="card-title-group mb-1">
-                                                    <div class="card-title">
-                                                        <h6 class="title">Evolution des cas - <small>Regions</small></h6>
-                                                        <p>Quelques statistiques de l'évolution des cas</p>
-                                                    </div>
-                                                </div>
-                                                <div class="nk-cov-wg3">
-                                                    <ul class="nav nav-tabs nav-tabs-card nav-tabs-xs">
-                                                        <li class="nav-item">
-                                                            <a class="nav-link active" data-toggle="tab" href="#confirmed-cases">Cas Confirmés</a>
-                                                        </li>
-                                                        <li class="nav-item">
-                                                            <a class="nav-link" data-toggle="tab" href="#daily-increase">Evolution Journalier</a>
-                                                        </li>
-                                                    </ul>
-                                                    <div class="tab-content mt-0">
-                                                        <div class="tab-pane active" id="confirmed-cases">
-                                                            <div class="nk-cov-wg3-legend-wrap">
-                                                                <h6 class="title">Evolution des cas</h6>
-                                                                <ul class="nk-cov-wg3-legend">
-                                                                    <li>
-                                                                        <div class="dot dot-md sq bg-danger"></div>
-                                                                        <span>Infectés</span>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="dot dot-md sq bg-dark"></div>
-                                                                        <span>Décédés</span>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                            <div class="nk-cov-wg3-ck">
-                                                                <canvas class="covid-case-line-chart" id="confirmedCases"></canvas>
-                                                            </div>
-                                                            <div class="justify-between ml-5">
-                                                                <div class="chart-label small text-soft">22 Jan, 2020</div>
-                                                                <div class="chart-label small text-soft">28 Mar, 2020</div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="tab-pane" id="daily-increase">
-                                                            <div class="nk-cov-wg3-legend-wrap">
-                                                                <h6 class="title">Flow of Cases</h6>
-                                                                <ul class="nk-cov-wg3-legend">
-                                                                    <li>
-                                                                        <div class="dot dot-md sq bg-danger"></div>
-                                                                        <span>Infecté</span>
-                                                                    </li>
-                                                                    <li>
-                                                                        <div class="dot dot-md sq bg-dark"></div>
-                                                                        <span>Décedé</span>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                            <div class="nk-cov-wg3-ck">
-                                                                <canvas class="covid-case-bar-chart" id="dailyIncrease"></canvas>
-                                                            </div>
-                                                            <div class="justify-between ml-5">
-                                                                <div class="chart-label small text-soft">22 Aout, 2024</div>
-                                                                <div class="chart-label small text-soft">28 Aout, 2024</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!-- .col -->
+
+                                 <div class="col-xl-4 col-md-6">
+    <div class="card card-bordered card-full">
+        <div class="card-inner">
+            <div class="nk-cov-wg2">
+                <div class="card-title">
+                    <h5 class="title">Répartition des Taux par - <small>Genre</small></h5>
+                </div>
+
+                <div style="width: 50%; margin: auto;" >
+                    <canvas id="genderPieChart"></canvas>
+
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
                                     <div class="col-xl-4 col-md-6">
                                         <div class="card card-bordered card-full">
                                             <div class="card-inner mb-n2">
@@ -369,25 +296,30 @@ function toggleDistricts(regionId) {
                                         <div class="card card-bordered card-full is-center-mb">
                                             <div class="card-inner">
                                                 <div class="card-title mb-4">
-                                                    <h6 class="title">Actualités et importantes mise à jours</h6>
+                                                    <h6 class="title">Repartition du nombre de positifs par tranche d'age</h6>
                                                 </div>
-                                                <div class="nk-cov-newswg">
-                                                    <div class="nk-cov-newswg-item">
-                                                        <div class="nk-cov-newswg-content">
-                                                            <h6 class="title"><a href="#">Arreter miniseriel du 08 Septembre</a></h6>
-                                                            <ul class="nk-cov-newswg-meta">
-                                                                <li><a href="#">Note d'Information DGS N°: 00988</a></li>
-                                                                <li>1 day ago</li>
-                                                            </ul>
-                                                        </div>
-                                                        <div class="nk-cov-newswg-image">
-                                                            <img src="{% static 'images/gfx/covid-news-a.jpg' %}" alt="">
-                                                        </div>
-                                                    </div>
 
-                                                </div>
-                                                <div class="mt-3">
-                                                    <a href="#" class="link link-sm"><span>Voir tout</span> <em class="icon ni ni-arrow-long-right"></em></a>
+                                                <div class="nk-cov-newswg">
+                                                    <table class="table">
+    <thead>
+        <tr>
+            <th>Tranche d'âge</th>
+            <th>Nombre de patients infectés</th>
+            <th>Ratios</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for tranche, count, ratio in tranches_age %}
+        <tr>
+            <td style="text-align: left">{{ tranche }}</td>
+            <td style="text-align: center">{{ count }}</td>
+            <td class="text-danger" style="text-align: center">{{ ratio }} %</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -398,24 +330,36 @@ function toggleDistricts(regionId) {
                     </div>
                 </div>
                 <!-- content @e -->
-                <!-- footer @s -->
-                <div class="nk-footer d-md-none">
+
+            </div>
+
+            <!-- wrap @e -->
+        </div>
+        <!-- main @e -->
+
+    </div>
+  <!-- footer @s -->
+                <div class="nk-footer ">
                     <div class="container-fluid">
                         <div class="nk-footer-wrap gy-1 gx-4">
                             <div class="nk-footer-links">
-                                
+                                <ul class="nav nav-sm">
+                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">A propos</a></li>
+                                    </ul>
                             </div>
-                            <div class="nk-footer-copyright"> &copy; Copyright 2024, <a href="www.afriqconsulting.com">Afriqconsulting</a>
+                            <span><img src="{% static 'images/ivory-coast.png' %}" width="30"></span><span> République de Côte d'Ivoire</span>
+
+                            <span>|</span>
+                            <span>Ministère de la Santé de l'Hygiène Publique et de la Couverture Maladie Universelle</span><span> <img src="{% static 'images/logoMSHPCMU.svg' %}" width="30"></span>
+                            <span>|</span>
+                            <span>Système National de surveillance Épidémiologique </span>
+                            <span>|</span>
+                            <div class="nk-footer-copyright white"> &copy; Copyright 2024, <a href="#">afriqconsulting</a>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- footer @e -->
-            </div>
-            <!-- wrap @e -->
-        </div>
-        <!-- main @e -->
-    </div>
     <!-- app-root @e -->
     <!-- Modal About -->
     <div class="modal fade" tabindex="-1" id="covid-about">
@@ -501,396 +445,386 @@ function toggleDistricts(regionId) {
     <script src="{% static 'assets/js/bundle.js' %}"></script>
     <script src="{% static 'assets/js/scripts.js' %}"></script>
 {#    <script src="{% static 'assets/js/libs/jqvmap.js' %}"></script>#}
-{#    <script src="{% static 'assets/js/chart-covid.js' %}"></script>#}
+
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="https://unpkg.com/terraformer@1.0.7"></script>
     <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
 
-{#    <script>#}
-{#    var coteDIvoireBounds = [#}
-{#        [4.35, -8.60], // Sud-Ouest (Point le plus au sud)#}
-{#        [10.73, -2.51] // Nord-Est (Point le plus au nord)#}
-{##}
-{#    ];#}
-{#    var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie#}
-{#    var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie#}
-{##}
-{#    var map = L.map('map', {#}
-{#        maxBounds: coteDIvoireBounds, // Définir les limites maximales#}
-{#        maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords#}
-{#        minZoom: 7, // Définir le zoom minimum#}
-{##}
-{##}
-{#    }).setView([7.54, -5.55], 7);#}
-{##}
-{##}
-{##}
-{##}
-{##}
-{#    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {#}
-{#        maxZoom: 18,#}
-{#        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'#}
-{#    }).addTo(map);#}
-{##}
-{#    var markers = L.markerClusterGroup(); // Initialiser le groupe de clusters pour les marqueurs#}
-{##}
-{#    function getMarkerColor(patient) {#}
-{#        if (patient.decede) {#}
-{#            return 'black'; // Décédé#}
-{#        } else if (patient.gueris) {#}
-{#            return 'green'; // Guéri#}
-{#        } else if (patient.echantillons && patient.echantillons.some(e => e.resultat === 'POSITIF')) {#}
-{#            return 'red'; // Positif#}
-{#        } else {#}
-{#            return 'orange'; // Autres#}
-{#        }#}
-{#    }#}
-{#    let markers_points = []#}
-{#    function addMarker(patient) {#}
-{#        if (patient.commune && patient.commune.geom) {#}
-{#            try {#}
-{#                var cleanedWKT = patient.commune.geom.replace(/^SRID=\d+;/, '');#}
-{#                var geoJSON = Terraformer.WKT.parse(cleanedWKT);#}
-{#                var centroid = L.geoJSON(geoJSON).getBounds().getCenter();#}
-{##}
-{#                var markerColor = getMarkerColor(patient);#}
-{##}
-{#                var myIcon = L.divIcon({#}
-{#                    className: 'custom-div-icon',#}
-{#                    html: `<div class='circle-marker' style='background-color: ${markerColor};'></div>`, // Couleur basée sur le statut#}
-{#                    iconSize: [30, 30],#}
-{#                    iconAnchor: [15, 15]#}
-{#                });#}
-{##}
-{#                var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';#}
-{##}
-{#                var marker = L.marker(centroid, {icon: myIcon})#}
-{#                    .bindPopup(` Localite : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Age: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu'}`)#}
-{#                    .on('mouseover', function () {#}
-{#                        this.bindTooltip(` Localite : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Age: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Status: ${patient.status || 'Inconnu' }`, {#}
-{#                            direction: 'top',#}
-{#                            offset: [0, -10],#}
-{#                            opacity: 0.8#}
-{#                        }).openTooltip();#}
-{#                    })#}
-{#                    .on('mouseout', function () {#}
-{#                        this.closeTooltip();#}
-{#                    });#}
-{##}
-{#                markers.addLayer(marker);#}
-{##}
-{##}
-{#            } catch (error) {#}
-{#                console.error(`Erreur lors de l'analyse GeoJSON pour le patient : ${patient.nom} ${patient.prenoms}`, error);#}
-{#            }#}
-{#        } else {#}
-{#            console.error(`Données de localisation invalides pour le patient : ${patient.nom} ${patient.prenoms}`);#}
-{#        }#}
-{#    }#}
-{##}
-{##}
-{##}
-{#    function calculateAge(date_naissance) {#}
-{#        var today = new Date();#}
-{#        var birthDate = new Date(date_naissance);#}
-{#        var age = today.getFullYear() - birthDate.getFullYear();#}
-{#        var monthDifference = today.getMonth() - birthDate.getMonth();#}
-{#        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {#}
-{#            age--;#}
-{#        }#}
-{#        return age;#}
-{#    }#}
-{##}
-{##}
-{#    let patientgroup = L.layerGroup()#}
-{#    let district = L.layerGroup()#}
-{#    var geoLayer = L.geoJSON().addTo(district);#}
-{#    var myStyle = {#}
-{#        "color": "red",#}
-{#        "weight": 1,#}
-{#        "opacity": 0.80,#}
-{#        fillColor:'#FF6347',#}
-{#    };#}
-{#    geoLayer.setStyle(myStyle)#}
-{##}
-{##}
-{##}
-{##}
-{#    fetch("/epidemie/api/synthese-district/")#}
-{#        .then(response => response.json())#}
-{#        .then(synthese => {#}
-{#            console.log(synthese)#}
-{#            synthese.forEach((s)=>{#}
-{#                console.log(s.district_geojson)#}
-                {#geoLayer.addData(s.district_geojson)#}
-{#                L.geoJSON(s.district_geojson, {#}
-{#                    style: {#}
-{#                        "color": "#ff0014",#}
-{#                        "weight": 1,#}
-{#                        "opacity": 1#}
-{#                    }#}
-{#                }).bindPopup(` District: ${s.nom_district} <br> Cas suspect: ${s.nbre_cas_suspects} <br> Cas positifs : ${s.cas_positif} <br> Cas Negatifs : ${s.cas_negatif}`)#}
-{#                    .addTo(district);#}
-{#                let center = L.polygon(s.district_geojson.geometry.coordinates).getBounds().getCenter()#}
-{#            #}
-{#            })#}
-{##}
-{#            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group#}
-{##}
-{#        })#}
-{#    #}
-{#        // Récupération des données des patients positifs en utilisant l'ID de l'épidémie#}
-{#    fetch(`/epidemie/api/patient/?epidemie_id=${epidemieId}`)#}
-{#        .then(response => response.json())#}
-{#        .then(patients => {#}
-{#            var regions = {};#}
-{##}
-{#            patients.forEach(patient => {#}
-{#                var regionName = patient.commune && patient.commune.district && patient.commune.district.region ? patient.commune.district.region.name : 'Inconnu';#}
-{#                var districtName = patient.commune && patient.commune.district ? patient.commune.district.nom : 'Inconnu';#}
-{#                var communeName = patient.commune ? patient.commune.name : 'Inconnu';#}
-{##}
-{#                if (!regions[regionName]) {#}
-{#                    regions[regionName] = {#}
-{#                        name: regionName,#}
-{#                        districts: {}#}
-{#                    };#}
-{#                }#}
-{##}
-{#                if (!regions[regionName].districts[districtName]) {#}
-{#                    regions[regionName].districts[districtName] = {#}
-{#                        name: districtName,#}
-{#                        communes: {}#}
-{#                    };#}
-{#                }#}
-{##}
-{#                if (!regions[regionName].districts[districtName].communes[communeName]) {#}
-{#                    regions[regionName].districts[districtName].communes[communeName] = {#}
-{#                        name: communeName,#}
-{#                        patients: []#}
-{#                    };#}
-{#                }#}
-{##}
-{#                regions[regionName].districts[districtName].communes[communeName].patients.push(patient);#}
-{#            });#}
-{##}
-{#            Object.values(regions).forEach(region => {#}
-{#                Object.values(region.districts).forEach(district => {#}
-{#                    Object.values(district.communes).forEach(commune => {#}
-{#                        commune.patients.forEach(patient => {#}
-{#                            addMarker(patient);#}
-{#                        });#}
-{#                    });#}
-{#                });#}
-{#            });#}
-{##}
-{#            map.addLayer(markers);  // Ajouter tous les marqueurs au cluster group#}
-{#            patientgroup.addLayer(markers)#}
-{##}
-{##}
-{#        })#}
-{#        .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));#}
-{#    #}
-{#    #}
-{#        map.addLayer(district)#}
-{#        map.addLayer(patientgroup)#}
-{#        var overlayMaps = {#}
-{#            "Patients": patientgroup,#}
-{#            "District": district,#}
-{#        };#}
-{##}
-{##}
-{#    var layerControl = L.control.layers(overlayMaps).addTo(map);#}
-{##}
-{##}
-{##}
-{##}
-{#</script>#}
-<script>
-    var coteDIvoireBounds = [
-        [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
-        [10.73, -2.51] // Nord-Est (Point le plus au nord)
-    ];
+    <script src="{% static 'assets/js/chart-covid.js' %}"></script>
+    <script src="{% static 'assets/js/example-chart.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@latest"></script>
+    <script>
+        const ctx = document.getElementById('evolutionLineChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ monthly_data.months|safe }},
+                datasets: [{
+                    label: 'Nombre de Cas',
+                    data: {{ monthly_data.cases|safe }},
+                    backgroundColor: 'rgba(255,0,0,0.2)',
+                    borderColor: 'rgb(255,0,22)',
+                    borderWidth: 1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mois'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Nombre de Cas'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                return `Nombre de Cas: ${tooltipItem.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    const ctxGender = document.getElementById('genderPieChart').getContext('2d');
 
-    var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie
-    var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie
-
-    var map = L.map('map', {
-        maxBounds: coteDIvoireBounds, // Définir les limites maximales
-        maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords
-        minZoom: 7 // Définir le zoom minimum
-    }).setView([7.54, -5.55], 7);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
-    }).addTo(map);
-
-    var markers = L.markerClusterGroup(); // Initialiser le groupe de clusters pour les marqueurs
-
-    function getMarkerColor(patient) {
-        if (patient.decede) {
-            return 'black'; // Décédé
-        } else if (patient.gueris) {
-            return 'green'; // Guéri
-        } else if (patient.echantillons && patient.echantillons.some(e => e.resultat === 'POSITIF')) {
-            return 'red'; // Positif
-        } else {
-            return 'orange'; // Autres
+    new Chart(ctxGender, {
+        type: 'pie',
+        data: {
+            labels: ['Masculin', 'Féminin'],
+            datasets: [{
+                label: 'Répartition par Genre',
+                data: [{{ report_data.male_cases }}, {{ report_data.female_cases }}],
+                backgroundColor: ['#36A2EB' ,'#FF6384' ],
+                borderColor: ['#36A2EB' , '#FF6384'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            const dataset = tooltipItem.dataset;
+                            const dataIndex = tooltipItem.dataIndex;
+                            const value = dataset.data[dataIndex];
+                            const total = dataset.data.reduce((sum, value) => sum + value, 0);
+                            const percentage = ((value / total) * 100).toFixed(2);
+                            return `${tooltipItem.label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                },
+                datalabels: {
+                    formatter: (value, ctx) => {
+                        const dataset = ctx.chart.data.datasets[0];
+                        const total = dataset.data.reduce((sum, value) => sum + value, 0);
+                        const percentage = ((value / total) * 100).toFixed(2);
+                        return `${value} (${percentage}%)`;
+                    },
+                    color: '#fff',
+                }
+            }
         }
-    }
+    });
+});
+        // Diagramme circulaire des résultats des patients
+        const ctxOutcome = document.getElementById('outcomePieChart').getContext('2d');
+        new Chart(ctxOutcome, {
+            type: 'pie',
+            data: {
+                labels: ['Guéris', 'Décédés', 'Non Guéris/Non Décédés'],
+                datasets: [{
+                    label: 'Résultat des Patients',
+                    data: [{{ report_data.patients_gueris }}, {{ report_data.patients_decedes }}, {{ report_data.patients|add:report_data.total_patients_positifs|sub:report_data.patients_gueris|sub:report_data.patients_decedes }}],
+                    backgroundColor: ['#4CAF50', '#FF5722', '#FFC107'],
+                    borderColor: ['#4CAF50', '#FF5722', '#FFC107'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                let label = tooltipItem.label || '';
+                                let value = tooltipItem.raw || 0;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-    let markers_points = [];
+        // Diagramme circulaire des échantillons positifs et négatifs
+        const ctxSampleOutcome = document.getElementById('sampleOutcomePieChart').getContext('2d');
+        new Chart(ctxSampleOutcome, {
+            type: 'pie',
+            data: {
+                labels: ['Positifs', 'Négatifs'],
+                datasets: [{
+                    label: 'Échantillons',
+                    data: [{{ report_data.echantillons_nbrP }}, {{ report_data.echantillons_nbr|sub:report_data.echantillons_nbrP }}],
+                    backgroundColor: ['#36A2EB', '#FFCE56'],
+                    borderColor: ['#36A2EB', '#FFCE56'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                let label = tooltipItem.label || '';
+                                let value = tooltipItem.raw || 0;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-    function addMarker(patient) {
-        if (patient.commune && patient.commune.geom) {
-            try {
-                var cleanedWKT = patient.commune.geom.replace(/^SRID=\d+;/, '');
-                var geoJSON = Terraformer.WKT.parse(cleanedWKT);
-                var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
 
-                var markerColor = getMarkerColor(patient);
+    </script>
+    <script>
+    const ctx = document.getElementById('ageTrancheChart').getContext('2d');
+    const ageTrancheChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys({{ tranches_age|safe }}),
+            datasets: [{
+                label: 'Nombre de patients infectés',
+                data: Object.values({{ tranches_age|safe }}),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 
-                var myIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div class='circle-marker' style='background-color: ${markerColor};'></div>`, // Couleur basée sur le statut
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                });
 
-                var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';
 
-                var marker = L.marker(centroid, { icon: myIcon })
-                    .bindPopup(` Localité : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Âge: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`)
-                    .on('mouseover', function () {
-                        this.bindTooltip(` Localité : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Âge: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`, {
-                            direction: 'top',
-                            offset: [0, -10],
-                            opacity: 0.8
-                        }).openTooltip();
-                    })
-                    .on('mouseout', function () {
-                        this.closeTooltip();
+    <script>
+        var coteDIvoireBounds = [
+            [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
+            [10.73, -2.51] // Nord-Est (Point le plus au nord)
+        ];
+
+        var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie
+        var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie
+
+        var map = L.map('map', {
+            maxBounds: coteDIvoireBounds, // Définir les limites maximales
+            maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords
+            minZoom: 7 // Définir le zoom minimum
+        }).setView([7.54, -5.55], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
+        }).addTo(map);
+
+        var markers = L.markerClusterGroup(); // Initialiser le groupe de clusters pour les marqueurs
+
+        function getMarkerColor(patient) {
+            if (patient.decede) {
+                return 'black'; // Décédé
+            } else if (patient.gueris) {
+                return 'green'; // Guéri
+            } else if (patient.echantillons && patient.echantillons.some(e => e.resultat === true)) {
+                return 'red'; // Positif
+            } else {
+                return 'orange'; // Autres
+            }
+        }
+
+        let markers_points = [];
+
+        function addMarker(patient) {
+            if (patient.commune && patient.commune.geom) {
+                try {
+                    var cleanedWKT = patient.commune.geom.replace(/^SRID=\d+;/, '');
+                    var geoJSON = Terraformer.WKT.parse(cleanedWKT);
+                    var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
+
+                    var markerColor = getMarkerColor(patient);
+
+                    var myIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div class='circle-marker' style='background-color: ${markerColor};'></div>`, // Couleur basée sur le statut
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
                     });
 
-                markers.addLayer(marker);
+                    var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';
 
-            } catch (error) {
-                console.error(`Erreur lors de l'analyse GeoJSON pour le patient : ${patient.nom} ${patient.prenoms}`, error);
+                    var marker = L.marker(centroid, {icon: myIcon})
+                        .bindPopup(` Localité : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Âge: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`)
+                        .on('mouseover', function () {
+                            this.bindTooltip(` Localité : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Âge: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`, {
+                                direction: 'top',
+                                offset: [0, -10],
+                                opacity: 0.8
+                            }).openTooltip();
+                        })
+                        .on('mouseout', function () {
+                            this.closeTooltip();
+                        });
+
+                    markers.addLayer(marker);
+
+                } catch (error) {
+                    console.error(`Erreur lors de l'analyse GeoJSON pour le patient : ${patient.nom} ${patient.prenoms}`, error);
+                }
+            } else {
+                console.error(`Données de localisation invalides pour le patient : ${patient.nom} ${patient.prenoms}`);
             }
-        } else {
-            console.error(`Données de localisation invalides pour le patient : ${patient.nom} ${patient.prenoms}`);
         }
-    }
 
-    function calculateAge(date_naissance) {
-        var today = new Date();
-        var birthDate = new Date(date_naissance);
-        var age = today.getFullYear() - birthDate.getFullYear();
-        var monthDifference = today.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
+        function calculateAge(date_naissance) {
+            var today = new Date();
+            var birthDate = new Date(date_naissance);
+            var age = today.getFullYear() - birthDate.getFullYear();
+            var monthDifference = today.getMonth() - birthDate.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
         }
-        return age;
-    }
 
-    let patientgroup = L.layerGroup();
-    let district = L.layerGroup(); // Groupement des polygones des districts
-    var geoLayer = L.geoJSON().addTo(district);
+        let patientgroup = L.layerGroup();
+        let district = L.layerGroup(); // Groupement des polygones des districts
+        var geoLayer = L.geoJSON().addTo(district);
 
-    // Style par défaut pour les polygones
-    var myStyle = {
-        color: "red",
-        weight: 1,
-        opacity: 0.80,
-        fillColor: '#FF6347'
-    };
+        // Style par défaut pour les polygones
+        var myStyle = {
+            color: "red",
+            weight: 1,
+            opacity: 0.80,
+            fillColor: '#FF6347'
+        };
 
-    geoLayer.setStyle(myStyle);
+        geoLayer.setStyle(myStyle);
 
-    // Récupération des données de synthèse des districts et ajout à la carte
-    fetch("/epidemie/api/synthese-district/?maladie_id={{ epidemie_id }}")
-        .then(response => response.json())
-        .then(synthese => {
-            console.log(synthese);
-            synthese.forEach((s) => {
-                console.log(s.district_geojson);
-                L.geoJSON(s.district_geojson, {
-                    style: {
-                        color: "#ff0014",
-                        weight: 1,
-                        opacity: 1
+        // Récupération des données de synthèse des districts et ajout à la carte
+        fetch("/epidemie/api/synthese-district/?maladie_id={{ epidemie_id }}")
+            .then(response => response.json())
+            .then(synthese => {
+                console.log(synthese);
+                synthese.forEach((s) => {
+                    console.log(s.district_geojson);
+                    L.geoJSON(s.district_geojson, {
+                        style: {
+                            color: "#ff0014",
+                            weight: 1,
+                            opacity: 1
+                        }
+                    }).bindPopup(`District: ${s.nom_district} <br> Cas suspect: ${s.nbre_cas_suspects} <br> Cas positifs : ${s.cas_positif} <br> Cas Négatifs : ${s.cas_negatif}`)
+                        .addTo(district);
+                });
+
+                map.addLayer(district); // Ajouter les districts par défaut
+            })
+            .catch(error => console.error('Erreur lors de la récupération des données des districts :', error));
+
+        // Récupération des données des patients positifs en utilisant l'ID de l'épidémie
+        fetch(`/epidemie/api/patient/?epidemie_id=${epidemieId}`)
+            .then(response => response.json())
+            .then(patients => {
+                var regions = {};
+
+                patients.forEach(patient => {
+                    var regionName = patient.commune && patient.commune.district && patient.commune.district.region ? patient.commune.district.region.name : 'Inconnu';
+                    var districtName = patient.commune && patient.commune.district ? patient.commune.district.nom : 'Inconnu';
+                    var communeName = patient.commune ? patient.commune.name : 'Inconnu';
+
+                    if (!regions[regionName]) {
+                        regions[regionName] = {
+                            name: regionName,
+                            districts: {}
+                        };
                     }
-                }).bindPopup(`District: ${s.nom_district} <br> Cas suspect: ${s.nbre_cas_suspects} <br> Cas positifs : ${s.cas_positif} <br> Cas Négatifs : ${s.cas_negatif}`)
-                    .addTo(district);
-            });
 
-            map.addLayer(district); // Ajouter les districts par défaut
-        })
-        .catch(error => console.error('Erreur lors de la récupération des données des districts :', error));
+                    if (!regions[regionName].districts[districtName]) {
+                        regions[regionName].districts[districtName] = {
+                            name: districtName,
+                            communes: {}
+                        };
+                    }
 
-    // Récupération des données des patients positifs en utilisant l'ID de l'épidémie
-    fetch(`/epidemie/api/patient/?epidemie_id=${epidemieId}`)
-        .then(response => response.json())
-        .then(patients => {
-            var regions = {};
+                    if (!regions[regionName].districts[districtName].communes[communeName]) {
+                        regions[regionName].districts[districtName].communes[communeName] = {
+                            name: communeName,
+                            patients: []
+                        };
+                    }
 
-            patients.forEach(patient => {
-                var regionName = patient.commune && patient.commune.district && patient.commune.district.region ? patient.commune.district.region.name : 'Inconnu';
-                var districtName = patient.commune && patient.commune.district ? patient.commune.district.nom : 'Inconnu';
-                var communeName = patient.commune ? patient.commune.name : 'Inconnu';
+                    regions[regionName].districts[districtName].communes[communeName].patients.push(patient);
+                });
 
-                if (!regions[regionName]) {
-                    regions[regionName] = {
-                        name: regionName,
-                        districts: {}
-                    };
-                }
-
-                if (!regions[regionName].districts[districtName]) {
-                    regions[regionName].districts[districtName] = {
-                        name: districtName,
-                        communes: {}
-                    };
-                }
-
-                if (!regions[regionName].districts[districtName].communes[communeName]) {
-                    regions[regionName].districts[districtName].communes[communeName] = {
-                        name: communeName,
-                        patients: []
-                    };
-                }
-
-                regions[regionName].districts[districtName].communes[communeName].patients.push(patient);
-            });
-
-            Object.values(regions).forEach(region => {
-                Object.values(region.districts).forEach(district => {
-                    Object.values(district.communes).forEach(commune => {
-                        commune.patients.forEach(patient => {
-                            addMarker(patient);
+                Object.values(regions).forEach(region => {
+                    Object.values(region.districts).forEach(district => {
+                        Object.values(district.communes).forEach(commune => {
+                            commune.patients.forEach(patient => {
+                                addMarker(patient);
+                            });
                         });
                     });
                 });
-            });
 
-            map.addLayer(markers); // Ajouter les marqueurs au cluster group
-            patientgroup.addLayer(markers);
-        })
-        .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));
+                map.addLayer(markers); // Ajouter les marqueurs au cluster group
+                patientgroup.addLayer(markers);
+            })
+            .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));
 
-    map.addLayer(district); // Afficher les districts par défaut
-    map.addLayer(patientgroup);
+        map.addLayer(district); // Afficher les districts par défaut
+        map.addLayer(patientgroup);
 
-    var overlayMaps = {
-        "District": district,
-        "Patients": patientgroup
-    };
+        var overlayMaps = {
+            "District": district,
+            "Patients": patientgroup
+        };
 
-    var layerControl = L.control.layers(overlayMaps).addTo(map);
+        var layerControl = L.control.layers(overlayMaps).addTo(map);
 
-</script>
+    </script>
 
     <style>
         /* Style pour le marqueur circulaire */

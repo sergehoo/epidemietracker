@@ -5,12 +5,14 @@ from django.core.management import BaseCommand
 from faker import Faker
 from epidemie.models import City, Employee, Commune, Patient, Epidemie, Echantillon, PreleveMode
 
+
 def patient_code():
     WordStack = ['MD', 'AC', 'NG', 'SO', 'SD', 'IP', 'CI', 'BC']
     random_str = random.choice(WordStack)
     current_date = datetime.now().strftime("%Y%m%d")
     traking = (random_str + str(random.randrange(0, 999999, 1)) + current_date + int(datetime.now().microsecond))
     return traking
+
 
 class Command(BaseCommand):
     help = 'Populate the database with fake data for testing in Côte d\'Ivoire'
@@ -22,12 +24,13 @@ class Command(BaseCommand):
         communes = Commune.objects.all()
 
         if not communes.exists():
-            self.stdout.write(self.style.ERROR("Aucune commune n'a été trouvée. Veuillez d'abord charger les données des communes."))
+            self.stdout.write(
+                self.style.ERROR("Aucune commune n'a été trouvée. Veuillez d'abord charger les données des communes."))
             return
 
         employee = Employee.objects.first()
 
-        for _ in range(10):
+        for _ in range(300):
             commune = random.choice(communes)
             patient = Patient.objects.create(
                 # code_patient=f'HU{random.randrange(0, 99999999, 2) + int(datetime.now().microsecond)}',
@@ -64,7 +67,7 @@ class Command(BaseCommand):
                 date_collect=fake.date_time_this_year(),
                 site_collect=commune.name,
                 agent_collect=employee,
-                resultat=random.choice(['POSITIF', 'NEGATIF']),
+                resultat=random.choice([True, False]),
                 linked=random.choice([True, False]),
                 used=random.choice([True, False])
             )

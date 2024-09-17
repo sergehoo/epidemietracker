@@ -1,3 +1,6 @@
+{% load unicorn %}
+{% load static %}
+{% csrf_token %}
    <div class="nk-header nk-header-fixed is-light">
                     <div class="container-fluid">
                         <div class="nk-header-wrap">
@@ -5,26 +8,16 @@
                                 <a href="#" class="nk-nav-toggle nk-quick-nav-icon" data-target="sidebarMenu"><em class="icon ni ni-menu"></em></a>
                             </div>
 
-                            <div class="nk-header-news d-none d-xl-block ">
-                                <div class="nk-news-list">
-                                    <a class="nk-news-item" href="#" target="_blank">
-                                        <div class="nk-news-icon">
-                                            <em class="icon ni ni-card-view"></em>
-                                        </div>
-                                        <div class="nk-news-text ">
-                                            <p>Zone de notification <span>Consulter... ...</span></p>
-                                            <em class="icon ni ni-external"></em>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div><!-- .nk-header-news -->
+                            <em class="icon ni ni-card-view text-primary"></em>
+                            {% unicorn 'bannerinfos' %}
+               <!-- .nk-header-news -->
                             <div class="nk-header-tools">
                                 <ul class="nk-quick-nav">
                                     <li class="dropdown user-dropdown">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                             <div class="user-toggle">
                                                 <div class="user-avatar sm">
-                                                    <em class="icon ni ni-user-alt"></em>
+                                                    <em class="icon ni ni-opt-dot-alt"></em>
                                                 </div>
                                             </div>
                                         </a>
@@ -42,7 +35,25 @@
                                             </div>
                                             <div class="dropdown-inner">
                                                 <ul class="link-list">
-                                                    <li><a href="#"><em class="icon ni ni-user-alt"></em><span>Profile</span></a></li>
+                                                
+                                                    <li>
+                                                        <a href="{% url 'landing' %}" class="nk-menu mb-3">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-home"></em></span>
+                                            <span class="nk-menu-text">Landing</span>
+                                            <span class="nk-menu-tooltip" title="Landing"></span>
+                                        </a>
+                                                    </li>
+                                                    <li> <a href="{% url 'patientlist' %}" class="nk-menu mb-3">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-users"></em></span>
+                                            <span class="nk-menu-text">Patients</span>
+                                            <span class="nk-menu-tooltip" title="Patients"></span>
+                                        </a></li>
+                                                    <li><a href="{% url 'echantillons' %}" class="nk-menu mb-3">
+                                            <span class="nk-menu-icon"><em class="icon ni ni-archive"></em></span>
+                                            <span class="nk-menu-text">Echantillons</span>
+                                            <span class="nk-menu-tooltip" title="Echantillons"></span>
+                                        </a></li>
+                                                        <li><a href="#"><em class="icon ni ni-user-alt"></em><span>Profile</span></a></li>
                                                     <li><a href="#"><em class="icon ni ni-setting-alt"></em><span>Parametre du compte </span></a></li>
                                                 </ul>
                                             </div>

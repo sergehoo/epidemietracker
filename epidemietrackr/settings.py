@@ -34,10 +34,11 @@ DEBUG = True
 # ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
 
-ALLOWED_HOSTS = ['https://veillesanitaire.com', 'veillesanitaire.com','www.veillesanitaire.com', 'http://veillesanitaire.com', '*']
-CSRF_TRUSTED_ORIGINS = ['https://veillesanitaire.com','http://veillesanitaire.com']
+ALLOWED_HOSTS = ['https://veillesanitaire.com', 'veillesanitaire.com', 'www.veillesanitaire.com',
+                 'http://veillesanitaire.com', '*']
+CSRF_TRUSTED_ORIGINS = ['https://veillesanitaire.com', 'http://veillesanitaire.com']
 CORS_ALLOWED_ORIGINS = [
-    'https://veillesanitaire.com', 'veillesanitaire.com','www.veillesanitaire.com', 'https://veillesanitaire.com'
+    'https://veillesanitaire.com', 'veillesanitaire.com', 'www.veillesanitaire.com', 'https://veillesanitaire.com'
 ]
 # Application definition
 
@@ -60,8 +61,42 @@ INSTALLED_APPS = [
     'import_data',
     'tinymce',
     'import_export',
+    'django_unicorn',
+    'guardian',
+    'rolepermissions',
+    'slick_reporting',
+    'crispy_forms',
+    'crispy_bootstrap4',
+    'mathfilters',
 
 ]
+UNICORN = {
+    "DEBUG": True,  # Active le mode debug pour Unicorn
+}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+CRISPY_TEMPLATE_PACK = "bootstrap4"
+SLICK_REPORTING_FORM_MEDIA = {
+    "css": {
+        "all": (
+            "https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.css",
+            "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css",
+        )
+    },
+    "js": (
+        "https://code.jquery.com/jquery-3.3.1.slim.min.js",
+        "https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js",
+        "https://code.highcharts.com/highcharts.js",
+    ),
+}
+SLICK_REPORT = {
+    'DEFAULT_REPORT_CLASS': 'slick_report.reports.Report',
+    'DEFAULT_REPORT_TEMPLATE': 'slick_report/report.html',
+}
+
+ROLEPERMISSIONS_MODULE = 'epidemie.roles'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -151,9 +186,9 @@ DATABASES = {
 #     }
 # }
 #gdal-config --libs >---commande linux ou mac os
-# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/Cellar/gdal/3.9.1_1/lib/libgdal.dylib')
-# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/Cellar/geos/3.12.2/lib/libgeos_c.dylib')
 
+# GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')
+# GEOS_LIBRARY_PATH = os.getenv('GEOS_LIBRARY_PATH', '/opt/homebrew/opt/geos/lib/libgeos_c.dylib')
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -211,11 +246,13 @@ AUTHENTICATION_BACKENDS = [
 
     # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
-
     # `allauth` specific authentication methods, such as login by email
     'allauth.account.auth_backends.AuthenticationBackend',
+    'guardian.backends.ObjectPermissionBackend',
 
 ]
+# ANONYMOUS_USER_ID = -1
+
 
 LOGOUT_REDIRECT_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'landing'

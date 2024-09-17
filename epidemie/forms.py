@@ -1,7 +1,8 @@
 from django import forms
 from django.utils.safestring import mark_safe
+from tinymce.widgets import TinyMCE
 
-from epidemie.models import Patient, Commune
+from epidemie.models import Patient, Commune, Information
 
 SEXE_CHOICES = [
     ('Homme', 'Homme'),
@@ -360,6 +361,8 @@ situation_matrimoniales_choices = [
     ('Veuf', 'Veuf'),
     ('Autre', 'Autre'),
 ]
+
+
 class PatientForm(forms.ModelForm):
     numeros_cmu = forms.CharField(required=False, label="N° CMU ",
                                   widget=forms.TextInput(
@@ -369,23 +372,27 @@ class PatientForm(forms.ModelForm):
     prenoms = forms.CharField(label="Prenom",
                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex:Serge'}))
 
-    contact = forms.CharField(label="Contact",widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex:0701020304'}))
+    contact = forms.CharField(label="Contact",
+                              widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex:0701020304'}))
 
-    lieu_naissance = forms.CharField(label="Lieu de naissance",widget=forms.TextInput(attrs={'class': 'form-control'}))
+    lieu_naissance = forms.CharField(label="Lieu de naissance", widget=forms.TextInput(attrs={'class': 'form-control'}))
     date_naissance = forms.DateField(label="Date de naissance",
                                      widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'Date'}))
     genre = forms.ChoiceField(choices=SEXE_CHOICES, label="Sexe", widget=forms.Select(attrs={'class': 'form-control'}))
-    situation_matrimoniale = forms.ChoiceField(label="Situation Matrimoniale",choices=situation_matrimoniales_choices, widget=forms.Select(attrs={'class': 'form-control select2 form-select ', 'data-search': 'on'}))
+    situation_matrimoniale = forms.ChoiceField(label="Situation Matrimoniale", choices=situation_matrimoniales_choices,
+                                               widget=forms.Select(attrs={'class': 'form-control select2 form-select ',
+                                                                          'data-search': 'on'}))
     nationalite = forms.ChoiceField(choices=NATIONALITE_CHOICES, label="Nationalité", widget=forms.Select(
         attrs={'class': 'form-control select2 form-select ', 'data-search': 'on'}))
-    profession = forms.CharField(label="Profession",widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex:Medecin'}))
+    profession = forms.CharField(label="Profession",
+                                 widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex:Medecin'}))
 
-    nbr_enfants = forms.IntegerField(label="Nombre d'Enfant",widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    nbr_enfants = forms.IntegerField(label="Nombre d'Enfant", widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
     groupe_sanguin = forms.ChoiceField(choices=Goupe_sanguin_choices, label="Groupe Sanguin", widget=forms.Select(
         attrs={'class': 'form-control select2 form-select ', 'data-search': 'on'}))
 
-    niveau_etude = forms.CharField(label="Niveau d'etude",widget=forms.TextInput(attrs={'class': 'form-control'}))
+    niveau_etude = forms.CharField(label="Niveau d'etude", widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     employeur = forms.CharField(label="Employeur",
                                 widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex:Ministere'}))
@@ -425,3 +432,15 @@ class PatientForm(forms.ModelForm):
             if field.required:
                 # Ajoutez le signe '*' à l'étiquette du champ
                 field.label = mark_safe(f"{field.label} <span style='color: red;'>*</span>")
+
+
+class InfoscreateForm(forms.ModelForm):
+    titre = forms.CharField(label="Titre",
+                          widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex:Titre de l\'information '}))
+    message = forms.CharField(required=True, label="Contenu",
+                                       widget=TinyMCE(attrs={'class': 'form-control', 'cols': 80, 'rows': 5}))
+
+    class Meta:
+        model = Information
+        fields = '__all__'
+        exclude = ('auteur','date_added')

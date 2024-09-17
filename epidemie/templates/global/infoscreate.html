@@ -1,0 +1,446 @@
+{% load static %}
+{% load humanize %}
+{% load unicorn %}
+<!DOCTYPE html>
+<html lang="zxx" class="js">
+
+<head>
+    <base href="../">
+    <meta charset="utf-8">
+    <meta name="author">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <!-- Fav Icon  -->
+    <link rel="shortcut icon" href="{% static 'images/logoMSHPCMU.svg' %}">
+    <!-- Page Title  -->
+    <title>EPIDEMIE Tracker & Dashboard</title>
+    <!-- StyleSheets  -->
+    <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
+    <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css">
+    <style>
+        #map {
+            width: 100%;
+            height: 600px;
+        }
+    </style>
+    <script>
+            // Initialiser TinyMCE
+            tinymce.init({
+                selector: 'textarea#id_analysis_results',  // Sélecteur du champ analysis_results
+                height: 500,  // Hauteur de l'éditeur
+                plugins: [
+                    'advlist autolink lists link image charmap print preview anchor',
+                    'searchreplace visualblocks code fullscreen',
+                    'insertdatetime media table paste code help wordcount'
+                ],
+                toolbar: 'undo redo | formatselect | ' +
+                    'bold italic backcolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+            });
+        </script>
+</head>
+
+<body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
+    <div class="nk-app-root">
+        <!-- main @s -->
+        <div class="nk-main ">
+            <!-- sidebar @s -->
+            {% include 'dingue/layouts/sidebarre.html' %}
+             <!-- sidebar @e -->
+            <!-- wrap @s -->
+            <div class="nk-wrap ">
+                <!-- main header @s -->
+                <div class="nk-header nk-header-fluid nk-header-fixed nk-header-onlymobile is-light">
+                    <div class="container-fluid">
+                        <div class="nk-header-wrap">
+                            <div class="nk-header-brand">
+                                <a href="#" class="logo-link">
+                                    <img class="logo-light logo-img" src="./images/logo.png" srcset="./images/logo2x.png 2x" alt="logo">
+                                    <img class="logo-dark logo-img" src="./images/logo-dark.png" srcset="./images/logo-dark2x.png 2x" alt="logo-dark">
+                                </a>
+                            </div>
+                            <div class="nk-menu-trigger ml-auto mr-n1">
+                                <a href="#" class="nk-nav-toggle nk-quick-nav-icon" data-target="sidebarMenu"><em class="icon ni ni-menu"></em></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- main header @e -->
+              {% include 'global/layouts/navhead.html' %}
+                <!-- content @s -->
+                <div class="nk-content ">
+                    <div class="container-fluid">
+                        <div class="nk-content-body">
+                            <div class="nk-block-head">
+                                <div class=" ">
+                                    <div class="">
+                                        <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"> </span> {{ epidemie.nom }} Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoCI.png' %}" width="50"></h5>
+                                    </div>
+                                </div>
+                            </div><!-- .nk-block-head -->
+                            <div class="nk-block">
+                                <div class="col-lg-7">
+                                    <form method="post">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                        <button  class=" btn btn-danger" type="reset">Annuler</button>
+                                        <button class="btn btn-primary" type="submit">Creer </button>
+                                        </form>
+
+                                </div>
+
+                            </div><!-- .nk-block -->
+                        </div>
+                    </div>
+                </div>
+                <!-- content @e -->
+                <!-- footer @s -->
+                <div class="nk-footer d-md-none">
+                    <div class="container-fluid">
+                        <div class="nk-footer-wrap gy-1 gx-4">
+                            <div class="nk-footer-links">
+
+                            </div>
+                            <div class="nk-footer-copyright"> &copy; Copyright 2024, <a href="www.afriqconsulting.com">Afriqconsulting</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- footer @e -->
+            </div>
+            <!-- wrap @e -->
+        </div>
+        <!-- main @e -->
+    </div>
+    <!-- app-root @e -->
+    <!-- Modal About -->
+    <div class="modal fade" tabindex="-1" id="covid-about">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <a href="#" class="close" data-dismiss="modal" aria-label="Close">
+                    <em class="icon ni ni-cross"></em>
+                </a>
+                <div class="modal-body">
+                    <h5 class="title mb-3">About this data</h5>
+                    <h6 class="lead-text text-primary">It changes rapidly</h6>
+                    <p>This data changes rapidly, so what’s shown may be out of date. Table totals may not always represent an accurate sum. Information about reported cases is also available on the <a href="#">World Health Organization</a> & <a href="#">WorldoMeters.info</a> site.</p>
+                    <h6 class="lead-text text-primary">It doesn’t include all cases</h6>
+                    <p>Confirmed cases aren’t all cases. They only include people who tested positive. Testing rules and availability vary by country.</p>
+                    <div class="note-text">Updated: March 27, 2020 12:30 (GMT +6)</div>
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Feedback -->
+    <div class="modal fade" tabindex="-1" id="covid-feedback">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="justify-between gx-5 mb-3">
+                        <div>
+                            <h6 class="modal-title text-primary">What kind of feedback do you have about this tool?</h6>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-icon btn-trigger mr-n2 mt-n1" data-dismiss="modal" aria-label="Close">
+                                <em class="icon ni ni-cross"></em>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="btn-list-vr g-2">
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-report"></em> <span>Report an issue</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-bulb"></em> <span>Share an idea</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-question-alt"></em> <span>Give a compliment</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                        <li>
+                            <a href="#" data-dismiss="modal" data-toggle="modal" data-target="#covid-feedback-form" class="btn btn-round btn-indc btn-lighter"><em class="icon text-primary ni ni-policy"></em> <span>Legal or privacy concern</span><em class="indc icon ni ni-chevron-right"></em></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Feedback Form -->
+    <div class="modal fade" tabindex="-1" id="covid-feedback-form">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="justify-between gx-5 mb-1">
+                        <div>
+                            <h6 class="modal-title text-primary">Tell us about the issue</h6>
+                        </div>
+                        <div>
+                            <a href="#" class="btn btn-icon btn-trigger mr-n2 mt-n1" data-dismiss="modal" aria-label="Close">
+                                <em class="icon ni ni-cross"></em>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light justify-content-center py-1">
+                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JavaScript -->
+    <script src="{% static 'assets/js/bundle.js' %}"></script>
+    <script src="{% static 'assets/js/scripts.js' %}"></script>
+{#    <script src="{% static 'assets/js/libs/jqvmap.js' %}"></script>#}
+{#    <script src="{% static 'assets/js/chart-covid.js' %}"></script>#}
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/terraformer@1.0.7"></script>
+    <script src="https://unpkg.com/terraformer-wkt-parser@1.1.2"></script>
+
+<script>
+    var coteDIvoireBounds = [
+        [4.35, -8.60], // Sud-Ouest (Point le plus au sud)
+        [10.73, -2.51] // Nord-Est (Point le plus au nord)
+    ];
+
+    var epidemieId = '{{ epidemie_id }}'; // ID de l'épidémie
+    var epidemieNom = '{{ epidemie_nom }}'; // Nom de l'épidémie
+
+    var map = L.map('map', {
+        maxBounds: coteDIvoireBounds, // Définir les limites maximales
+        maxBoundsViscosity: 1.0, // Contrôle la "viscosité" des bords
+        minZoom: 7 // Définir le zoom minimum
+    }).setView([7.54, -5.55], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.afriqconsulting.com">AfriqConsulting</a> EPIDEMITRACKER'
+    }).addTo(map);
+
+    var markers = L.markerClusterGroup(); // Initialiser le groupe de clusters pour les marqueurs
+
+    function getMarkerColor(patient) {
+        if (patient.decede) {
+            return 'black'; // Décédé
+        } else if (patient.gueris) {
+            return 'green'; // Guéri
+        } else if (patient.echantillons && patient.echantillons.some(e => e.resultat === 'POSITIF')) {
+            return 'red'; // Positif
+        } else {
+            return 'orange'; // Autres
+        }
+    }
+
+    let markers_points = [];
+
+    function addMarker(patient) {
+        if (patient.commune && patient.commune.geom) {
+            try {
+                var cleanedWKT = patient.commune.geom.replace(/^SRID=\d+;/, '');
+                var geoJSON = Terraformer.WKT.parse(cleanedWKT);
+                var centroid = L.geoJSON(geoJSON).getBounds().getCenter();
+
+                var markerColor = getMarkerColor(patient);
+
+                var myIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class='circle-marker' style='background-color: ${markerColor};'></div>`, // Couleur basée sur le statut
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                var age = patient.date_naissance ? calculateAge(patient.date_naissance) : 'Inconnu';
+
+                var marker = L.marker(centroid, { icon: myIcon })
+                    .bindPopup(` Localité : ${patient.commune.name}<br> <b>Code Patient : ${patient.code_patient}</b><br>Âge: ${age} ans <br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`)
+                    .on('mouseover', function () {
+                        this.bindTooltip(` Localité : ${patient.commune.name}<br> Code Patient :${patient.code_patient}<br>Âge: ${age} ans<br>Sexe: ${patient.genre || 'Inconnu'}<br>Statut: ${patient.status || 'Inconnu'}`, {
+                            direction: 'top',
+                            offset: [0, -10],
+                            opacity: 0.8
+                        }).openTooltip();
+                    })
+                    .on('mouseout', function () {
+                        this.closeTooltip();
+                    });
+
+                markers.addLayer(marker);
+
+            } catch (error) {
+                console.error(`Erreur lors de l'analyse GeoJSON pour le patient : ${patient.nom} ${patient.prenoms}`, error);
+            }
+        } else {
+            console.error(`Données de localisation invalides pour le patient : ${patient.nom} ${patient.prenoms}`);
+        }
+    }
+
+    function calculateAge(date_naissance) {
+        var today = new Date();
+        var birthDate = new Date(date_naissance);
+        var age = today.getFullYear() - birthDate.getFullYear();
+        var monthDifference = today.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    let patientgroup = L.layerGroup();
+    let district = L.layerGroup(); // Groupement des polygones des districts
+    var geoLayer = L.geoJSON().addTo(district);
+
+    // Style par défaut pour les polygones
+    var myStyle = {
+        color: "red",
+        weight: 1,
+        opacity: 0.80,
+        fillColor: '#FF6347'
+    };
+
+    geoLayer.setStyle(myStyle);
+
+    // Récupération des données de synthèse des districts et ajout à la carte
+    fetch("/epidemie/api/synthese-district/?maladie_id={{ epidemie_id }}")
+        .then(response => response.json())
+        .then(synthese => {
+            console.log(synthese);
+            synthese.forEach((s) => {
+                console.log(s.district_geojson);
+                L.geoJSON(s.district_geojson, {
+                    style: {
+                        color: "#ff0014",
+                        weight: 1,
+                        opacity: 1
+                    }
+                }).bindPopup(`District: ${s.nom_district} <br> Cas suspect: ${s.nbre_cas_suspects} <br> Cas positifs : ${s.cas_positif} <br> Cas Négatifs : ${s.cas_negatif}`)
+                    .addTo(district);
+            });
+
+            map.addLayer(district); // Ajouter les districts par défaut
+        })
+        .catch(error => console.error('Erreur lors de la récupération des données des districts :', error));
+
+    // Récupération des données des patients positifs en utilisant l'ID de l'épidémie
+    fetch(`/epidemie/api/patient/?epidemie_id=${epidemieId}`)
+        .then(response => response.json())
+        .then(patients => {
+            var regions = {};
+
+            patients.forEach(patient => {
+                var regionName = patient.commune && patient.commune.district && patient.commune.district.region ? patient.commune.district.region.name : 'Inconnu';
+                var districtName = patient.commune && patient.commune.district ? patient.commune.district.nom : 'Inconnu';
+                var communeName = patient.commune ? patient.commune.name : 'Inconnu';
+
+                if (!regions[regionName]) {
+                    regions[regionName] = {
+                        name: regionName,
+                        districts: {}
+                    };
+                }
+
+                if (!regions[regionName].districts[districtName]) {
+                    regions[regionName].districts[districtName] = {
+                        name: districtName,
+                        communes: {}
+                    };
+                }
+
+                if (!regions[regionName].districts[districtName].communes[communeName]) {
+                    regions[regionName].districts[districtName].communes[communeName] = {
+                        name: communeName,
+                        patients: []
+                    };
+                }
+
+                regions[regionName].districts[districtName].communes[communeName].patients.push(patient);
+            });
+
+            Object.values(regions).forEach(region => {
+                Object.values(region.districts).forEach(district => {
+                    Object.values(district.communes).forEach(commune => {
+                        commune.patients.forEach(patient => {
+                            addMarker(patient);
+                        });
+                    });
+                });
+            });
+
+            map.addLayer(markers); // Ajouter les marqueurs au cluster group
+            patientgroup.addLayer(markers);
+        })
+        .catch(error => console.error('Erreur lors de la récupération des données des patients :', error));
+
+    map.addLayer(district); // Afficher les districts par défaut
+    map.addLayer(patientgroup);
+
+    var overlayMaps = {
+        "District": district,
+        "Patients": patientgroup
+    };
+
+    var layerControl = L.control.layers(overlayMaps).addTo(map);
+
+</script>
+
+    <style>
+        /* Style pour le marqueur circulaire */
+        .circle-marker {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            border: 3px dashed white;
+            animation: dash 2s linear infinite;
+        }
+
+        /* Animation des bordures en pointillés */
+        @keyframes dash {
+            0% {
+                border-style: dashed;
+                border-width: 3px;
+            }
+            50% {
+                border-style: dashed;
+                border-width: 3px;
+                transform: rotate(180deg);
+            }
+            100% {
+                border-style: dashed;
+                border-width: 3px;
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+<script>
+            // Initialiser TinyMCE
+            tinymce.init({
+                selector: 'textarea#id_analysis_results',  // Sélecteur du champ analysis_results
+                height: 500,  // Hauteur de l'éditeur
+                plugins: [
+                    'advlist autolink lists link image charmap print preview anchor',
+                    'searchreplace visualblocks code fullscreen',
+                    'insertdatetime media table paste code help wordcount'
+                ],
+                toolbar: 'undo redo | formatselect | ' +
+                    'bold italic backcolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+            });
+        </script>
+</body>
+
+</html>

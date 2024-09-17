@@ -33,23 +33,29 @@
                                             <div class="card-inner">
 
                                                 <form method="POST" action="{% url 'import_echantillons' %}" enctype="multipart/form-data" onsubmit="return validateFileSelection()">
-    {% csrf_token %}
-    {% if temp_file_name %}
-        <input type="hidden" name="temp_file_name" value="{{ temp_file_name }}">
-        <button type="submit" name="confirm" class="btn btn-success">Confirmer l'importation</button>
-    {% else %}
-        <div id="progress-container" style="display: none;">
-            <div id="progress-bar" style="width: 0%; height: 20px; background-color: #009dff; text-align: center; color: white;">
-                0%
-            </div>
-        </div>
-        <div class="form-group">
-            <label for="file">Upload fichier format (xls, csv):</label>
-            <input type="file" name="file" class="form-control" id="file-input" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Prévisualiser</button>
-    {% endif %}
-</form>
+                                                    {% csrf_token %}
+                                                    {% if temp_file_name %}
+                                                        <input type="hidden" name="temp_file_name"
+                                                               value="{{ temp_file_name }}">
+                                                        <button type="submit" name="confirm" class="btn btn-success">
+                                                            Confirmer l'importation
+                                                        </button>
+                                                    {% else %}
+                                                        <div id="progress-container" style="display: none;">
+                                                            <div id="progress-bar"
+                                                                 style="width: 0%; height: 20px; background-color: #009dff; text-align: center; color: white;">
+                                                                0%
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="file">Upload fichier format (xls, csv):</label>
+                                                            <input type="file" name="file" class="form-control"
+                                                                   id="file-input" required>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary">Prévisualiser
+                                                        </button>
+                                                    {% endif %}
+                                                </form>
 
                                                 <script>
                                                     function validateFileSelection() {
@@ -89,6 +95,46 @@
                                                         }, 100);
                                                     }
                                                 </script>
+
+
+{#                                                <script>#}
+{#                                                    function validateFileSelection() {#}
+{#                                                        var fileInput = document.getElementById('file-input');#}
+{#                                                        var filePath = fileInput.value;#}
+{#                                                        var allowedExtensions = /(\.xlsx|\.xls|\.csv)$/i;#}
+{##}
+{#                                                        if (fileInput.files.length === 0) {#}
+{#                                                            alert('Veuillez sélectionner un fichier à importer.');#}
+{#                                                            return false;#}
+{#                                                        }#}
+{##}
+{#                                                        if (!allowedExtensions.exec(filePath)) {#}
+{#                                                            alert('Veuillez sélectionner un fichier valide avec une extension .xlsx, .xls ou .csv.');#}
+{#                                                            fileInput.value = '';#}
+{#                                                            return false;#}
+{#                                                        }#}
+{##}
+{#                                                        // Affiche la barre de progression#}
+{#                                                        document.getElementById('progress-container').style.display = 'block';#}
+{#                                                        // Simule la progression#}
+{#                                                        simulateProgressBar();#}
+{#                                                        return true;#}
+{#                                                    }#}
+{##}
+{#                                                    function simulateProgressBar() {#}
+{#                                                        var progressBar = document.getElementById('progress-bar');#}
+{#                                                        var width = 0;#}
+{#                                                        var interval = setInterval(function () {#}
+{#                                                            if (width >= 100) {#}
+{#                                                                clearInterval(interval);#}
+{#                                                            } else {#}
+{#                                                                width++;#}
+{#                                                                progressBar.style.width = width + '%';#}
+{#                                                                progressBar.innerHTML = width + '%';#}
+{#                                                            }#}
+{#                                                        }, 100);#}
+{#                                                    }#}
+{#                                                </script>#}
                                             </div>
                                         </div><!-- .card-preview -->
 
@@ -127,9 +173,7 @@
                                                         {% endfor %}
                                                         </tbody>
                                                     </table>
-                                                    <button type="submit" name="confirm" class="btn btn-success">
-                                                        Confirmer l'importation
-                                                    </button>
+                                                    
                                                     <button type="button" class="btn btn-secondary"
                                                             onclick="window.history.back()">Annuler
                                                     </button>

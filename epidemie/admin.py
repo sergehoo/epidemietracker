@@ -8,7 +8,7 @@ from import_export.widgets import ForeignKeyWidget
 from leaflet.forms.widgets import LeafletWidget
 
 from epidemie.models import HealthRegion, City, EpidemicCase, DistrictSanitaire, Epidemie, Echantillon, Patient, \
-    Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict
+    Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict, Information, Alert
 from epidemie.ressources import SyntheseDistrictResource
 
 admin.site.site_header = 'EPIDEMIE BACK-END CONTROLER'
@@ -183,4 +183,15 @@ class SyntheseDistrictAdmin(ImportExportModelAdmin):
 
 @admin.register(Echantillon)
 class EchantillonAdmin(ImportExportModelAdmin):
-    resource_class = (EchantillonResource)
+    resource_class = ((EchantillonResource))
+
+
+@admin.register(Information)
+class InformationAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(Alert)
+class AlertAdmin(ImportExportModelAdmin):
+    pass
+    # resource_class = (EchantillonResource)

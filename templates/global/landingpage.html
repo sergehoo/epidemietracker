@@ -1,4 +1,5 @@
 {% load static %}
+{% load unicorn %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="zxx" class="js">
@@ -12,7 +13,7 @@
     <!-- Fav Icon  -->
     <link rel="shortcut icon" href="{% static 'images/logoMSHPCMU.svg' %}">
     <!-- Page Title  -->
-    <title>Dengue Situation Tracker & Dashboard</title>
+    <title>Système National de Surveillance Épidémiologique </title>
     <!-- StyleSheets  -->
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
@@ -49,7 +50,7 @@
     overflow: visible; /* Permettre à l'image de déborder du cadre */
 }
 </style>
-<body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
+<body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder ">
     <div class="nk-app-root">
 
         <!-- main @s -->
@@ -59,7 +60,7 @@
              <!-- sidebar @e -->
             <!-- wrap @s -->
 
-            <div class="nk-wrap ">
+            <div class="nk-wrap bg-gray-200 ">
                 <!-- main header @s -->
 
                 <div class="nk-header nk-header-fluid nk-header-fixed nk-header-onlymobile is-light">
@@ -80,28 +81,25 @@
                 <!-- main header @e -->
          {% include 'global/layouts/navhead.html' %}
                 <!-- content @s -->
-                <div class="nk-content ">
+                <div class="nk-content">
                     <div class="container-fluid">
                         <div class="nk-content-body">
-                            <div class="nk-block-head nk-block-head-sm">
-                                <div class="mb-20">
+                            <div class="nk-block-head ">
+                                <div class="mb-40">
                                     <div class="">
                                         <h5 class="nk-block-title" style="text-align: center"><span class="mr-20"><img class="flex mr-5" src="{% static 'images/logoMSHPCMU.svg' %}" width="50"> </span> Epidemie Tracker & Dashboard <img class="flex ml-5" src="{% static 'images/logoCI.png' %}" width="50"></h5>
                                     </div>
-
                                 </div>
                             </div><!-- .nk-block-head -->
-                            <div class="nk-block card-bordered ">
-
-
-                                <div class="nk-cov-wg4">
+                            <div class="nk-block card-bordered round pt-10">
+                                <div class="nk-cov-wg4 mt-5">
 
                                     <div class="nk-cov-content">
                                         <div class="row p-5">
                                             {% for maladie in list_epidemie %}
                                                 <div class="{% if list_epidemie.count <= 4 %}col-xl-6{% else %}col-xl-3{% endif %} mb-5">
-                                                    <div class="card card-bordered">
-                                                        <div class="card-header border-bottom">
+                                                    <div class="card">
+                                                        <div class="card-header  text-black-100 ">
                                                             {{ maladie.nom }}
                                                             <span class="float-right">
                         <span class="badge badge-danger">{{ maladie.nombre_patients_positifs_ce_mois }}</span> Cas
@@ -134,9 +132,9 @@
 
                                                         </div>
 
-                                                        <div class="card-footer border-top text-muted text-right">
+                                                        <div class="card-footer border-top text-white text-right bg-gray-400">
                                                             <a href="{% url 'epidemie-detail' maladie.pk %}"
-                                                               class="btn btn-muted text-muted">Parcourir</a>
+                                                               class="btn btn-muted text-white">Parcourir</a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -178,33 +176,38 @@
 
                                 </div><!-- .row -->
                             </div>
-                                                                        <!-- Modal pour afficher les détails de la description -->
-
-
                     </div>
-                </div>
+                    </div>
                 <!-- content @e -->
-                <!-- footer @s -->
-                <div class="nk-footer d-md-none">
-                    <div class="container-fluid">
-                        <div class="nk-footer-wrap gy-1 gx-4">
-                            <div class="nk-footer-links">
-                                <ul class="nav nav-sm">
-{#                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">Feedback</a></li>#}
-{#                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-about">About Data</a></li>#}
-                                </ul>
-                            </div>
-                            <div class="nk-footer-copyright"> &copy; Copyright 2024, <a href="#">afriqconsulting</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- footer @e -->
+
             </div>
             <!-- wrap @e -->
         </div>
         <!-- main @e -->
     </div>
+
+     <!-- footer @s -->
+                <div class="nk-footer ">
+                    <div class="container-fluid">
+                        <div class="nk-footer-wrap gy-1 gx-4">
+                            <div class="nk-footer-links">
+                                <ul class="nav nav-sm">
+                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">A propos</a></li>
+                                    </ul>
+                            </div>
+                            <span><img src="{% static 'images/ivory-coast.png' %}" width="30"></span><span> République de Côte d'Ivoire</span>
+
+                            <span>|</span>
+                            <span>Ministère de la Santé de l'Hygiène Publique et de la Couverture Maladie Universelle</span><span> <img src="{% static 'images/logoMSHPCMU.svg' %}" width="30"></span>
+                            <span>|</span>
+                            <span>Système National de Surveillance Épidémiologique </span>
+                            <span>|</span>
+                            <div class="nk-footer-copyright white"> &copy; Copyright 2024, <a href="#">afriqconsulting</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- footer @e -->
     <!-- app-root @e -->
     <!-- Modal About -->
 
@@ -262,7 +265,7 @@
 
                 </div>
                 <div class="modal-footer bg-light justify-content-center py-1">
-                    <div class="sub-text">Copyright by <a href="https://softnio.com">Softnio</a></div>
+                    <div class="sub-text">Copyright by <a href="">Afriqconsulting</a></div>
                 </div>
             </div>
         </div>

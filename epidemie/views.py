@@ -1,28 +1,98 @@
 import logging
 import os
+import pandas as pd
+from datetime import datetime, timedelta, date
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group, Permission
 from django.contrib.postgres.search import TrigramSimilarity
+from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db.models import Q, Count, Sum
+from django.db.models.functions import TruncMonth
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import TemplateView, DetailView, ListView, CreateView, UpdateView, DeleteView
+from guardian.shortcuts import assign_perm, get_objects_for_user
 from rest_framework import viewsets, serializers
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rolepermissions.mixins import HasRoleMixin
 from tablib import Dataset
 from unidecode import unidecode
 
 from epidemie.admin import EchantillonResource
-from epidemie.forms import PatientForm
+from epidemie.forms import PatientForm, InfoscreateForm
 from epidemie.models import HealthRegion, City, EpidemicCase, Patient, ServiceSanitaire, Commune, Epidemie, Echantillon, \
-    DistrictSanitaire, SyntheseDistrict
+    DistrictSanitaire, SyntheseDistrict, Information
+from epidemie.reports import EpidemieReport
 from epidemie.serializers import HealthRegionSerializer, CitySerializer, EpidemicCaseSerializer, CommuneSerializer, \
     PatientSerializer, ServiceSanitaireSerializer
+
+
+def import_synthese_districts(file):
+    # Save the file temporarily
+    temp_file_name = default_storage.save('temp/' + file.name, ContentFile(file.read()))
+    temp_file_path = os.path.join(settings.MEDIA_ROOT, temp_file_name)
+
+    # Read the Excel file into a DataFrame
+    df = pd.read_excel(temp_file_path)
+
+    # Iterate over DataFrame rows and create/update SyntheseDistrict instances
+    for index, row in df.iterrows():
+        try:
+            maladie = Epidemie.objects.get(nom=row['maladie'])
+            district_sanitaire = DistrictSanitaire.objects.get(nom=row['district_sanitaire'])
+
+            # Create or update SyntheseDistrict instance
+            SyntheseDistrict.objects.update_or_create(
+                maladie=maladie,
+                district_sanitaire=district_sanitaire,
+                defaults={
+                    'nbre_cas_suspects': row.get('nbre_cas_suspects', 0),
+                    'cas_positif': row.get('cas_positif', 0),
+                    'cas_negatif': row.get('cas_negatif', 0),
+                    'evacue': row.get('evacue', 0),
+                    'decede': row.get('decede', 0),
+                    'gueri': row.get('gueri', 0),
+                    'suivi_en_cours': row.get('suivi_en_cours', 0),
+                    'nbre_sujets_contacts': row.get('nbre_sujets_contacts', 0),
+                    'contacts_en_cours_suivi': row.get('contacts_en_cours_suivi', 0),
+                    'contacts_sorti_suivi': row.get('contacts_sorti_suivi', 0),
+                    'devenu_suspect': row.get('devenu_suspect', 0),
+                    'devenu_positif': row.get('devenu_positif', 0)
+                }
+            )
+        except Exception as e:
+            print(f"Error processing row {index}: {e}")
+
+    # Clean up the temporary file
+    default_storage.delete(temp_file_name)
+
+    return df
+
+
+def import_synthese_view(request):
+    if request.method == 'POST':
+        if 'file' not in request.FILES:
+            messages.error(request, 'Veuillez sélectionner un fichier à importer.')
+            return render(request, 'dingue/import_synthese.html')
+
+        file = request.FILES['file']
+        try:
+            import_synthese_districts(file)
+            messages.success(request, 'Données importées avec succès')
+            return redirect('echantillons')  # Replace with your success URL
+        except Exception as e:
+            messages.error(request, f"Erreur lors de l'importation des données : {e}")
+            return render(request, 'dingue/import_synthese.html')
+
+    return render(request, 'dingue/import_synthese.html')
 
 
 def import_echantillons(request):
@@ -45,14 +115,14 @@ def import_echantillons(request):
 
                 for row in dataset.dict:
                     # Recherche de la région sanitaire en ignorant la casse et les accents
-                    region_name = unidecode(row['Region_Sanitaire']).lower()
-                    region = HealthRegion.objects.annotate(
-                        similarity=TrigramSimilarity('name', region_name)
-                    ).filter(similarity__gt=0.3).order_by('-similarity').first()
-
-                    if not region:
-                        messages.error(request, f"Région sanitaire '{row['Region_Sanitaire']}' introuvable.")
-                        continue
+                    # region_name = unidecode(row['Region_Sanitaire']).lower()
+                    # region = HealthRegion.objects.annotate(
+                    #     similarity=TrigramSimilarity('name', region_name)
+                    # ).filter(similarity__gt=0.3).order_by('-similarity').first()
+                    #
+                    # if not region:
+                    #     messages.error(request, f"Région sanitaire '{row['Region_Sanitaire']}' introuvable.")
+                    #     continue
 
                     # Recherche du district sanitaire en ignorant la casse et les accents
                     district_name = unidecode(row['DistrictSanitaire']).lower()
@@ -65,27 +135,35 @@ def import_echantillons(request):
                         continue
 
                     # Recherche de la commune sans filtrer par district
-                    commune_name = unidecode(row['patient__commune']).lower()
+                    commune_name = unidecode(row['patient_commune']).lower()
                     commune = Commune.objects.annotate(
                         similarity=TrigramSimilarity('name', commune_name)
                     ).filter(similarity__gt=0.3).order_by('-similarity').first()
 
                     if not commune:
-                        messages.error(request, f"Commune '{row['patient__commune']}' introuvable.")
+                        messages.error(request, f"Commune '{row['patient_commune']}' introuvable.")
                         continue
 
-                    maladie_name = row['maladie__nom']
+                    maladie_name = row['maladie_nom']
                     maladie, _ = Epidemie.objects.get_or_create(nom=maladie_name)
+
+                    # Calcul de l'âge du patient à partir de la colonne 'patient_age'
+                    # (S'assurer d'avoir une date de naissance cohérente)
+                    if 'patient_age' in row:
+                        birth_date = (datetime.today() - timedelta(
+                            days=365 * int(row.get('patient_age')))).date()  # Approximation avec la date de naissance
 
                     # Création ou mise à jour du patient
                     patient, created = Patient.objects.update_or_create(
                         code_patient=row['code_echantillon'],
                         defaults={
-                            'nom': row['patient__nom'],
-                            'prenoms': row['patient__prenoms'],
-                            'date_naissance': row['patient__datenaissance'],
+                            'nom': row['patient'].split()[0],  # Extraction du nom et prénom
+                            'prenoms': " ".join(row['patient'].split()[1:]),
+                            'date_naissance': birth_date,  # Date approximative basée sur l'âge
                             'genre': row['patient_sexe'],
                             'commune': commune,
+                            'decede': bool(int(row['patient_decede'])),  # Conversion 0/1 en booléen
+                            'gueris': bool(int(row['patient_gueris'])),
                             'contact': 'N/A'  # Remplacez par la colonne appropriée si elle existe
                         }
                     )
@@ -95,10 +173,10 @@ def import_echantillons(request):
                         code_echantillon=row['code_echantillon'],
                         defaults={
                             'patient': patient,
-                            'maladie': maladie,  # Assurez-vous que l'ID de l'épidémie est correct
-                            'date_collect': row['date_collect'],
-                            'site_collect': row['site_collect'],
-                            'resultat': row['resultat'],
+                            'maladie': maladie,
+                            'date_collect': row['echantillon_date_prelevement'],
+                            'site_collect': row['DistrictSanitaire'],
+                            'resultat': bool(int(row['echantillon_resultat'])),  # Résultat comme booléen
                         }
                     )
 
@@ -139,7 +217,91 @@ def import_view(request):
 logger = logging.getLogger(__name__)
 
 
+def info_banner_view(request):
+    infos = Information.objects.all().order_by('-date_added')  # You can filter as needed
+    return render(request, 'global/layouts/navhead.html', {'infos': infos})
+
+
+def import_excel(request):
+    if request.method == 'POST':
+        if True:
+            # Read the uploaded Excel file
+            excel_file = request.FILES['file']
+            try:
+                # Load the Excel file into a pandas DataFrame
+                df = pd.read_excel(excel_file, engine='openpyxl')
+
+                # Iterate through each row of the DataFrame and create objects
+                for index, row in df.iterrows():
+                    # Create or update the Patient object
+                    nom = row['Nom'].split(' ')[0]
+                    prenoms = ' '.join(row['Nom'].split(' ')[1:10])
+                    patient, created = Patient.objects.get_or_create(
+
+                        code_patient=row.get('code_patient'),
+                        defaults={
+                            'nom': nom,
+                            'prenoms': prenoms,
+                            'contact': row.get('contact'),
+                            'situation_matrimoniale': row.get('situation_matrimoniale'),
+                            'lieu_naissance': row.get('lieu_naissance'),
+                            'date_naissance': datetime.today() - timedelta(days=365 * int(row.get('date_naissance'))),
+                            'genre': 'Femme' if row.get('genre') == 'F' else 'Homme',
+                            'nationalite': row.get('nationalite'),
+                            'profession': row.get('profession'),
+                            'nbr_enfants': row.get('nbr_enfants'),
+                            'groupe_sanguin': row.get('groupe_sanguin', 'B+'),
+                            'niveau_etude': row.get('niveau_etude', 'Primaire'),
+                            'employeur': row.get('employeur', 'Non defini'),
+                            'commune_id': row.get('commune_id'),  # Assuming Commune ID is available
+                            'hopital_id': row.get('hopital_id'),  # Assuming ServiceSanitaire ID is available
+                            'quartier': Commune.filter(nom__contains=row.get('commune'))[0],
+                            'status': row.get('cas_positif'),
+                            'gueris': bool(row.get('gueris')),
+                            'decede': bool(row.get('decede')),
+                        }
+                    )
+
+                    # Create or update the Echantillon object
+                    Echantillon.objects.create(
+                        patient=patient,
+                        code_echantillon=row.get('code_echantillon'),
+                        maladie_id=row.get('maladie_id'),  # Assuming Epidemie ID is available
+                        mode_preleve_id=row.get('mode_preleve_id'),  # Assuming PreleveMode ID is available
+                        date_collect=row.get('date_collect'),
+                        site_collect=row.get('site_collect'),
+                        agent_collect_id=row.get('agent_collect_id'),  # Assuming Employee ID is available
+                        status_echantillons=row.get('status_echantillons'),
+                        resultat=row.get('resultat'),
+
+                    )
+
+                messages.success(request, 'Data imported successfully.')
+                return redirect('your-success-url')
+            except Exception as e:
+                messages.error(request, f'Error occurred: {e}')
+    else:
+        messages.error(request, 'Fichier  introuvable.')
+        return render(request, 'dingue/import.html')
+
+    return render(request, 'dingue/import.html')
+
+
+class InformationDetailView(DetailView):
+    model = Information
+    template_name = 'global/infosdetails.html'
+    context_object_name = "infodetail"
+
+
+class InformationCreateView(CreateView):
+    model = Information
+    template_name = 'global/infoscreate.html'
+    form_class = InfoscreateForm
+    success_url = reverse_lazy('landing')
+
+
 class LandinguePageView(LoginRequiredMixin, ListView):
+    allowed_roles = ['RegionalRole', 'NationalRole']  # Accès pour les utilisateurs régionaux et nationaux
     model = Epidemie
     login_url = '/accounts/login/'
     template_name = "global/landingpage.html"
@@ -160,7 +322,7 @@ class LandinguePageView(LoginRequiredMixin, ListView):
 
         # Filtrer les patients ayant au moins un échantillon avec un résultat positif
         positive_cases = (
-            Patient.objects.filter(echantillons__resultat='POSITIF')
+            Patient.objects.filter(echantillons__resultat=True)
             .values('commune__name')
             .annotate(total=Count('id'))
             .order_by('-total')
@@ -172,24 +334,50 @@ class LandinguePageView(LoginRequiredMixin, ListView):
 
 
 class EpidemieDetailView(LoginRequiredMixin, DetailView):
+    allowed_roles = ['NationalRole']
     model = Epidemie
     template_name = 'global/dashboard.html'
     context_object_name = "epidemiedetail"
     ordering = ['id']
 
     def get(self, request, pk):
+
         epidemie = get_object_or_404(Epidemie, pk=pk)
+
+        # Calcul des tranches d'âge pour les patients infectés par cette épidémie
+        tranches_age = self.get_infected_by_age_tranche(epidemie)
+
+        # Ajouter les données au contexte
+
+
+        # Générer le rapport
+        report = EpidemieReport()
+        report_data = report.generate(epidemie_id=epidemie.pk)
+
+        # Filter patients by gender and epidemic
+        male_cases = Patient.objects.filter(echantillons__maladie=epidemie, genre='Male').count()
+        female_cases = Patient.objects.filter(echantillons__maladie=epidemie, genre='Female').count()
+
+        # Récupérer les données mensuelles d'évolution de l'épidémie
+        monthly_data = Echantillon.objects.filter(maladie=epidemie).annotate(
+            month=TruncMonth('date_collect')
+        ).values('month').annotate(
+            total_cases=Count('id')
+        ).order_by('month')
+
+        months = [data['month'].strftime('%b %Y') for data in monthly_data]
+        cases = [data['total_cases'] for data in monthly_data]
 
         # Filtrer les échantillons et les patients par épidémie
         echantillons_nbr = Echantillon.objects.filter(maladie=epidemie).count()
-        echantillons_nbrP = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF').count()
+        echantillons_nbrP = Echantillon.objects.filter(maladie=epidemie, resultat=True).count()
 
         patients = Patient.objects.filter(echantillons__maladie=epidemie).distinct().count()
         patients_gueris = Patient.objects.filter(echantillons__maladie=epidemie, gueris=True).distinct().count()
         patients_decedes = Patient.objects.filter(echantillons__maladie=epidemie, decede=True).distinct().count()
 
         # Nombre total de patients dont les échantillons ont été positifs
-        echantillons_positifs = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF')
+        echantillons_positifs = Echantillon.objects.filter(maladie=epidemie, resultat=True)
         patients_avec_echantillons_positifs = Patient.objects.filter(echantillons__in=echantillons_positifs).distinct()
         total_patients_positifs = patients_avec_echantillons_positifs.count()
 
@@ -243,20 +431,28 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
         ).order_by('-num_echantillons')[:5]
 
         cases_by_region = (
-            Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat='POSITIF')
+            Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat=True)
             .values('commune__district__region__name')
             .annotate(total=Count('id'))
             .order_by('-total')
         )
 
         cases_by_district = (
-            Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat='POSITIF')
+            Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat=True)
             .values('commune__district__region__name', 'commune__district__nom')
             .annotate(total=Count('id'))
             .order_by('-total')
         )
 
         context = {
+            'tranches_age': tranches_age,
+            # 'tranches_age_ratios': tranches_age_ratios,
+            'epidemierep': epidemie,
+            'report_data': report_data,
+
+            'male_cases': male_cases,
+            'female_cases': female_cases,
+
             'cases_by_region': cases_by_region,
             'cases_by_district': cases_by_district,
             'epidemie': epidemie,
@@ -270,7 +466,7 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
             'patients_gueris': patients_gueris,
             'patients_decedes': patients_decedes,
             'patients': patients + total_cas_negatif,
-            'total_patients_positifs': total_patients_positifs ,
+            'total_patients_positifs': total_patients_positifs,
             'patients_gueris_positifs': patients_gueris_positifs,
             'patients_decedes_positifs': patients_decedes_positifs,
             'pourcentage_gueris_positifs': pourcentage_gueris_positifs,
@@ -288,9 +484,68 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
             'total_contacts_sorti_suivi': total_contacts_sorti_suivi,
             'total_devenu_suspect': total_devenu_suspect,
             'total_devenu_positif': total_devenu_positif,
+
+            'monthly_data': {
+                'months': months,
+                'cases': cases
+            }
         }
 
         return render(request, self.template_name, context)
+
+    def get_infected_by_age_tranche(self, epidemie):
+        """Calcule le nombre de patients infectés par tranche d'âge et leurs ratios pour une épidémie donnée."""
+        patients_infectes = Echantillon.objects.filter(
+            maladie=epidemie, resultat=True
+        ).select_related('patient')
+
+        # Dictionnaire pour stocker les résultats par tranche d'âge
+        tranches_age_data = {
+            '0-17 ans': 0,
+            '18-29 ans': 0,
+            '30-44 ans': 0,
+            '45-59 ans': 0,
+            '60 ans et plus': 0,
+        }
+
+        # Compter les patients par tranche d'âge
+        total_patients = 0
+        for echantillon in patients_infectes:
+            patient = echantillon.patient
+            age = self.calcul_age(patient.date_naissance)
+
+            if age is not None:
+                total_patients += 1
+                if age < 18:
+                    tranches_age_data['0-17 ans'] += 1
+                elif 18 <= age < 30:
+                    tranches_age_data['18-29 ans'] += 1
+                elif 30 <= age < 45:
+                    tranches_age_data['30-44 ans'] += 1
+                elif 45 <= age < 60:
+                    tranches_age_data['45-59 ans'] += 1
+                else:
+                    tranches_age_data['60 ans et plus'] += 1
+
+        # Calcul des ratios et création d'une liste de tuples (tranche, nombre, ratio)
+        tranches_age_list = []
+        for tranche, count in tranches_age_data.items():
+            if total_patients > 0:
+                ratio = round((count / total_patients) * 100, 2)
+            else:
+                ratio = 0
+            tranches_age_list.append((tranche, count, ratio))
+
+        return tranches_age_list
+
+    def calcul_age(self, date_naissance):
+        """Calcule l'âge d'une personne à partir de sa date de naissance."""
+        if date_naissance:
+            today = date.today()
+            return today.year - date_naissance.year - (
+                    (today.month, today.day) < (date_naissance.month, date_naissance.day)
+            )
+        return None
 
     # def get(self, request, pk):
     #     epidemie = get_object_or_404(Epidemie, pk=pk)
@@ -384,6 +639,7 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
     #     }
     #
     #     return render(request, self.template_name, context)
+
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
@@ -511,3 +767,33 @@ class EchantillonDeleteView(DeleteView):
     model = Echantillon
     template_name = 'echantillon_confirm_delete.html'
     success_url = reverse_lazy('echantillon-list')
+
+
+@api_view(['POST'])
+def import_data(request):
+    data = request.data
+
+    for row in data:
+        try:
+            # Gestion des données du modèle Patient
+            patient, created = Patient.objects.get_or_create(
+                code_patient=row.get('code_patient', ''),
+                defaults={
+                    'nom': row.get('nom', ''),
+                    'prenoms': row.get('prenoms', ''),
+                    'contact': row.get('contact', ''),
+                    'date_naissance': row.get('date_naissance', None),
+                    # Mappez d'autres champs nécessaires
+                }
+            )
+            # Gestion des données du modèle Echantillon
+            Echantillon.objects.create(
+                patient=patient,
+                code_echantillon=row.get('code_echantillon', ''),
+                resultat=row.get('resultat', 'NEGATIF'),  # Valeur par défaut ou dynamique
+                # Mappez d'autres champs nécessaires
+            )
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"status": "success"}, status=200)

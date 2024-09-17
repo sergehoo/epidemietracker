@@ -1,0 +1,14 @@
+{#alerteepidemie.tml#}
+
+<div>
+    <div class="typewriter">
+        {% if alerts %}
+            {% for alert in alerts %}
+                <a href="{{ alert.url }}" class="text-link animate__animated animate__flash">{{ alert.message }}</a>
+                <br>
+            {% endfor %}
+        {% else %}
+            <a href="#" class="text-link">Aucune alerte disponible.</a>
+        {% endif %}
+    </div>
+</div>

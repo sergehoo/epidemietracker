@@ -56,7 +56,7 @@ class Command(BaseCommand):
             )
 
             # Créer des données factices pour Echantillon
-            dengue = Epidemie.objects.get(nom="FIEVRE")
+            dengue = Epidemie.objects.get(nom="MPOX")
             mode_preleve = PreleveMode.objects.first()
 
             Echantillon.objects.create(

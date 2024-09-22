@@ -164,27 +164,27 @@ WSGI_APPLICATION = 'epidemietrackr.wsgi.application'
 # }
 #Productionone
 #
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-#         'NAME': os.environ.get('DATABASE_NAME'),
-#         'USER': os.environ.get('DATABASE_USER'),
-#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-#         'HOST': os.environ.get('DATABASE_HOST'),
-#         'PORT': os.environ.get('DATABASE_PORT'),
-#     }
-# }
-# local one
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'epidemitracker',
-        'USER': 'postgres',
-        'PASSWORD': 'weddingLIFE18',
-        'HOST': 'localhost',
-        'PORT': '5433',
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOST'),
+        'PORT': os.environ.get('DATABASE_PORT'),
     }
 }
+# local one
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.contrib.gis.db.backends.postgis',
+#         'NAME': 'epidemitracker',
+#         'USER': 'postgres',
+#         'PASSWORD': 'weddingLIFE18',
+#         'HOST': 'localhost',
+#         'PORT': '5433',
+#     }
+# }
 #gdal-config --libs >---commande linux ou mac os
 
 # GDAL_LIBRARY_PATH = os.getenv('GDAL_LIBRARY_PATH', '/opt/homebrew/opt/gdal/lib/libgdal.dylib')

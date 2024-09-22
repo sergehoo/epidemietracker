@@ -186,7 +186,7 @@
                                                             <th>code echantillon</th>
                                                             <th>Code patient</th>
                                                             <th>created_at</th>
-                                                            <th>mode_preleve</th>
+                                                            <th>District</th>
                                                             <th>Epidemies</th>
                                                             <th>resultat</th>
                                                         </tr>
@@ -197,14 +197,14 @@
                                                             <td>{{ enquete.code_echantillon }}</td>
                                                             <td>{{ enquete.patient.code_patient }}</td>
                                                             <td>{{ enquete.created_at}}</td>
-                                                            <td>{{ enquete.mode_preleve}}</td>
+                                                            <td>{{ enquete.patient.commune.district.nom}}</td>
                                                             <td>{{ enquete.maladie}}</td>
                                                             <td>
-                                                                {% if enquete.resultat == 'NEGATIF' %}
+                                                                {% if enquete.resultat is True %}
                                                                 
-                                                                     <span class="badge badge-success">{{ enquete.resultat }}</span>
+                                                                     <span class="badge badge-danger">POSITIF</span>
                                                                     {% else %}
-                                                                    <span class="badge badge-danger">{{ enquete.resultat }}</span>
+                                                                    <span class="badge badge-success">NEGATIF</span>
                                                                 {% endif %}
                                                             
                                                             </td>

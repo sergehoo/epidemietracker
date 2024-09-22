@@ -95,6 +95,119 @@ def import_synthese_view(request):
     return render(request, 'dingue/import_synthese.html')
 
 
+# def import_echantillons(request):
+#     if request.method == 'POST':
+#         if 'file' not in request.FILES and 'temp_file_name' not in request.POST:
+#             messages.error(request, 'Veuillez sélectionner un fichier à importer.')
+#             return render(request, 'dingue/import.html')
+#
+#         echantillon_resource = EchantillonResource()
+#         dataset = Dataset()
+#
+#         if 'file' in request.FILES:
+#             new_echantillons = request.FILES['file']
+#             temp_file_name = default_storage.save(os.path.join('temp', new_echantillons.name),
+#                                                   ContentFile(new_echantillons.read()))
+#             temp_file_path = os.path.join(settings.MEDIA_ROOT, temp_file_name)
+#
+#             try:
+#                 imported_data = dataset.load(open(temp_file_path, 'rb').read(), format='xlsx')
+#
+#                 for row in dataset.dict:
+#                     # Recherche de la région sanitaire en ignorant la casse et les accents
+#                     # region_name = unidecode(row['Region_Sanitaire']).lower()
+#                     # region = HealthRegion.objects.annotate(
+#                     #     similarity=TrigramSimilarity('name', region_name)
+#                     # ).filter(similarity__gt=0.3).order_by('-similarity').first()
+#                     #
+#                     # if not region:
+#                     #     messages.error(request, f"Région sanitaire '{row['Region_Sanitaire']}' introuvable.")
+#                     #     continue
+#
+#                     # Recherche du district sanitaire en ignorant la casse et les accents
+#                     district_name = unidecode(row['DistrictSanitaire']).lower()
+#                     district = DistrictSanitaire.objects.annotate(
+#                         similarity=TrigramSimilarity('nom', district_name)
+#                     ).filter(similarity__gt=0.3).order_by('-similarity').first()
+#
+#                     if not district:
+#                         messages.error(request, f"District sanitaire '{row['DistrictSanitaire']}' introuvable.")
+#                         continue
+#
+#                     # Recherche de la commune sans filtrer par district
+#                     commune_name = unidecode(row['patient_commune']).lower()
+#                     commune = Commune.objects.annotate(
+#                         similarity=TrigramSimilarity('name', commune_name)
+#                     ).filter(similarity__gt=0.3).order_by('-similarity').first()
+#
+#                     if not commune:
+#                         messages.error(request, f"Commune '{row['patient_commune']}' introuvable.")
+#                         continue
+#
+#                     maladie_name = row['maladie_nom']
+#                     maladie, _ = Epidemie.objects.get_or_create(nom=maladie_name)
+#
+#                     # Calcul de l'âge du patient à partir de la colonne 'patient_age'
+#                     # (S'assurer d'avoir une date de naissance cohérente)
+#                     if 'patient_age' in row:
+#                         birth_date = (datetime.today() - timedelta(
+#                             days=365 * int(row.get('patient_age')))).date()  # Approximation avec la date de naissance
+#
+#                     # Création ou mise à jour du patient
+#                     patient, created = Patient.objects.update_or_create(
+#                         code_patient=row['code_echantillon'],
+#                         defaults={
+#                             'nom': row['patient'].split()[0],  # Extraction du nom et prénom
+#                             'prenoms': " ".join(row['patient'].split()[1:]),
+#                             'date_naissance': birth_date,  # Date approximative basée sur l'âge
+#                             'genre': row['patient_sexe'],
+#                             'commune': commune,
+#                             'decede': bool(int(row['patient_decede'])),  # Conversion 0/1 en booléen
+#                             'gueris': bool(int(row['patient_gueris'])),
+#                             'contact': 'N/A'  # Remplacez par la colonne appropriée si elle existe
+#                         }
+#                     )
+#
+#                     # Création ou mise à jour de l'échantillon
+#                     Echantillon.objects.update_or_create(
+#                         code_echantillon=row['code_echantillon'],
+#                         defaults={
+#                             'patient': patient,
+#                             'maladie': maladie,
+#                             'date_collect': row['echantillon_date_prelevement'],
+#                             'site_collect': row['DistrictSanitaire'],
+#                             'resultat': bool(int(row['echantillon_resultat'])),  # Résultat comme booléen
+#                         }
+#                     )
+#
+#                 result = echantillon_resource.import_data(dataset, dry_run=True)
+#
+#                 if not result.has_errors():
+#                     preview_data = dataset.dict
+#                     return render(request, 'dingue/import.html',
+#                                   {'preview_data': preview_data, 'temp_file_name': temp_file_name})
+#
+#                 messages.error(request,
+#                                'Erreur lors de l\'importation des données : vérifiez les données et réessayez.')
+#
+#             except Exception as e:
+#                 messages.error(request, f"Erreur lors de l'importation des données : {e}")
+#                 return render(request, 'dingue/import.html')
+#
+#         elif 'temp_file_name' in request.POST:
+#             temp_file_name = request.POST['temp_file_name']
+#             temp_file_path = os.path.join(settings.MEDIA_ROOT, temp_file_name)
+#
+#             if os.path.exists(temp_file_path):
+#                 imported_data = dataset.load(open(temp_file_path, 'rb').read(), format='xlsx')
+#                 echantillon_resource.import_data(dataset, dry_run=False)
+#                 messages.success(request, 'Données importées avec succès')
+#                 return redirect('echantillons')
+#             else:
+#                 messages.error(request, 'Fichier temporaire introuvable.')
+#                 return render(request, 'dingue/import.html')
+#
+#     return render(request, 'dingue/import.html')
 def import_echantillons(request):
     if request.method == 'POST':
         if 'file' not in request.FILES and 'temp_file_name' not in request.POST:
@@ -114,18 +227,10 @@ def import_echantillons(request):
                 imported_data = dataset.load(open(temp_file_path, 'rb').read(), format='xlsx')
 
                 for row in dataset.dict:
-                    # Recherche de la région sanitaire en ignorant la casse et les accents
-                    # region_name = unidecode(row['Region_Sanitaire']).lower()
-                    # region = HealthRegion.objects.annotate(
-                    #     similarity=TrigramSimilarity('name', region_name)
-                    # ).filter(similarity__gt=0.3).order_by('-similarity').first()
-                    #
-                    # if not region:
-                    #     messages.error(request, f"Région sanitaire '{row['Region_Sanitaire']}' introuvable.")
-                    #     continue
-
-                    # Recherche du district sanitaire en ignorant la casse et les accents
+                    # Normaliser et nettoyer le nom du district sanitaire (enlever accents, mettre en minuscule)
                     district_name = unidecode(row['DistrictSanitaire']).lower()
+
+                    # Recherche du district sanitaire le plus proche par similarité
                     district = DistrictSanitaire.objects.annotate(
                         similarity=TrigramSimilarity('nom', district_name)
                     ).filter(similarity__gt=0.3).order_by('-similarity').first()
@@ -134,8 +239,10 @@ def import_echantillons(request):
                         messages.error(request, f"District sanitaire '{row['DistrictSanitaire']}' introuvable.")
                         continue
 
-                    # Recherche de la commune sans filtrer par district
+                    # Normaliser et nettoyer le nom de la commune (enlever accents, mettre en minuscule)
                     commune_name = unidecode(row['patient_commune']).lower()
+
+                    # Recherche de la commune la plus proche par similarité
                     commune = Commune.objects.annotate(
                         similarity=TrigramSimilarity('name', commune_name)
                     ).filter(similarity__gt=0.3).order_by('-similarity').first()
@@ -144,27 +251,27 @@ def import_echantillons(request):
                         messages.error(request, f"Commune '{row['patient_commune']}' introuvable.")
                         continue
 
+                    # Recherche ou création de la maladie (épidémie)
                     maladie_name = row['maladie_nom']
                     maladie, _ = Epidemie.objects.get_or_create(nom=maladie_name)
 
                     # Calcul de l'âge du patient à partir de la colonne 'patient_age'
-                    # (S'assurer d'avoir une date de naissance cohérente)
                     if 'patient_age' in row:
                         birth_date = (datetime.today() - timedelta(
-                            days=365 * int(row.get('patient_age')))).date()  # Approximation avec la date de naissance
+                            days=365 * int(row.get('patient_age')))).date()  # Approximation de la date de naissance
 
                     # Création ou mise à jour du patient
                     patient, created = Patient.objects.update_or_create(
                         code_patient=row['code_echantillon'],
                         defaults={
-                            'nom': row['patient'].split()[0],  # Extraction du nom et prénom
-                            'prenoms': " ".join(row['patient'].split()[1:]),
-                            'date_naissance': birth_date,  # Date approximative basée sur l'âge
+                            'nom': row['patient'].split()[0],  # Extraction du nom
+                            'prenoms': " ".join(row['patient'].split()[1:]),  # Extraction des prénoms
+                            'date_naissance': birth_date,
                             'genre': row['patient_sexe'],
                             'commune': commune,
                             'decede': bool(int(row['patient_decede'])),  # Conversion 0/1 en booléen
                             'gueris': bool(int(row['patient_gueris'])),
-                            'contact': 'N/A'  # Remplacez par la colonne appropriée si elle existe
+                            'contact': 'N/A'  # Remplacer si la colonne existe
                         }
                     )
 
@@ -208,7 +315,6 @@ def import_echantillons(request):
                 return render(request, 'dingue/import.html')
 
     return render(request, 'dingue/import.html')
-
 
 def import_view(request):
     return render(request, 'dingue/import.html')

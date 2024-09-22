@@ -160,7 +160,7 @@
                                             <div class="nk-cov-wg4">
                                                 <div class="nk-cov-wg4-aside">
                                                     <div class="nk-cov-wg4-aside-head">
-                                                        <h6 class="nk-cov-wg4-aside-title"> District Sanitaire</h6>
+                                                        <h6 class="nk-cov-wg4-aside-title"> Effectif par Régions Sanitaire</h6>
                                                         <div class="nk-cov-wg4-aside-action mr-n2">
                                                             <a href="#" class="btn btn-icon toggle-search" data-target="search"><em class="icon ni ni-search"></em></a>
                                                         </div>
@@ -173,27 +173,38 @@
                                                         </div><!-- .search-wrap -->
                                                     </div>
                                                     <div class="nk-cov-wg4-aside-body" data-simplebar>
-{% for region in cases_by_region %}
-        <li>
-            <span class="region-title" onclick="toggleDistricts('{{ region.commune__district__region__name|slugify }}')">
-                {{ region.commune__district__region__name }} ({{ region.total|intcomma }} cas )
-            </span>
+<div id="accordion-regions" class="accordion accordion-s3">
+    {% for region in cases_by_region %}
+        <div class="accordion-item">
+            <!-- Titre de la région avec badge -->
+            <a href="#" class="accordion-head collapsed" data-toggle="collapse" data-target="#accordion-region-{{ region.commune__district__region__name|slugify }}">
+                <h6 class="title">
+                    {{ region.commune__district__region__name }}
+                    <span class="badge badge-danger float-right">{{ region.total|intcomma }}</span>
+                </h6>
+                <span class="accordion-icon"></span>
+            </a>
+            
             <!-- Liste des districts associés à cette région -->
-            <ul class="district-list" id="{{ region.commune__district__region__name|slugify }}" style="display: none;">
-                {% for district in cases_by_district %}
-                    {% if district.commune__district__region__name == region.commune__district__region__name %}
-                        <li>
-                            <a class="nk-cov-wg4-list-item" href="#">
-                                <span class="title">{{ district.commune__district__nom }}</span>
-                                <span class="count">{{ district.total|intcomma }} cas </span>
-                            </a>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        </li>
+            <div class="accordion-body collapse" id="accordion-region-{{ region.commune__district__region__name|slugify }}" data-parent="#accordion-regions">
+                <div class="accordion-inner">
+                    <ul class="nav-item">
+                        {% for district in cases_by_district %}
+                            {% if district.commune__district__region__name == region.commune__district__region__name %}
+                                <li>
+                                    <a class="nk-cov-wg4-list-item" href="#">
+                                        <span class="title">{{ district.commune__district__nom }}</span>
+                                        <span class="count">{{ district.total|intcomma }} cas</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
     {% endfor %}
-</ul>
+</div>
 
 <script>
 function toggleDistricts(regionId) {

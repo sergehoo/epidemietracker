@@ -51,20 +51,28 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --upgrade pip
 COPY requirements.txt /epidemietrackr-app/requirements.txt
 
-# Add the ubuntugis PPA for updated GDAL packages
+# Install the required packages before adding repositories
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository ppa:ubuntugis/ubuntugis-unstable && \
-    apt-get update
+    apt-get install -y --no-install-recommends \
+    software-properties-common \
+    dirmngr \
+    gnupg2 \
+    lsb-release \
+    ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install the correct version of GDAL and necessary system dependencies
-RUN apt-get install -y --no-install-recommends \
+# Add the ubuntugis-unstable repository and install GDAL
+RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
     gdal-bin=3.9.2+dfsg-1~focal0 \
     libgdal-dev=3.9.2+dfsg-1~focal0 \
     libpq-dev \
     gcc \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
 
 # Définir la variable d'environnement pour GDAL
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal

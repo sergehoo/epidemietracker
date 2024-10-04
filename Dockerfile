@@ -12,13 +12,14 @@ RUN pip install --upgrade pip
 # Copy the requirements.txt to the working directory
 COPY requirements.txt /epidemietrackr-app/requirements.txt
 
-# Install the required packages without adding the PPA
+# Install the required packages including g++ and GDAL dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gdal-bin \
     libgdal-dev \
     libpq-dev \
     gcc \
+    g++ \                    # Ensure g++ is installed for GDAL compilation
     software-properties-common \
     ca-certificates \
     dirmngr \
@@ -46,7 +47,6 @@ EXPOSE 8000
 
 # Start the application using Gunicorn
 CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000", "--workers=4", "--timeout=180", "--log-level=debug"]
-
 #FROM python:3.9-slim
 #LABEL authors="ogahserge"
 #

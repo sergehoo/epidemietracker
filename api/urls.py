@@ -24,6 +24,7 @@ urlpatterns = [
 
                   path('dash/', dashboard_view, name='tethome'),
                   path('import_data/', import_view, name='import_view'),
+                  path("select2/", include("django_select2.urls")),
 
                   path('import-echantillons/', import_echantillons, name='import_echantillons'),
                   path('import-excel/', import_excel, name='import_excel'),

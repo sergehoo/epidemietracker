@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'mathfilters',
+    'django_select2',
 
 ]
 UNICORN = {
@@ -135,7 +136,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'epidemietrackr.wsgi.application'
-
+# SELECT2_CACHE_BACKEND = "select2"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -242,6 +243,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
 AUTHENTICATION_BACKENDS = [
 
     # Needed to login by username in Django admin, regardless of `allauth`

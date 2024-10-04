@@ -107,6 +107,8 @@ class Commune(models.Model):
         return f"{self.name} - {self.place} ({self.geom})"
 
 
+
+
 class ServiceSanitaire(models.Model):
     nom = models.CharField(max_length=100, null=True, blank=True)
     type = models.CharField(max_length=100, null=True, blank=True)

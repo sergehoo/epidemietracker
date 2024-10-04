@@ -96,8 +96,8 @@ class DistrictSanitaireResource(resources.ModelResource):
 
     class Meta:
         model = DistrictSanitaire
-        fields = ('id', 'nom', 'region__name')  # Fields to be imported/exported
-        export_order = ('id', 'nom', 'region__name')
+        fields = ('id', 'nom', 'region__name', 'geojson')  # Fields to be imported/exported
+        export_order = ('id', 'nom', 'region__name', 'geojson')
 
     def before_import_row(self, row, **kwargs):
         region_name = row.get('region__name')
@@ -111,7 +111,7 @@ class DistrictSanitaireResource(resources.ModelResource):
 @admin.register(DistrictSanitaire)
 class DistrictSanitaireAdmin(ImportExportModelAdmin):
     resource_class = DistrictSanitaireResource
-    list_display = ('nom', 'region')
+    list_display = ('nom', 'region', 'geojson')
 
 
 @admin.register(Symptom)

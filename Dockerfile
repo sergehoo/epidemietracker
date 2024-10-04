@@ -51,11 +51,16 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN pip install --upgrade pip
 COPY requirements.txt /epidemietrackr-app/requirements.txt
 
-# Installer les dépendances système nécessaires pour GDAL et PostgreSQL
+# Add the ubuntugis PPA for updated GDAL packages
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    gdal-bin \
-    libgdal-dev \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:ubuntugis/ubuntugis-unstable && \
+    apt-get update
+
+# Install the correct version of GDAL and necessary system dependencies
+RUN apt-get install -y --no-install-recommends \
+    gdal-bin=3.9.2+dfsg-1~focal0 \
+    libgdal-dev=3.9.2+dfsg-1~focal0 \
     libpq-dev \
     gcc \
     && apt-get clean && \

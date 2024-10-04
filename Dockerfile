@@ -9,22 +9,20 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# Copy the requirements.txt to the working directory
-COPY requirements.txt /epidemietrackr-app/requirements.txt
-
-# Install the required packages including g++ and GDAL dependencies
+# Install system dependencies including g++ and GDAL
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    g++ \
+    gcc \
     gdal-bin \
     libgdal-dev \
     libpq-dev \
-    gcc \
-    g++ \                    # Ensure g++ is installed for GDAL compilation
     software-properties-common \
     ca-certificates \
     dirmngr \
     gnupg2 \
-    lsb-release && \
+    lsb-release \
+    postgresql-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -33,20 +31,20 @@ ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 ENV GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so
 
-# Install Python dependencies
+# Copy the requirements.txt and install Python dependencies
+COPY requirements.txt /epidemietrackr-app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . /epidemietrackr-app/
-
-# Install PostgreSQL client
-RUN apt-get update && apt-get install -y postgresql-client
 
 # Expose port 8000
 EXPOSE 8000
 
 # Start the application using Gunicorn
 CMD ["gunicorn", "epidemietrackr.wsgi:application", "--bind=0.0.0.0:8000", "--workers=4", "--timeout=180", "--log-level=debug"]
+
+
 #FROM python:3.9-slim
 #LABEL authors="ogahserge"
 #

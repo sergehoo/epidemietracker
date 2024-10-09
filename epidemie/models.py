@@ -104,7 +104,7 @@ class Commune(models.Model):
     geom = models.PointField()
 
     def __str__(self):
-        return f"{self.name} - {self.place} ({self.geom})"
+        return f"{self.name} - {self.district} ({self.geom})"
 
 
 

@@ -124,9 +124,6 @@ class EmployeeAdmin(ModelAdmin):
     pass
 
 
-@admin.register(Patient)
-class PatientAdmin(ModelAdmin):
-    pass
 
 
 @admin.register(Epidemie)
@@ -181,9 +178,22 @@ class SyntheseDistrictAdmin(ImportExportModelAdmin):
     list_display = ('district_sanitaire', 'maladie', 'nbre_cas_suspects', 'cas_positif', 'cas_negatif', 'evacue')
 
 
+
 @admin.register(Echantillon)
 class EchantillonAdmin(ImportExportModelAdmin):
-    resource_class = ((EchantillonResource))
+    resource_class = EchantillonResource
+    # form = DistrictSanitaireForm
+    list_display = ('maladie','code_echantillon', 'patient','resultat')
+    search_fields = ['patient', 'patient__commune']
+    list_filter = ['resultat']
+
+@admin.register(Patient)
+class PatientAdmin(ImportExportModelAdmin):
+    # resource_class = EchantillonResource
+    # form = DistrictSanitaireForm
+    list_display = ('nom','prenoms','commune','status')
+    search_fields = ['status', 'nom']
+    list_filter = ['status','gueris','decede']
 
 
 @admin.register(Information)

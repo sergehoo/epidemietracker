@@ -8,7 +8,7 @@ from import_export.widgets import ForeignKeyWidget
 from leaflet.forms.widgets import LeafletWidget
 
 from epidemie.models import HealthRegion, City, EpidemicCase, DistrictSanitaire, Epidemie, Echantillon, Patient, \
-    Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict, Information, Alert
+    Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict, Information, Alert, PolesRegionaux
 from epidemie.ressources import SyntheseDistrictResource
 
 admin.site.site_header = 'EPIDEMIE BACK-END CONTROLER'
@@ -63,6 +63,15 @@ class HealthRegionResource(resources.ModelResource):
         model = HealthRegion
         fields = ('id', 'name')  # Adjust fields as needed
         export_order = ('id', 'name')
+
+
+@admin.register(PolesRegionaux)
+class PolesRegionauxAdmin(ImportExportModelAdmin):
+    list_display = ('id','name')
+    list_filter = ('id', 'name')
+    search_fields = ('id','name')
+
+
 
 
 @admin.register(HealthRegion)
@@ -124,8 +133,6 @@ class EmployeeAdmin(ModelAdmin):
     pass
 
 
-
-
 @admin.register(Epidemie)
 class EpidemieAdmin(ModelAdmin):
     pass
@@ -178,22 +185,22 @@ class SyntheseDistrictAdmin(ImportExportModelAdmin):
     list_display = ('district_sanitaire', 'maladie', 'nbre_cas_suspects', 'cas_positif', 'cas_negatif', 'evacue')
 
 
-
 @admin.register(Echantillon)
 class EchantillonAdmin(ImportExportModelAdmin):
     resource_class = EchantillonResource
     # form = DistrictSanitaireForm
-    list_display = ('maladie','code_echantillon', 'patient','resultat')
+    list_display = ('maladie', 'code_echantillon', 'patient', 'resultat')
     search_fields = ['patient', 'patient__commune']
     list_filter = ['resultat']
+
 
 @admin.register(Patient)
 class PatientAdmin(ImportExportModelAdmin):
     # resource_class = EchantillonResource
     # form = DistrictSanitaireForm
-    list_display = ('nom','prenoms','commune','status')
+    list_display = ('nom', 'prenoms', 'commune', 'status')
     search_fields = ['status', 'nom']
-    list_filter = ['status','gueris','decede']
+    list_filter = ['status', 'gueris', 'decede']
 
 
 @admin.register(Information)

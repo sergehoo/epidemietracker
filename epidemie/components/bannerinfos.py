@@ -10,4 +10,4 @@ class BannerinfosView(UnicornView):
 
     def mount(self):
         # Chargez les messages à afficher dans la bande d'information
-        self.messages = Information.objects.all().order_by('-date_added')
+        self.messages = Information.objects.all().order_by('-date_added')[:5]

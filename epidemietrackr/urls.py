@@ -3,14 +3,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-from epidemie.views import LandinguePageView, EpidemieDetailView, PatientCreateView, PatientUpdateView, \
+from epidemie.views import LandingPageView, EpidemieDetailView, PatientCreateView, PatientUpdateView, \
     PatientDeleteView, EchantillonCreateView, EchantillonUpdateView, EchantillonDeleteView, InformationDetailView, \
     InformationCreateView, import_data, import_synthese_view
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('api-auth/', include('rest_framework.urls')),
-
+                  # path('api/', include(router.urls)),
 
                   path('tinymce/', include('tinymce.urls')),
                   path("unicorn/", include("django_unicorn.urls")),
@@ -22,7 +22,7 @@ urlpatterns = [
                   path('mpox/', include('mpox.urls')),
                   path('covid/', include('covid.urls')),
                   path('ebola/', include('ebola.urls')),
-                  path('', LandinguePageView.as_view(), name='landing'),
+                  path('', LandingPageView.as_view(), name='landing'),
                   path('epidemie/<int:pk>/', EpidemieDetailView.as_view(), name='epidemie-detail'),
 
                   path('information/create/', InformationCreateView.as_view(), name='infos-create'),

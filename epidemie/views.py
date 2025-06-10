@@ -1,5 +1,8 @@
+import json
 import logging
 import os
+from collections import defaultdict
+
 import pandas as pd
 from datetime import datetime, timedelta, date
 
@@ -8,14 +11,16 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, Permission
 from django.contrib.postgres.search import TrigramSimilarity
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, F, Max
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.timezone import now
 from django.views.generic import TemplateView, DetailView, ListView, CreateView, UpdateView, DeleteView
 from guardian.shortcuts import assign_perm, get_objects_for_user
@@ -29,7 +34,7 @@ from unidecode import unidecode
 from epidemie.admin import EchantillonResource
 from epidemie.forms import PatientForm, InfoscreateForm
 from epidemie.models import HealthRegion, City, EpidemicCase, Patient, ServiceSanitaire, Commune, Epidemie, Echantillon, \
-    DistrictSanitaire, SyntheseDistrict, Information
+    DistrictSanitaire, SyntheseDistrict, Information, SignalementJournal
 from epidemie.reports import EpidemieReport
 from epidemie.serializers import HealthRegionSerializer, CitySerializer, EpidemicCaseSerializer, CommuneSerializer, \
     PatientSerializer, ServiceSanitaireSerializer
@@ -316,6 +321,7 @@ def import_echantillons(request):
 
     return render(request, 'dingue/import.html')
 
+
 def import_view(request):
     return render(request, 'dingue/import.html')
 
@@ -406,35 +412,231 @@ class InformationCreateView(CreateView):
     success_url = reverse_lazy('landing')
 
 
-class LandinguePageView(LoginRequiredMixin, ListView):
-    allowed_roles = ['RegionalRole', 'NationalRole']  # Accès pour les utilisateurs régionaux et nationaux
-    model = Epidemie
-    login_url = '/accounts/login/'
-    template_name = "global/landingpage.html"
-    context_object_name = 'list_epidemie'
+# class LandinguePageView(LoginRequiredMixin, ListView):
+#     allowed_roles = ['RegionalRole', 'NationalRole']  # Accès pour les utilisateurs régionaux et nationaux
+#     model = Epidemie
+#     login_url = '/accounts/login/'
+#     template_name = "global/landingpage.html"
+#     context_object_name = 'list_epidemie'
+#
+#     # paginate_by = 5
+#
+#     def get_queryset(self):
+#         epidemies = Epidemie.objects.all()
+#
+#         # Trier les épidémies en fonction de la propriété nombre_patients_positifs_ce_mois
+#         sorted_epidemies = sorted(epidemies, key=lambda e: e.nombre_patients_positifs_ce_mois, reverse=True)
+#
+#         return sorted_epidemies
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#
+#         # Filtrer les patients ayant au moins un échantillon avec un résultat positif
+#         positive_cases = (
+#             Patient.objects.filter(echantillons__resultat=True)
+#             .values('commune__name')
+#             .annotate(total=Count('id'))
+#             .order_by('-total')
+#         )
+#         # Passer les données au template
+#         context['positive_cases'] = positive_cases
+#
+#         return context
+#
+#     def is_active(self):
+#         today = timezone.now().date()
+#         if self.date_debut is None:
+#             return False  # Si pas de date de début, considérer comme inactive
+#         return self.date_debut <= today and (self.date_fin is None or self.date_fin >= today)
 
-    # paginate_by = 5
+class LandingPageView(LoginRequiredMixin, ListView):
+    model = Epidemie
+    template_name = "global/landingpage.html"
+    context_object_name = 'epidemies'
+    login_url = '/accounts/login/'
 
     def get_queryset(self):
-        epidemies = Epidemie.objects.all()
-
-        # Trier les épidémies en fonction de la propriété nombre_patients_positifs_ce_mois
-        sorted_epidemies = sorted(epidemies, key=lambda e: e.nombre_patients_positifs_ce_mois, reverse=True)
-
-        return sorted_epidemies
+        # Annotate epidemics with statistics and order by most recent activity
+        return Epidemie.objects.annotate(
+            last_activity=Max('echantillon__created_at', filter=Q(echantillon__resultat=True)),
+            total_cases=Count('echantillon__patient', filter=Q(echantillon__resultat=True), distinct=True),
+            total_deaths=Count('echantillon__patient',
+                               filter=Q(echantillon__resultat=True, echantillon__patient__decede=True), distinct=True),
+            new_cases_7d=Count('echantillon', filter=Q(echantillon__resultat=True,
+                                                       echantillon__created_at__gte=timezone.now() - timedelta(
+                                                           days=7)))
+        ).order_by(F('last_activity').desc(nulls_last=True))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Filtrer les patients ayant au moins un échantillon avec un résultat positif
-        positive_cases = (
-            Patient.objects.filter(echantillons__resultat=True)
-            .values('commune__name')
-            .annotate(total=Count('id'))
-            .order_by('-total')
+        # --- Global Statistics (Cached) ---
+        global_stats = cache.get('global_epidemic_stats_v2')
+        if not global_stats:
+            stats = Patient.objects.aggregate(
+                total_confirmed=Count('id', filter=Q(echantillons__resultat=True), distinct=True),
+                total_recovered=Count('id', filter=Q(gueris=True, echantillons__resultat=True), distinct=True),
+                total_deaths=Count('id', filter=Q(decede=True, echantillons__resultat=True), distinct=True),
+                total_suspects=Count('id', filter=Q(cas_suspects=True)),
+                new_suspects_7d=Count('id',
+                                      filter=Q(cas_suspects=True, created_at__gte=timezone.now() - timedelta(days=7)))
+            )
+            confirmed = stats.get('total_confirmed', 0)
+            recovered = stats.get('total_recovered', 0)
+            deaths = stats.get('total_deaths', 0)
+
+            global_stats = {
+                'total_cas_actifs': confirmed - recovered - deaths,
+                'total_gueris': recovered,
+                'total_deces': deaths,
+                'total_suspects': stats.get('total_suspects', 0),
+                'nouveaux_suspects_7j': stats.get('new_suspects_7d', 0),
+                'taux_guerison': round((recovered / confirmed) * 100, 1) if confirmed else 0,
+                'taux_mortalite': round((deaths / confirmed) * 100, 1) if confirmed else 0,
+            }
+            cache.set('global_epidemic_stats_v2', global_stats, 60 * 15)
+
+        context.update(global_stats)
+
+        # --- Statistiques par Pôle Régional ---
+        stats_par_pole = (
+            SyntheseDistrict.objects
+            .values('district_sanitaire__region__poles__name')
+            .annotate(
+                total_cas_positifs=Sum('cas_positif'),
+                total_deces=Sum('decede'),
+                total_gueris=Sum('gueri'),
+            )
+            .order_by('district_sanitaire__region__poles__name')
         )
-        # Passer les données au template
-        context['positive_cases'] = positive_cases
+
+        context['stats_par_pole'] = stats_par_pole
+
+        # --- Chart Data (Cached) ---
+        chart_data = cache.get('chart_evolution_data_v2')
+        if not chart_data:
+            dates = [(timezone.now() - timedelta(days=i)).date() for i in range(29, -1, -1)]
+            daily_counts = Echantillon.objects.filter(created_at__date__gte=dates[0]).extra(
+                {"day": "date(date_collect)"}).values("day").annotate(
+                confirmed=Count('id', filter=Q(resultat=True)),
+                deaths=Count('id', filter=Q(resultat=True, patient__decede=True))
+            ).order_by('day')
+            counts_by_date = {item['day'].strftime('%Y-%m-%d'): item for item in daily_counts}
+            chart_data = {
+                'labels': [d.strftime('%d/%m') for d in dates],
+                'confirmed': [counts_by_date.get(d.strftime('%Y-%m-%d'), {}).get('confirmed', 0) for d in dates],
+                'deaths': [counts_by_date.get(d.strftime('%Y-%m-%d'), {}).get('deaths', 0) for d in dates],
+            }
+            cache.set('chart_evolution_data_v2', chart_data, 60 * 15)
+
+        context['evolution_data_json'] = json.dumps(chart_data)
+
+        # Génère un graphique animé avec ApexCharts par épidémie et pôle régional
+        evolution_apex_data = defaultdict(lambda: defaultdict(lambda: [0] * 30))
+        date_labels = [(timezone.now() - timedelta(days=i)).date() for i in range(29, -1, -1)]
+        date_strs = [d.strftime('%Y-%m-%d') for d in date_labels]
+
+        echantillons = (
+            Echantillon.objects
+            .filter(resultat=True, created_at__date__gte=date_labels[0])
+            .select_related('maladie', 'patient__commune__district__region__poles')
+        )
+
+        for e in echantillons:
+            commune = getattr(e.patient, 'commune', None)
+            district = getattr(commune, 'district', None) if commune else None
+            region = getattr(district, 'region', None) if district else None
+            pole_obj = getattr(region, 'poles', None) if region else None
+            pole = getattr(pole_obj, 'name', 'Inconnu')
+
+            maladie = e.maladie.nom
+            date_str = e.created_at.date().strftime('%Y-%m-%d')
+            if date_str in date_strs:
+                idx = date_strs.index(date_str)
+                evolution_apex_data[f"{maladie} ({pole})"][maladie][idx] += 1
+
+        # Format final pour ApexCharts
+        series_apex = [
+            {
+                'name': label,
+                'data': counts[maladie]
+            }
+            for label, counts in evolution_apex_data.items()
+        ]
+
+        context['apex_labels'] = [d.strftime('%d/%m') for d in date_labels]
+        context['apex_series_json'] = json.dumps(series_apex)
+
+        stats_epidemies_par_pole = (
+            Echantillon.objects
+            .filter(resultat=True, patient__commune__district__region__poles__isnull=False)
+            .values(
+                'patient__commune__district__region__poles__name',
+                'maladie__nom'
+            )
+            .annotate(
+                nb_cas=Count('id'),
+                nb_deces=Count('patient', filter=Q(patient__decede=True))
+            )
+            .order_by('patient__commune__district__region__poles__name', 'maladie__nom')
+        )
+
+        # Formatage des résultats
+        poles_epidemie_stats = {}
+        for item in stats_epidemies_par_pole:
+            pole = item['patient__commune__district__region__poles__name']
+            maladie = item['maladie__nom']
+            cas = item['nb_cas']
+            deces = item['nb_deces']
+
+            if pole not in poles_epidemie_stats:
+                poles_epidemie_stats[pole] = {}
+
+            poles_epidemie_stats[pole][maladie] = {
+                'cas': cas,
+                'deces': deces
+            }
+
+        context['stats_epidemies_par_pole'] = poles_epidemie_stats
+
+        # --- Map & Alerts Data ---
+        foyers = SignalementJournal.objects.filter(
+            created_at__gte=timezone.now() - timedelta(days=90),
+            commune__geom__isnull=False
+        ).select_related('maladie', 'commune').order_by('commune', '-created_at').distinct('commune')
+
+        context['foyers_epidemiques_json'] = json.dumps([
+            {
+                'lat': f.commune.geom.y,
+                'lon': f.commune.geom.x,
+                'maladie': f.maladie.nom,
+                'commune': f.commune.name,
+
+                # 'niveau': f.get_niveau_display(),
+                'date': f.created_at.strftime('%d/%m/%Y')
+            }
+            for f in foyers
+        ])
+        context['regions_touchees'] = foyers.values('commune__district__region').distinct().count()
+        context['foyers_actifs'] = foyers.count()
+        context['dernieres_alertes'] = SignalementJournal.objects.select_related('maladie','commune__district__region').order_by(
+            '-created_at')[:5]
+
+        # --- Data for Dynamic Symptom Modal ---
+        all_epidemies = Epidemie.objects.prefetch_related('symptomes').all()
+        symptoms_data = {
+            epidemie.id: {
+                'nom': epidemie.nom,
+                'description': epidemie.description or "Informations détaillées sur les symptômes courants.",
+                'symptomes': [
+                    {'nom': s.nom
+                    }
+                    for s in epidemie.symptomes.all()
+                ]
+            } for epidemie in all_epidemies
+        }
+        context['symptoms_data_json'] = json.dumps(symptoms_data)
 
         return context
 
@@ -454,7 +656,6 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
         tranches_age = self.get_infected_by_age_tranche(epidemie)
 
         # Ajouter les données au contexte
-
 
         # Générer le rapport
         report = EpidemieReport()
@@ -747,7 +948,6 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
     #     return render(request, self.template_name, context)
 
 
-
 class HomePageView(LoginRequiredMixin, TemplateView):
     login_url = '/accounts/login/'
     # form_class = LoginForm
@@ -758,7 +958,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 
         # Obtenez le nombre de cas par région
         cases_by_region = (
-            Patient.objects.filter(echantillons__resultat='POSITIF')
+            Patient.objects.filter(echantillons__resultat=True)
             .values('commune__district__region__name')
             .annotate(total=Count('id'))
             .order_by('-total')
@@ -766,7 +966,7 @@ class HomePageView(LoginRequiredMixin, TemplateView):
 
         # Obtenez le nombre de cas par district
         cases_by_district = (
-            Patient.objects.filter(echantillons__resultat='POSITIF')
+            Patient.objects.filter(echantillons__resultat=True)
             .values('commune__district__region__name', 'commune__district__nom')
             .annotate(total=Count('id'))
             .order_by('-total')

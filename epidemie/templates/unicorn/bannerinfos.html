@@ -32,43 +32,50 @@
 </style>
 
 <div class="typewriter">
-    <a href="#" id="text-display" class="text-link">Aucune information disponible.</a>
+    <a href="#" id="text-display" class="text-link"><i class="fa fa-bell"></i></a>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Messages list with URLs
     const messages = [
         {% for message in messages %}
-            { title: "{{ message.titre }}", url: "{% url 'infos-detail' message.pk %}" },
+            {
+                title: `{{ message.titre|escapejs }}`,
+                message: `{{ message.message|striptags|truncatechars:120|escapejs }}`,
+                url: `{% url 'infos-detail' message.pk %}`
+            },
         {% empty %}
-            { title: "Aucune information disponible.", url: "#" }
+            {
+                title: "Aucune information disponible.",
+                message: "",
+                url: "#"
+            }
         {% endfor %}
     ];
 
     let currentIndex = 0;
     const textDisplay = document.getElementById('text-display');
 
-    function typeEffect(message, index) {
-        if (index < message.title.length) {
-            textDisplay.textContent += message.title[index];
-            setTimeout(() => typeEffect(message, index + 1), 150); // Adjust speed here
+    function typeEffect(msg, index = 0) {
+        if (index < msg.message.length) {
+            textDisplay.textContent += msg.message[index];
+            setTimeout(() => typeEffect(msg, index + 1), 50); // Vitesse de frappe
         } else {
-            // Add icon after text and set link URL
+            // Ajout de l'icône et du lien
             textDisplay.innerHTML += ' <em class="icon ni ni-external"></em>';
-            textDisplay.setAttribute('href', message.url); // Set the link URL
+            textDisplay.setAttribute('href', msg.url);
+            textDisplay.setAttribute('title', msg.title); // Info-bulle = titre
 
-            // Wait before moving to the next message
             setTimeout(() => {
-                textDisplay.textContent = ''; // Clear the text
-                currentIndex = (currentIndex + 1) % messages.length; // Move to the next message
-                typeEffect(messages[currentIndex], 0); // Start typing the next message
-            }, 2000); // Time before the next message starts
+                textDisplay.textContent = '';
+                currentIndex = (currentIndex + 1) % messages.length;
+                typeEffect(messages[currentIndex], 0);
+            }, 5000);
         }
     }
 
     if (messages.length > 0) {
-        typeEffect(messages[currentIndex], 0); // Start typing the first message
+        typeEffect(messages[currentIndex], 0);
     }
 });
 </script>

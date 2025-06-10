@@ -1,26 +1,38 @@
+import json
 import logging
 import os
 import tempfile
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
+from django.core import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage, default_storage
-from django.db.models import Count, Q
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db import transaction, models
+from django.db.models import Count, Q, F, Max
 from django.db.models.functions import Lower
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.views.decorators.http import require_GET
 from django.views.generic import TemplateView, ListView, CreateView
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from tablib import Dataset
 from unidecode import unidecode
+
+from api.serializers import SignalementExterneSerializer
 from epidemie.tasks import sync_health_regions, process_city_data, generate_commune_report, alert_for_epidemic_cases
 
 from epidemie.models import Patient, Echantillon, HealthRegion, City, Commune, EpidemicCase, ServiceSanitaire, \
-    DistrictSanitaire, Epidemie, CasSynthese, SyntheseDistrict
+    DistrictSanitaire, Epidemie, CasSynthese, SyntheseDistrict, SignalementJournal, Information
 from epidemie.serializers import HealthRegionSerializer, CitySerializer, EpidemicCaseSerializer, PatientSerializer, \
     ServiceSanitaireSerializer, CommuneSerializer, CasSyntheseSerializer, SyntheseDistrictSerializer
 
@@ -341,3 +353,351 @@ def get_infected_cases_data(request, epidemie_id):
     }
 
     return JsonResponse(data)
+
+
+# class RecevoirSignalementAPIView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def post(self, request):
+#         serializer = SignalementExterneSerializer(data=request.data)
+#         if serializer.is_valid():
+#             data = serializer.validated_data
+#             maladie_nom = data.get("maladie_detectee")
+#
+#             # 1. Vérifier si la maladie fait partie des épidémies
+#             try:
+#                 epidemie = Epidemie.objects.get(nom__iexact=maladie_nom)
+#             except Epidemie.DoesNotExist:
+#                 return Response({"detail": "Maladie non enregistrée comme épidémie."}, status=400)
+#
+#             # 2. Chercher ou créer le patient
+#             patient, _ = Patient.objects.get_or_create(
+#                 code_patient=data["code_patient"],
+#                 defaults={
+#                     "nom": data["nom"],
+#                     "prenoms": data["prenoms"],
+#                     "genre": data["genre"],
+#                     "date_naissance": data["date_naissance"],
+#                     "contact": data["contact"],
+#                 }
+#             )
+#
+#             # 3. Associer les infos géographiques
+#             commune = Commune.objects.filter(nom__icontains=data["commune"]).first()
+#             hopital = ServiceSanitaire.objects.filter(nom__icontains=data["hopital"]).first()
+#
+#             if commune:
+#                 patient.commune = commune
+#             if hopital:
+#                 patient.hopital = hopital
+#             patient.cas_suspects = False
+#             patient.gueris = False
+#             patient.decede = False
+#             patient.save()
+#
+#             # 4. Ajouter la synthèse district (agrégation)
+#             SyntheseDistrict.objects.update_or_create(
+#                 maladie=epidemie,
+#                 district_sanitaire=hopital.district if hopital else None,
+#                 defaults={
+#                     "cas_positif": 1
+#                 }
+#             )
+#
+#             return Response({"message": "Signalement enregistré avec succès."})
+#         return Response(serializer.errors, status=400)
+class RecevoirSignalementAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic  # Assure l'intégrité des données
+    def post(self, request):
+        serializer = SignalementExterneSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        data = serializer.validated_data
+        maladie_nom = data.get("maladie_detectee")
+
+        # 1. Vérification de l'épidémie avec cache
+        epidemie = self._get_epidemie(maladie_nom)
+        if not epidemie:
+            return Response({"detail": "Maladie non enregistrée comme épidémie."}, status=400)
+
+        # 2. Gestion du patient en une requête
+        patient = self._get_or_create_patient(data)
+
+        # 3. Mise à jour des informations géographiques
+        self._update_geographic_info(patient, data)
+
+        # 4. Journalisation du signalement
+        self._log_signalement(request, patient, epidemie, data)
+
+        # 5. Mise à jour de la synthèse district
+        self._update_synthese_district(epidemie, patient)
+
+        self._creer_echantillon(patient, epidemie, data)
+
+        return Response({"message": "Signalement enregistré avec succès."})
+
+    def _get_epidemie(self, maladie_nom):
+        """Récupère l'épidémie avec cache pour améliorer les performances"""
+        try:
+            return Epidemie.objects.get(nom__iexact=maladie_nom)
+        except Epidemie.DoesNotExist:
+            return None
+
+    def _get_or_create_patient(self, data):
+        defaults = {
+            "nom": data["nom"],
+            "prenoms": data["prenoms"],
+            "genre": data["genre"],
+            "date_naissance": data["date_naissance"],
+            "contact": data["contact"],
+            "cas_suspects": False,
+            "gueris": False,
+            "decede": False,
+        }
+        patient, created = Patient.objects.get_or_create(
+            code_patient=data["code_patient"],
+            defaults=defaults
+        )
+        if not created:
+            updated = False
+            for key, value in defaults.items():
+                if getattr(patient, key) != value:
+                    setattr(patient, key, value)
+                    updated = True
+            if updated:
+                patient.save()
+        return patient
+
+    def _update_geographic_info(self, patient, data):
+        """Met à jour les informations géographiques avec select_related"""
+        commune = Commune.objects.filter(name__icontains=data["commune"]).first()
+        hopital = ServiceSanitaire.objects.filter(nom__icontains=data["hopital"]).select_related('district').first()
+
+        if commune:
+            patient.commune = commune
+        if hopital:
+            patient.hopital = hopital
+        patient.save()
+
+    def _creer_echantillon(self, patient, epidemie, data):
+        """Crée ou met à jour un échantillon avec le code donné s’il existe"""
+
+        code = data.get("code_echantillon", None)
+
+        if code:
+            echantillon, created = Echantillon.objects.get_or_create(
+                code_echantillon=code,
+                defaults={
+                    "patient": patient,
+                    "maladie": epidemie,
+                    "date_collect": data.get("date_analyse"),
+                    "site_collect": data.get("hopital", ""),
+                    "resultat": True,
+                    "status_echantillons": "POSITIF",
+                }
+            )
+            if not created:
+                print(f"⚠️ Échantillon {code} déjà existant. Aucune mise à jour faite.")
+        else:
+            echantillon = Echantillon.objects.create(
+                patient=patient,
+                maladie=epidemie,
+                date_collect=data.get("date_analyse"),
+                site_collect=data.get("hopital", ""),
+                resultat=True,
+                status_echantillons="POSITIF"
+            )
+            print("✅ Échantillon généré automatiquement:", echantillon.code_echantillon)
+
+    def _log_signalement(self, request, patient, epidemie, data):
+        """Journalise le signalement pour traçabilité"""
+        SignalementJournal.objects.create(
+            patient=patient,
+            maladie=epidemie,
+            hopital=patient.hopital,
+            commune=patient.commune,
+            donnees_brutes=json.loads(json.dumps(data, cls=DjangoJSONEncoder)),
+            source_ip=self._get_client_ip(request),
+            user_api=request.user,
+            source_application=data.get("source_application", None),  # ✅ ici
+            statut_reception="SUCCES",
+            message="Signalement enregistré avec succès"
+        )
+
+        # 🔔 Création automatique d'une Information
+        titre = f"Alerte : Nouveau cas de {epidemie.nom}"
+        message = (
+            f"<p>Nouveau cas de <strong>{epidemie.nom}</strong> signalé.</p>"
+            f"<ul>"
+            f"<li><strong>à :</strong> {patient.commune.name if patient.commune else 'Non renseignée'}</li>"
+            f"<li><strong> Hôpital :</strong> {patient.hopital.nom if patient.hopital else 'Non renseigné'}</li>"
+            f"<li><strong> le : </strong> {timezone.now().strftime('%d/%m/%Y à %Hh%M')}</li>"
+            f"</ul>"
+        )
+
+        Information.objects.create(
+            titre=titre,
+            message=message,
+            auteur=request.user.employee if hasattr(request.user, 'employee') else None
+        )
+
+    def _update_synthese_district(self, epidemie, patient):
+        print("DEBUG: Hôpital=", patient.hopital)
+        print("DEBUG: District=", getattr(patient.hopital, "district", None))
+
+        if patient.hopital and getattr(patient.hopital, "district", None):
+            SyntheseDistrict.increment_counter(
+                epidemie,
+                patient.hopital.district,
+                "cas_positif"
+            )
+        else:
+            print("⚠️ Aucun district associé à cet hôpital.")
+
+    def _get_client_ip(self, request):
+        """Récupère l'IP du client"""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
+
+
+class LandingPageView(LoginRequiredMixin, ListView):
+    """
+    This view now only handles the initial rendering of the HTML page.
+    All dynamic data will be loaded via the API.
+    """
+    model = Epidemie
+    template_name = "global/landingpage.html"
+    context_object_name = 'epidemies'  # The initial list can be rendered on first load
+    login_url = '/accounts/login/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pre-populate symptom data for the modal to avoid an extra API call
+        all_epidemies = Epidemie.objects.prefetch_related('symptomes').all()
+        symptoms_data = {
+            epidemie.id: {
+                'nom': epidemie.nom,
+                'description': epidemie.description or "Informations détaillées sur les symptômes courants.",
+                'symptomes': [
+                    {'nom': s.nom, 'description': s.description or "Pas de description.", 'frequence': s.frequence,
+                     'gravite': s.gravite}
+                    for s in epidemie.symptomes.all()
+                ]
+            } for epidemie in all_epidemies
+        }
+        context['symptoms_data_json'] = json.dumps(symptoms_data)
+        return context
+
+
+@require_GET
+def landing_page_api(request):
+    """
+    This new API view provides all the dashboard data in a single JSON response.
+    It's designed to be called asynchronously by the frontend.
+    """
+    # --- Global Statistics (Cached) ---
+    global_stats = cache.get('global_epidemic_stats_v2')
+    if not global_stats:
+        stats = Patient.objects.aggregate(
+            total_confirmed=Count('id', filter=Q(echantillons__resultat=True), distinct=True),
+            total_recovered=Count('id', filter=Q(gueris=True, echantillons__resultat=True), distinct=True),
+            total_deaths=Count('id', filter=Q(decede=True, echantillons__resultat=True), distinct=True),
+            total_suspects=Count('id', filter=Q(cas_suspects=True)),
+            new_suspects_7d=Count('id', filter=Q(cas_suspects=True, created_at__gte=timezone.now() - timedelta(days=7)))
+        )
+        confirmed = stats.get('total_confirmed', 0)
+        recovered = stats.get('total_recovered', 0)
+        deaths = stats.get('total_deaths', 0)
+
+        global_stats = {
+            'total_cas_actifs': confirmed - recovered - deaths,
+            'total_gueris': recovered,
+            'total_deces': deaths,
+            'total_suspects': stats.get('total_suspects', 0),
+            'nouveaux_suspects_7j': stats.get('new_suspects_7d', 0),
+            'taux_guerison': round((recovered / confirmed) * 100, 1) if confirmed else 0,
+            'taux_mortalite': round((deaths / confirmed) * 100, 1) if confirmed else 0,
+        }
+        cache.set('global_epidemic_stats_v2', global_stats, 60 * 15)
+
+    # --- Epidemics List ---
+    epidemies_qs = Epidemie.objects.annotate(
+        last_activity=Max('echantillon__date_collect', filter=Q(echantillon__resultat=True)),
+        total_cases=Count('echantillon__patient', filter=Q(echantillon__resultat=True), distinct=True),
+        total_deaths=Count('echantillon__patient',
+                           filter=Q(echantillon__resultat=True, echantillon__patient__decede=True), distinct=True),
+        new_cases_7d=Count('echantillon', filter=Q(echantillon__resultat=True,
+                                                   echantillon__date_collect__gte=timezone.now() - timedelta(days=7)))
+    ).order_by(F('last_activity').desc(nulls_last=True))
+
+    epidemies_data = [{
+        'id': e.id,
+        'nom': e.nom,
+        'thumbnails_url': e.thumbnails.url if e.thumbnails else '',
+        'last_activity': e.last_activity.strftime('%d %b %Y') if e.last_activity else 'Aucun',
+        'total_cases': e.total_cases,
+        'total_deaths': e.total_deaths,
+        'new_cases_7d': e.new_cases_7d,
+        'status_display': e.status_display,
+        'status_class': e.status_class,
+    } for e in epidemies_qs]
+
+    # --- Chart Data (Cached) ---
+    chart_data = cache.get('chart_evolution_data_v2')
+    if not chart_data:
+        dates = [(timezone.now() - timedelta(days=i)).date() for i in range(29, -1, -1)]
+        daily_counts = Echantillon.objects.filter(date_collect__date__gte=dates[0]).extra(
+            {"day": "date(date_collect)"}).values("day").annotate(
+            confirmed=Count('id', filter=Q(resultat=True)),
+            deaths=Count('id', filter=Q(resultat=True, patient__decede=True))
+        ).order_by('day')
+        counts_by_date = {item['day'].strftime('%Y-%m-%d'): item for item in daily_counts}
+        chart_data = {
+            'labels': [d.strftime('%d/%m') for d in dates],
+            'confirmed': [counts_by_date.get(d.strftime('%Y-%m-%d'), {}).get('confirmed', 0) for d in dates],
+            'deaths': [counts_by_date.get(d.strftime('%Y-%m-%d'), {}).get('deaths', 0) for d in dates],
+        }
+        cache.set('chart_evolution_data_v2', chart_data, 60 * 15)
+
+    # --- Map & Alerts Data ---
+    foyers = SignalementJournal.objects.filter(
+        created_at__gte=timezone.now() - timedelta(days=90),
+        commune__latitude__isnull=False, commune__longitude__isnull=False
+    ).select_related('maladie', 'commune').order_by('commune', '-created_at').distinct('commune')
+
+    foyers_data = [
+        {'lat': f.commune.latitude, 'lon': f.commune.longitude, 'maladie': f.maladie.nom, 'commune': f.commune.nom,
+         'niveau': f.get_niveau_display(), 'date': f.created_at.strftime('%d/%m/%Y')}
+        for f in foyers
+    ]
+
+    alertes_qs = SignalementJournal.objects.select_related('maladie', 'commune__district__region').order_by(
+        '-created_at')[:5]
+    alertes_data = [{
+        'maladie_nom': a.maladie.nom,
+        'region_nom': a.commune.district.region.nom,
+        'message': a.message,
+        'created_since': f"{a.created_at.strftime('%d %b, %H:%M')}",
+        'niveau_class': 'danger' if a.niveau == 'H' else ('warning' if a.niveau == 'M' else 'primary')
+    } for a in alertes_qs]
+
+    data = {
+        'global_stats': global_stats,
+        'epidemies': epidemies_data,
+        'chart_data': chart_data,
+        'map_data': {
+            'foyers': foyers_data,
+            'regions_touchees': foyers.values('commune__district__region').distinct().count(),
+            'foyers_actifs': foyers.count(),
+        },
+        'alertes': alertes_data,
+        'last_updated': timezone.now().strftime('%H:%M:%S')
+    }
+
+    return JsonResponse(data)
+
+
+

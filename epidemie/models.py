@@ -5,7 +5,9 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
+from django.db import transaction
 from django.db.models import Sum
+from django.utils import timezone
 from django.utils.timezone import now
 from djgeojson.fields import PointField
 from simple_history.models import HistoricalRecords
@@ -74,11 +76,20 @@ class Information(models.Model):
         return self.titre
 
 
-class HealthRegion(models.Model):
-    name = models.CharField(max_length=100)
+class PolesRegionaux(models.Model):
+    name = models.CharField(max_length=100, unique=True, db_index=True)
 
     def __str__(self):
-        return self.name
+        return self.name if self.name else "Unnamed Pole"
+
+
+# Modèle des Régions Sanitaires
+class HealthRegion(models.Model):
+    name = models.CharField(max_length=100, unique=True, db_index=True)
+    poles = models.ForeignKey(PolesRegionaux, on_delete=models.SET_NULL, null=True, blank=True, related_name='regions')
+
+    def __str__(self):
+        return f"{self.name}-{self.poles}"
 
 
 class DistrictSanitaire(models.Model):
@@ -105,8 +116,6 @@ class Commune(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.district} ({self.geom})"
-
-
 
 
 class ServiceSanitaire(models.Model):
@@ -196,11 +205,15 @@ class Patient(models.Model):
     # ville = models.ForeignKey('City', on_delete=models.SET_NULL, null=True)
     status = models.CharField(choices=Patient_statut_choices, max_length=100, default='Aucun', null=True, blank=True)
     gueris = models.BooleanField(default=False)
+    cas_suspects = models.BooleanField(default=False)
     decede = models.BooleanField(default=False)
     cascontact = models.ManyToManyField('self', blank=True)
     history = HistoricalRecords()
 
     class Meta:
+        indexes = [
+            models.Index(fields=['code_patient']),  # Pour les recherches fréquentes
+        ]
         ordering = ['-created_at']
         permissions = (('voir_patient', 'Peut voir patient'),)
 
@@ -242,7 +255,8 @@ class Symptom(models.Model):
 
 
 class Typeepidemie(models.Model):
-    pass
+    nom = models.CharField(max_length=100)
+    def __str__(self): return self.nom
 
 
 class Epidemie(models.Model):
@@ -309,9 +323,22 @@ class Epidemie(models.Model):
         ).count()
 
     def is_active(self):
-        from django.utils import timezone
         today = timezone.now().date()
-        return self.date_debut <= today and (self.date_fin is None or self.date_fin >= today)
+        if not self.date_debut:  # Si pas de date de début, considérer comme inactive
+            return False
+        return (self.date_debut <= today) and (self.date_fin is None or self.date_fin >= today)
+
+    @property
+    def status_display(self):
+        if not self.date_debut:
+            return "Non planifiée"
+        return "Active" if self.is_active() else "Inactive"
+
+    @property
+    def status_class(self):
+        if not self.date_debut:
+            return "secondary"
+        return "danger" if self.is_active() else "light"
 
     def __str__(self):
         return self.nom
@@ -442,5 +469,74 @@ class SyntheseDistrict(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['maladie', 'district_sanitaire']),  # Pour les jointures
+            models.Index(fields=['created_at']),  # Pour les analyses temporelles
+        ]
+        # unique_together = ('maladie', 'district_sanitaire')  # Évite les doublons
+
+    @classmethod
+    def increment_counter(cls, epidemie, district, field_name):
+        """Incrémente un champ et initialise explicitement tous les autres si création"""
+        with transaction.atomic():
+            obj, created = cls.objects.select_for_update().get_or_create(
+                maladie=epidemie,
+                district_sanitaire=district,
+                defaults={
+                    # Initialise tous les champs à 0 sauf celui ciblé
+                    'nbre_cas_suspects': 0,
+                    'cas_positif': 1 if field_name == 'cas_positif' else 0,
+                    'cas_negatif': 1 if field_name == 'cas_negatif' else 0,
+                    'evacue': 1 if field_name == 'evacue' else 0,
+                    'decede': 1 if field_name == 'decede' else 0,
+                    'gueri': 1 if field_name == 'gueri' else 0,
+                    'suivi_en_cours': 1 if field_name == 'suivi_en_cours' else 0,
+                    'nbre_sujets_contacts': 1 if field_name == 'nbre_sujets_contacts' else 0,
+                    'contacts_en_cours_suivi': 1 if field_name == 'contacts_en_cours_suivi' else 0,
+                    'contacts_sorti_suivi': 1 if field_name == 'contacts_sorti_suivi' else 0,
+                    'devenu_suspect': 1 if field_name == 'devenu_suspect' else 0,
+                    'devenu_positif': 1 if field_name == 'devenu_positif' else 0,
+                }
+            )
+            if not created:
+                setattr(obj, field_name, models.F(field_name) + 1)
+                obj.save()
+
     def __str__(self):
         return f"Cas en provenance de {self.district_sanitaire} enregistré "
+
+
+class SignalementJournal(models.Model):
+    patient = models.ForeignKey('Patient', on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='journaux_signalement')
+    maladie = models.ForeignKey('Epidemie', on_delete=models.SET_NULL, null=True, blank=True)
+    date_analyse = models.DateField(null=True, blank=True)
+    hopital = models.ForeignKey('ServiceSanitaire', on_delete=models.SET_NULL, null=True, blank=True)
+    commune = models.ForeignKey('Commune', on_delete=models.SET_NULL, null=True, blank=True)
+
+    donnees_brutes = models.JSONField(null=True, blank=True, help_text="Requête JSON complète reçue.")
+    source_ip = models.GenericIPAddressField(null=True, blank=True)
+    user_api = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL,
+                                 help_text="Utilisateur API ayant envoyé le signalement.")
+
+    statut_reception = models.CharField(
+        max_length=50,
+        choices=[
+            ("SUCCES", "Succès"),
+            ("ERREUR", "Erreur"),
+            ("IGNORÉ", "Ignoré"),
+        ],
+        default="SUCCES"
+    )
+    message = models.TextField(blank=True, null=True, help_text="Message ou erreur retournée.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    source_application = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Nom de l'application ayant envoyé le signalement."
+    )
+
+    def __str__(self):
+        return f"{self.maladie} - {self.patient} - {self.statut_reception}"

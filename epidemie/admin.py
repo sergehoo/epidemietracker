@@ -78,7 +78,7 @@ class PolesRegionauxAdmin(ImportExportModelAdmin):
 @admin.register(HealthRegion)
 class HealthRegionAdmin(ImportExportModelAdmin):
     resource_class = HealthRegionResource
-    list_display = ('id', 'name')
+    list_display = ('id', 'name','poles')
 
 
 class CityAdminForm(forms.ModelForm):

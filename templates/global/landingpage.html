@@ -197,7 +197,7 @@
                                             <div class="card-inner">
                                                 <h5 class="card-title">Répartition Géographique</h5>
                                                 <div class="map-container mt-3">
-                                                    <div id="map" style="height:100%;"></div>
+                                                    <div id="map" style="height:400px"></div>
                                                 </div>
                                                 <div class="d-flex justify-content-between pt-3">
                                                     <span class="text-soft"><em class="icon ni ni-map-pin-fill text-primary"></em> Régions: {{ regions_touchees }}</span>
@@ -546,7 +546,7 @@
         // --- Leaflet Map ---
         // --- Leaflet Map with MarkerCluster ---
         const foyersData = {{ foyers_epidemiques_json|safe }};
-        console.log('FOYERS DATA:', {{ foyers_epidemiques_json|safe }});
+        {#console.log('FOYERS DATA:', {{ foyers_epidemiques_json|safe }});#}
         if (document.getElementById('map') && L && foyersData.length > 0) {
             const map = L.map('map').setView([7.54, -5.55], 6);
 

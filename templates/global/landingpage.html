@@ -1,7 +1,7 @@
 
 {% load static %}
 {% load humanize %}
-
+{% load unicorn %}
 <!DOCTYPE html>
 <html lang="fr" class="js">
 <head>
@@ -112,6 +112,7 @@
     }
 
 </style>
+{% unicorn_scripts %}
 <body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
 <div class="nk-app-root">
     {% include 'global/layouts/navhead.html' %}
@@ -545,6 +546,7 @@
         // --- Leaflet Map ---
         // --- Leaflet Map with MarkerCluster ---
         const foyersData = {{ foyers_epidemiques_json|safe }};
+        console.log('FOYERS DATA:', {{ foyers_epidemiques_json|safe }});
         if (document.getElementById('map') && L && foyersData.length > 0) {
             const map = L.map('map').setView([7.54, -5.55], 6);
 

@@ -1,5 +1,6 @@
 import datetime
 import random
+import secrets
 import string
 import uuid
 
@@ -508,10 +509,17 @@ class SyntheseDistrict(models.Model):
         return f"Cas en provenance de {self.district_sanitaire} enregistré "
 
 
+def generate_api_key():
+    while True:
+        key = secrets.token_urlsafe(32)  # ou get_random_string(50)
+        if not Platform.objects.filter(api_key=key).exists():
+            return key
+
+
 class Platform(models.Model):
     name = models.CharField(max_length=100, unique=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    api_key = models.CharField(max_length=128, unique=True)
+    api_key = models.CharField(max_length=128, default=generate_api_key, unique=True)
     last_connected = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
 
@@ -541,8 +549,8 @@ class SignalementJournal(models.Model):
     message = models.TextField(blank=True, null=True, help_text="Message ou erreur retournée.")
     created_at = models.DateTimeField(auto_now_add=True)
     source_application = models.ForeignKey(Platform, on_delete=models.SET_NULL, null=True, blank=True,
-        help_text="Nom de l'application ayant envoyé le signalement."
-    )
+                                           help_text="Nom de l'application ayant envoyé le signalement."
+                                           )
 
     def __str__(self):
         return f"{self.maladie} - {self.patient} - {self.statut_reception}"

@@ -324,21 +324,44 @@ class Epidemie(models.Model):
             date_collect__year=current_year
         ).count()
 
+    @property
+    def dernier_cas_positif(self):
+        dernier = self.echantillon_set.filter(
+            resultat=True
+        ).order_by('-created_at').first()
+
+        return dernier.created_at.date() if dernier and dernier.created_at else None
+
+    # def is_active(self):
+    #     today = timezone.now().date()
+    #     if not self.date_debut:  # Si pas de date de début, considérer comme inactive
+    #         return False
+    #     return (self.date_debut <= today) and (self.date_fin is None or self.date_fin >= today)
+
     def is_active(self):
         today = timezone.now().date()
-        if not self.date_debut:  # Si pas de date de début, considérer comme inactive
-            return False
-        return (self.date_debut <= today) and (self.date_fin is None or self.date_fin >= today)
+        recent_threshold = today - datetime.timedelta(days=15)
+
+        return self.echantillon_set.filter(
+            resultat=True,
+            created_at__date__gte=recent_threshold
+        ).exists()
 
     @property
     def status_display(self):
-        if not self.date_debut:
-            return "Non planifiée"
-        return "Active" if self.is_active() else "Inactive"
+        dernier_cas = self.dernier_cas_positif
+        if not dernier_cas:
+            return "Aucun cas détecté"
+
+        jours_depuis = (now().date() - dernier_cas).days
+        if jours_depuis > 15:
+            return f"Aucun nouveau cas depuis {jours_depuis} jours"
+        return "Active"
 
     @property
     def status_class(self):
-        if not self.date_debut:
+        dernier_cas = self.dernier_cas_positif
+        if not dernier_cas:
             return "secondary"
         return "danger" if self.is_active() else "light"
 

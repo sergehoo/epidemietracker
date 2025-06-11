@@ -546,6 +546,9 @@ class Platform(models.Model):
     last_connected = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+
 
 class SignalementJournal(models.Model):
     patient = models.ForeignKey('Patient', on_delete=models.SET_NULL, null=True, blank=True,

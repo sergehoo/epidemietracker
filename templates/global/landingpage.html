@@ -6,20 +6,54 @@
 <html lang="fr" class="js">
 <head>
     <meta charset="utf-8">
-    <meta name="author" content="Ministère de la Santé Côte d'Ivoire">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Tableau de bord national de surveillance épidémiologique">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Métadonnées standards -->
+    <meta name="author" content="Ministère de la Santé et de l'Hygiène Publique, Côte d'Ivoire">
+    <meta name="description" content="Tableau de bord national de surveillance épidémiologique - Système de veille sanitaire pour le suivi des maladies en Côte d'Ivoire">
+    <meta name="keywords" content="santé publique, veille sanitaire, épidémiologie, Côte d'Ivoire, surveillance des maladies, ministère de la santé">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Métadonnées Open Graph pour le partage social -->
+    <meta property="og:title" content="Système National de Veille Sanitaire - Côte d'Ivoire">
+    <meta property="og:description" content="Tableau de bord de surveillance épidémiologique du Ministère de la Santé de Côte d'Ivoire">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://[URL-DU-SITE]">
+    <meta property="og:image" content="{% static 'images/logoMSHPCMU.svg' %}">
+    <meta property="og:site_name" content="Système National de Veille Sanitaire">
+    <meta property="og:locale" content="fr_CI">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Système National de Veille Sanitaire">
+    <meta name="twitter:description" content="Tableau de bord de surveillance épidémiologique du Ministère de la Santé de Côte d'Ivoire">
+    <meta name="twitter:image" content="{% static 'images/logoMSHPCMU.svg' %}">
+    
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'images/logoMSHPCMU.svg' %}" type="image/svg+xml">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="manifest" href="{% static 'site.webmanifest' %}">
+    
+    <title>Système National de Veille Sanitaire - Ministère de la Santé Côte d'Ivoire</title>
 
-    <link rel="shortcut icon" href="{% static 'images/logoMSHPCMU.svg' %}">
-    <title>Système National de veille sanitaire</title>
-
+    <!-- Feuilles de style -->
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
-
-    <style>
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://[URL-DU-SITE]">
+    
+    <!-- Thème du navigateur -->
+    <meta name="theme-color" content="#0056b3">
+    <meta name="msapplication-TileColor" content="#0056b3">
+</head>
+ <style>
         :root {
             --primary-color: #2c7be5;
             --success-color: #00d97e;
@@ -88,7 +122,6 @@
             box-shadow: none;
         }
     </style>
-</head>
 <style>
 /* Transition de l'opacité au remplacement HTMX */
     .transition-opacity {

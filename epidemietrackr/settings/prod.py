@@ -1,6 +1,6 @@
 from .base import *
 
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'veillesanitaire.com', 'www.veillesanitaire.com', 'https://veillesanitaire.com'

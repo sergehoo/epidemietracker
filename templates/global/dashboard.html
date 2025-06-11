@@ -49,10 +49,9 @@
                     <div class="nk-header-wrap">
                         <div class="nk-header-brand">
                             <a href="#" class="logo-link">
-                                <img class="logo-light logo-img" src="./images/logo.png" srcset="./images/logo2x.png 2x"
+                                <img class="logo-light logo-img" src="{% static 'images/logo.png'%}"
                                      alt="logo">
-                                <img class="logo-dark logo-img" src="./images/logo-dark.png"
-                                     srcset="./images/logo-dark2x.png 2x" alt="logo-dark">
+                                <img class="logo-dark logo-img" src="{% static 'images/logo-dark.png'%}" alt="logo-dark">
                             </a>
                         </div>
                         <div class="nk-menu-trigger ml-auto mr-n1">
@@ -320,7 +319,7 @@
                                                 <div class="nk-tb-item">
                                                     <div class="nk-tb-col">
                                                         <div class="tb-country">
-                                                            <img class="flag" src="./images/flags/us.png" alt="">
+                                                            <img class="flag" src="{% static 'images/ivory-coast.png'%}" alt="">
                                                             <div class="name">{{ district.nom }}</div>
                                                         </div>
                                                     </div>

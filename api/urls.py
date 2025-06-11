@@ -9,7 +9,7 @@ from api.views import HealthRegionViewSet, CityViewSet, EpidemicCaseViewSet, Pat
     ServiceSanitaireViewSet, dashboard_view, CasSyntheseViewSet, SyntheseDistrictViewSet, get_infected_cases_data, \
     RecevoirSignalementAPIView, landing_page_api
 from epidemie.views import import_view, import_echantillons, PatientListView, EchantillonListView, HomePageView, \
-    import_excel
+    import_excel, stats_epidemie_partial, epidemies_partial, dernieres_alertes_partial
 
 router = DefaultRouter()
 router.register(r'healthregions', HealthRegionViewSet)
@@ -40,6 +40,10 @@ urlpatterns = [
                   path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # login
                   path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # refresh token
                   path('epidemie/api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+
+                  path("api/partials/stats/", stats_epidemie_partial, name="stats-epidemie-partial"),
+                  path("api/partials/epidemies/", epidemies_partial, name="epidemies-partial"),
+                  path("api/partials/dernieres_alertes/", dernieres_alertes_partial, name="dernieres_alertes_partial"),
 
                   path('api/dashboard-data/', landing_page_api, name='dashboard_api_data'),
 

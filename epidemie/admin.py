@@ -1,3 +1,5 @@
+import secrets
+
 from django import forms
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
@@ -8,7 +10,8 @@ from import_export.widgets import ForeignKeyWidget
 from leaflet.forms.widgets import LeafletWidget
 
 from epidemie.models import HealthRegion, City, EpidemicCase, DistrictSanitaire, Epidemie, Echantillon, Patient, \
-    Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict, Information, Alert, PolesRegionaux
+    Employee, Symptom, ServiceSanitaire, Commune, CasSynthese, SyntheseDistrict, Information, Alert, PolesRegionaux, \
+    StructureProvenance, SignalementJournal, Platform
 from epidemie.ressources import SyntheseDistrictResource
 
 admin.site.site_header = 'EPIDEMIE BACK-END CONTROLER'
@@ -67,11 +70,9 @@ class HealthRegionResource(resources.ModelResource):
 
 @admin.register(PolesRegionaux)
 class PolesRegionauxAdmin(ImportExportModelAdmin):
-    list_display = ('id','name')
+    list_display = ('id', 'name')
     list_filter = ('id', 'name')
-    search_fields = ('id','name')
-
-
+    search_fields = ('id', 'name')
 
 
 @admin.register(HealthRegion)
@@ -212,3 +213,110 @@ class InformationAdmin(ImportExportModelAdmin):
 class AlertAdmin(ImportExportModelAdmin):
     pass
     # resource_class = (EchantillonResource)
+
+
+@admin.register(SignalementJournal)
+class SignalementJournalAdmin(admin.ModelAdmin):
+    list_display = ('id', 'maladie', 'patient', 'commune', 'statut_reception', 'created_at', 'source_application')
+    list_filter = ('statut_reception', 'maladie', 'commune', 'created_at')
+    search_fields = ('patient__nom', 'patient__prenom', 'maladie__nom', 'commune__name', 'message')
+    list_select_related = ('maladie', 'patient', 'commune')
+    date_hierarchy = 'created_at'
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'source_ip', 'user_api')
+    fieldsets = (
+        ('Information de base', {
+            'fields': ('maladie', 'patient', 'commune', 'hopital')
+        }),
+        ('Détails du signalement', {
+            'fields': ('date_analyse', 'statut_reception', 'message')
+        }),
+        ('Métadonnées', {
+            'fields': ('donnees_brutes', 'source_application', 'source_ip', 'user_api', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('maladie', 'patient', 'commune', 'hopital', 'user_api')
+
+
+@admin.register(StructureProvenance)
+class StructureProvenanceAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'district')
+    list_filter = ('district',)
+    search_fields = ('nom', 'district__name')
+    list_select_related = ('district',)
+    ordering = ('nom',)
+
+@admin.register(Platform)
+class PlatformAdmin(admin.ModelAdmin):
+    list_display = ("name", "user", "is_active", "last_connected", "api_key")
+    readonly_fields = ("api_key",)
+# @admin.register(Platform)
+# class PlatformAdmin(admin.ModelAdmin):
+#     """
+#     Interface d'administration personnalisée pour le modèle Platform.
+#     """
+#
+#     # --- Configuration de l'affichage dans la liste ---
+#     list_display = (
+#         'name',
+#         'user',
+#         'is_active',
+#         'last_connected',
+#         'api_key_preview'
+#     )
+#
+#     list_filter = (
+#         'is_active',
+#         'last_connected'
+#     )
+#
+#     search_fields = (
+#         'name',
+#         'user__username',  # Permet de rechercher par le nom d'utilisateur associé
+#         'user__email'
+#     )
+#
+#     # --- Configuration du formulaire d'édition ---
+#
+#     # Organise les champs en sections pour plus de clarté
+#     fieldsets = (
+#         ('Informations Générales', {
+#             'fields': ('name', 'user', 'is_active')
+#         }),
+#
+#     )
+#
+#     # --- Sécurité et Automatisation ---
+#
+#     def get_readonly_fields(self, request, obj=None):
+#         """
+#         Rend la clé API non-modifiable après la création de l'objet.
+#         """
+#         if obj:  # Si l'objet existe déjà (formulaire de modification)
+#             return self.readonly_fields + ('api_key', 'last_connected')
+#         # Pour un nouvel objet (formulaire de création), les champs ne sont pas en lecture seule
+#         return self.readonly_fields
+#
+#     def save_model(self, request, obj, form, change):
+#         """
+#         Génère automatiquement une clé API sécurisée si c'est un nouvel objet.
+#         """
+#         if not obj.pk:  # Si l'objet n'a pas encore d'ID, c'est une création
+#             # Génère un token hexadécimal de 64 caractères (32 octets)
+#             obj.api_key = secrets.token_hex(32)
+#
+#         super().save_model(request, obj, form, change)
+#
+#     @admin.display(description='Aperçu Clé API')
+#     def api_key_preview(self, obj):
+#         """
+#         Affiche seulement les 8 premiers caractères de la clé API dans la liste
+#         pour ne pas surcharger l'affichage et pour la sécurité.
+#         """
+#         if obj.api_key:
+#             return f"{obj.api_key}..."
+#         return "Non générée"

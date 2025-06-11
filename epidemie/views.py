@@ -19,9 +19,11 @@ from django.db.models import Q, Count, Sum, F, Max
 from django.db.models.functions import TruncMonth
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.timezone import now
+from django.views.decorators.cache import never_cache
 from django.views.generic import TemplateView, DetailView, ListView, CreateView, UpdateView, DeleteView
 from guardian.shortcuts import assign_perm, get_objects_for_user
 from rest_framework import viewsets, serializers
@@ -450,6 +452,52 @@ class InformationCreateView(CreateView):
 #             return False  # Si pas de date de début, considérer comme inactive
 #         return self.date_debut <= today and (self.date_fin is None or self.date_fin >= today)
 
+def stats_epidemie_partial(request):
+    # Reprendre la logique principale
+    landing_view = LandingPageView()
+    landing_view.request = request
+    epidemies = landing_view.get_queryset()
+    context = landing_view.get_context_data()
+
+    html = render_to_string("partials/_stats_epidemies.html", {
+        'epidemies': epidemies,
+        'total_cas_actifs': context['total_cas_actifs'],
+        'total_gueris': context['total_gueris'],
+        'total_deces': context['total_deces'],
+        'total_suspects': context['total_suspects'],
+        'nouveaux_suspects_7j': context['nouveaux_suspects_7j'],
+        'taux_guerison': context['taux_guerison'],
+        'taux_mortalite': context['taux_mortalite'],
+    })
+
+    return JsonResponse({"html": html})
+
+
+@never_cache
+def epidemies_partial(request):
+    # Récupère les données comme dans la vue principale
+    epidemies = Epidemie.objects.annotate(
+        last_activity=Max('echantillon__created_at', filter=Q(echantillon__resultat=True)),
+        total_cases=Count('echantillon__patient', filter=Q(echantillon__resultat=True), distinct=True),
+        total_deaths=Count('echantillon__patient',
+                           filter=Q(echantillon__resultat=True, echantillon__patient__decede=True), distinct=True),
+        new_cases_7d=Count('echantillon', filter=Q(echantillon__resultat=True,
+                                                   echantillon__created_at__gte=now() - timedelta(days=7)))
+    ).order_by(F('last_activity').desc(nulls_last=True))
+
+    return render(request, "partials/_epidemies_list.html", {"epidemies": epidemies})
+
+
+@never_cache
+def dernieres_alertes_partial(request):
+    alertes = SignalementJournal.objects.select_related(
+        'maladie', 'commune__district__region'
+    ).order_by('-created_at')[:5]
+    html = render_to_string("partials/_alertes_list.html", {'dernieres_alertes': alertes})
+    # return JsonResponse({"html": html})
+    return render(request, "partials/_alertes_list.html", {'dernieres_alertes': alertes})
+
+
 class LandingPageView(LoginRequiredMixin, ListView):
     model = Epidemie
     template_name = "global/landingpage.html"
@@ -620,7 +668,8 @@ class LandingPageView(LoginRequiredMixin, ListView):
         ])
         context['regions_touchees'] = foyers.values('commune__district__region').distinct().count()
         context['foyers_actifs'] = foyers.count()
-        context['dernieres_alertes'] = SignalementJournal.objects.select_related('maladie','commune__district__region').order_by(
+        context['dernieres_alertes'] = SignalementJournal.objects.select_related('maladie',
+                                                                                 'commune__district__region').order_by(
             '-created_at')[:5]
 
         # --- Data for Dynamic Symptom Modal ---
@@ -631,7 +680,7 @@ class LandingPageView(LoginRequiredMixin, ListView):
                 'description': epidemie.description or "Informations détaillées sur les symptômes courants.",
                 'symptomes': [
                     {'nom': s.nom
-                    }
+                     }
                     for s in epidemie.symptomes.all()
                 ]
             } for epidemie in all_epidemies
@@ -853,99 +902,6 @@ class EpidemieDetailView(LoginRequiredMixin, DetailView):
                     (today.month, today.day) < (date_naissance.month, date_naissance.day)
             )
         return None
-
-    # def get(self, request, pk):
-    #     epidemie = get_object_or_404(Epidemie, pk=pk)
-    #
-    #     # Filtrer les échantillons et les patients par épidémie
-    #     echantillons_nbr = Echantillon.objects.filter(maladie=epidemie).count()
-    #     echantillons_nbrP = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF').count()
-    #
-    #     patients = Patient.objects.filter(echantillons__maladie=epidemie).distinct().count()
-    #     patients_gueris = Patient.objects.filter(echantillons__maladie=epidemie, gueris=True).distinct().count()
-    #     patients_decedes = Patient.objects.filter(echantillons__maladie=epidemie, decede=True).distinct().count()
-    #
-    #     # Nombre total de patients dont les échantillons ont été positifs
-    #     echantillons_positifs = Echantillon.objects.filter(maladie=epidemie, resultat='POSITIF')
-    #     patients_avec_echantillons_positifs = Patient.objects.filter(echantillons__in=echantillons_positifs).distinct()
-    #
-    #     total_patients_positifs = patients_avec_echantillons_positifs.count()
-    #
-    #     # Nombre de patients guéris et décédés parmi ceux dont les échantillons ont été positifs
-    #     patients_gueris_positifs = patients_avec_echantillons_positifs.filter(gueris=True).count()
-    #     patients_decedes_positifs = patients_avec_echantillons_positifs.filter(decede=True).count()
-    #
-    #     synthesedistrict = SyntheseDistrict.objects.filter(maladie_id=epidemie.pk).annotate(
-    #         tcas_positif=Sum('cas_positif')
-    #     )
-    #
-    #     # Calculer le pourcentage de patients guéris et décédés parmi les patients avec des échantillons positifs
-    #     if total_patients_positifs > 0:
-    #         pourcentage_gueris_positifs = (patients_gueris_positifs / total_patients_positifs) * 100
-    #         pourcentage_decedes_positifs = (patients_decedes_positifs / total_patients_positifs) * 100
-    #     else:
-    #         pourcentage_gueris_positifs = 0
-    #         pourcentage_decedes_positifs = 0
-    #
-    #     if echantillons_nbr > 0:
-    #         pourcentage_positifs = (echantillons_nbrP / echantillons_nbr) * 100
-    #     else:
-    #         pourcentage_positifs = 0
-    #
-    #     last_update = Echantillon.objects.filter(maladie=epidemie).order_by('-created_at').values_list('created_at',
-    #                                                                                                    flat=True).first()
-    #
-    #     top_districts = DistrictSanitaire.objects.annotate(
-    #         num_echantillons=Count('commune__patient__echantillons',
-    #                                filter=Q(commune__patient__echantillons__maladie=epidemie)),
-    #         num_gueris=Count('commune__patient__echantillons',
-    #                          filter=Q(commune__patient__gueris=True, commune__patient__echantillons__maladie=epidemie)),
-    #         num_decedes=Count('commune__patient__echantillons',
-    #                           filter=Q(commune__patient__decede=True, commune__patient__echantillons__maladie=epidemie))
-    #     ).order_by('-num_echantillons')[:5] + SyntheseDistrict
-    #
-    #     cases_by_region = (
-    #         Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat='POSITIF')
-    #         .values('commune__district__region__name')
-    #         .annotate(total=Count('id'))
-    #         .order_by('-total')
-    #     )
-    #
-    #     # Obtenez le nombre de cas par district
-    #     cases_by_district = (
-    #         Patient.objects.filter(echantillons__maladie=epidemie, echantillons__resultat='POSITIF')
-    #         .values('commune__district__region__name', 'commune__district__nom')
-    #         .annotate(total=Count('id'))
-    #         .order_by('-total')
-    #     )
-    #
-    #     # Passer les données au template
-    #
-    #     # Passer les données au template
-    #     context = {
-    #         'cases_by_region': cases_by_region,
-    #         'cases_by_district': cases_by_district,
-    #
-    #         'epidemie': epidemie,
-    #         'epidemie_id': epidemie.pk,  # Passer l'ID de l'épidémie
-    #         'epidemie_nom': epidemie.nom,  # Passer le nom de l'épidémie
-    #
-    #         'top_districts': top_districts,
-    #         'last_update': last_update,
-    #         'echantillons_nbr': echantillons_nbr,
-    #         'echantillons_nbrP': echantillons_nbrP,
-    #         'pourcentage_positifs': pourcentage_positifs,
-    #         'patients_gueris': patients_gueris,
-    #         'patients_decedes': patients_decedes,
-    #         'patients': patients,
-    #         'total_patients_positifs': total_patients_positifs,
-    #         'patients_gueris_positifs': patients_gueris_positifs,
-    #         'patients_decedes_positifs': patients_decedes_positifs,
-    #         'pourcentage_gueris_positifs': pourcentage_gueris_positifs,
-    #         'pourcentage_decedes_positifs': pourcentage_decedes_positifs,
-    #     }
-    #
-    #     return render(request, self.template_name, context)
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):

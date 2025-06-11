@@ -256,6 +256,7 @@ class Symptom(models.Model):
 
 class Typeepidemie(models.Model):
     nom = models.CharField(max_length=100)
+
     def __str__(self): return self.nom
 
 
@@ -507,6 +508,14 @@ class SyntheseDistrict(models.Model):
         return f"Cas en provenance de {self.district_sanitaire} enregistré "
 
 
+class Platform(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    api_key = models.CharField(max_length=128, unique=True)
+    last_connected = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+
 class SignalementJournal(models.Model):
     patient = models.ForeignKey('Patient', on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='journaux_signalement')
@@ -531,10 +540,7 @@ class SignalementJournal(models.Model):
     )
     message = models.TextField(blank=True, null=True, help_text="Message ou erreur retournée.")
     created_at = models.DateTimeField(auto_now_add=True)
-    source_application = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
+    source_application = models.ForeignKey(Platform, on_delete=models.SET_NULL, null=True, blank=True,
         help_text="Nom de l'application ayant envoyé le signalement."
     )
 

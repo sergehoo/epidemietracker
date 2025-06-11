@@ -22,13 +22,16 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET
 from django.views.generic import TemplateView, ListView, CreateView
 from rest_framework import viewsets
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from tablib import Dataset
 from unidecode import unidecode
 
 from api.serializers import SignalementExterneSerializer
+from epidemie.authentication import APIKeyAuthentication
 from epidemie.tasks import sync_health_regions, process_city_data, generate_commune_report, alert_for_epidemic_cases
 
 from epidemie.models import Patient, Echantillon, HealthRegion, City, Commune, EpidemicCase, ServiceSanitaire, \
@@ -116,6 +119,8 @@ class EpidemicCaseViewSet(viewsets.ModelViewSet):
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Obtenez l'ID de l'épidémie à partir des paramètres de l'URL
@@ -331,11 +336,16 @@ class CasSyntheseViewSet(viewsets.ModelViewSet):
 
 
 class SyntheseDistrictViewSet(viewsets.ModelViewSet):
+    authentication_classes = [SessionAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = SyntheseDistrict.objects.all()
     serializer_class = SyntheseDistrictSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(maladie_id=self.request.query_params.get('maladie_id'))
+        maladie_id = self.request.query_params.get('maladie_id')
+        if maladie_id:
+            return self.queryset.filter(maladie_id=maladie_id)
+        return self.queryset.none()
 
 
 def get_infected_cases_data(request, epidemie_id):
@@ -407,6 +417,7 @@ def get_infected_cases_data(request, epidemie_id):
 #             return Response({"message": "Signalement enregistré avec succès."})
 #         return Response(serializer.errors, status=400)
 class RecevoirSignalementAPIView(APIView):
+    authentication_classes = [APIKeyAuthentication]
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic  # Assure l'intégrité des données
@@ -514,6 +525,11 @@ class RecevoirSignalementAPIView(APIView):
 
     def _log_signalement(self, request, patient, epidemie, data):
         """Journalise le signalement pour traçabilité"""
+        platform = getattr(request.user, 'platform', None)
+        if platform:
+            platform.last_connected = timezone.now()
+            platform.save()
+
         SignalementJournal.objects.create(
             patient=patient,
             maladie=epidemie,
@@ -522,7 +538,7 @@ class RecevoirSignalementAPIView(APIView):
             donnees_brutes=json.loads(json.dumps(data, cls=DjangoJSONEncoder)),
             source_ip=self._get_client_ip(request),
             user_api=request.user,
-            source_application=data.get("source_application", None),  # ✅ ici
+            source_application=platform,
             statut_reception="SUCCES",
             message="Signalement enregistré avec succès"
         )
@@ -698,6 +714,3 @@ def landing_page_api(request):
     }
 
     return JsonResponse(data)
-
-
-

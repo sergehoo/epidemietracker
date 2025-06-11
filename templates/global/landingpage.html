@@ -16,8 +16,8 @@
     <link rel="stylesheet" href="{% static 'assets/css/dashlite.css' %}">
     <link id="skin-default" rel="stylesheet" href="{% static 'assets/css/theme.css' %}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
 
     <style>
         :root {
@@ -89,12 +89,32 @@
         }
     </style>
 </head>
+<style>
+/* Transition de l'opacité au remplacement HTMX */
+    .transition-opacity {
+        transition: opacity 0.5s ease-in-out;
+    }
 
+    .htmx-swapping {
+        opacity: 0.3;
+    }
+
+    /* Effet de défilement vertical */
+    .slide-up-enter {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    .slide-up-enter-active {
+        transform: translateY(0);
+        opacity: 1;
+        transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    }
+}
+</style>
 <body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
 <div class="nk-app-root">
-    <div class="nk-main">
-        {% include 'global/layouts/navhead.html' %}
-
+    {% include 'global/layouts/navhead.html' %}
         <div class="nk-content">
             <div class="container-fluid">
                 <div class="nk-content-body">
@@ -108,6 +128,8 @@
                             </div>
                         </div>
                     </div>
+                
+      
 
                     <!-- Stat Cards -->
                     <div class="nk-block">
@@ -158,8 +180,7 @@
                                 <div class="card card-bordered stat-card bg-gray-100">
                                     <div class="card-inner">
                                         <div class="d-flex justify-content-between align-items-start mb-3">
-                                            <div class="text-warning"><em class="icon ni ni-alert-fill"
-                                                                          style="font-size: 2.5rem;"></em></div>
+                                            <div class="text-warning"><em class="icon ni ni-alert-fill" style="font-size: 2.5rem;"></em></div>
                                         </div>
                                         <div class="h3 text-dark font-weight-bold">{{ total_suspects|intcomma }}</div>
                                         <div class="text-soft">Cas Suspects (+{{ nouveaux_suspects_7j }} récents)</div>
@@ -178,10 +199,8 @@
                                                     <div id="map" style="height:100%;"></div>
                                                 </div>
                                                 <div class="d-flex justify-content-between pt-3">
-                                                    <span class="text-soft"><em
-                                                            class="icon ni ni-map-pin-fill text-primary"></em> Régions: {{ regions_touchees }}</span>
-                                                    <span class="text-soft"><em
-                                                            class="icon ni ni-alert-c-fill text-danger"></em> Foyers: {{ foyers_actifs }}</span>
+                                                    <span class="text-soft"><em class="icon ni ni-map-pin-fill text-primary"></em> Régions: {{ regions_touchees }}</span>
+                                                    <span class="text-soft"><em class="icon ni ni-alert-c-fill text-danger"></em> Foyers: {{ foyers_actifs }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -195,92 +214,106 @@
                                 <div class="card card-bordered h-100">
                                     <div class="card-inner">
                                         <h5 class="card-title">Surveillance des Maladies Épidémiques</h5>
-                                        <div class="mt-4" style="max-height: 1250px; overflow-y: auto;">
-                                            {% for epidemie in epidemies %}
-                                                <div class="card epidemie-card bg-light mb-3">
-                                                    <div class="card-body">
-                                                        <div class="d-flex flex-wrap justify-content-between align-items-center">
-                                                            <div class="d-flex align-items-center mb-3 mb-md-0">
-                                                                <div class="mr-3">
-                                                                    <div class="user-avatar bg-{{ epidemie.status_class }}-dim">
-                                                                        {% if epidemie.thumbnails %}
-                                                                            <img src="{{ epidemie.thumbnails.url }}"
-                                                                                 alt="">
-                                                                        {% else %}
-                                                                            <em class="icon ni ni-bug"></em>
-                                                                        {% endif %}
-                                                                    </div>
-                                                                </div>
-                                                                <div>
-                                                                    <h6 class="card-title mb-0"><a href="{% url 'epidemie-detail' epidemie.pk %}" >{{ epidemie.nom }}</a></h6>
-                                                                    <p class="text-soft text-sm">Dernier
-                                                                        cas: {{ epidemie.last_activity|date:"d M Y"|default:"Aucun" }}</p>
-                                                                </div>
-                                                            </div>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="text-center px-3">
-                                                                    <div class="h4 font-weight-bold">{{ epidemie.total_cases|intcomma }}</div>
-                                                                    <div class="text-xs text-soft">Total Cas</div>
-                                                                </div>
-                                                                <div class="text-center px-3 border-left border-right">
-                                                                    <div class="h4 font-weight-bold">{{ epidemie.total_deaths|intcomma }}</div>
-                                                                    <div class="text-xs text-soft">Décès</div>
-                                                                </div>
-                                                                <div class="text-center pl-3">
-                                                                    <div class="h5 font-weight-bold text-{{ epidemie.status_class }}">
-                                                                        +{{ epidemie.new_cases_7d|intcomma }}</div>
-                                                                    <div class="text-xs text-soft">7 derniers jours</div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="d-flex align-items-center mt-3 mt-md-0">
-                                                                <span class="badge badge-pill badge-{{ epidemie.status_class }} ml-md-4 mr-2">{{ epidemie.status_display }}</span>
-                                                                <button class="btn btn-sm btn-icon btn-trigger" onclick="openSymptomModal({{ epidemie.id }})"><em class="icon ni ni-info"></em></button>
-                                                                <button class="btn btn-sm btn-icon btn-trigger"><a href="{% url 'epidemie-detail' epidemie.pk %}" ><em class="icon ni ni-eye"></em></a></button>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {% empty %}
-                                                <div class="text-center py-5">
-                                                    <p class="text-soft">Aucune maladie épidémique à surveiller.</p>
-                                                </div>
-                                            {% endfor %}
+                                        <div class="mt-4" style="max-height: 1250px; overflow-y: auto;"
+                                             id="epidemiesContainer"
+                                             hx-get="{% url 'epidemies-partial' %}"
+                                             hx-trigger="every 5s"
+                                             hx-swap="innerHTML transition:true"
+                                             hx-on="
+        htmx:beforeSwap: this.classList.remove('slide-up-enter', 'slide-up-enter-active');
+        htmx:afterSwap: this.classList.add('slide-up-enter'); 
+        setTimeout(() => this.classList.add('slide-up-enter-active'), 10);
+     " class="transition-opacity">
+                                            {% include "partials/_epidemies_list.html" %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                                      
+{#                            <div class="col-lg-8">#}
+{#                                <div class="card card-bordered h-100">#}
+{#                                    <div class="card-inner">#}
+{#                                        <h5 class="card-title">Surveillance des Maladies Épidémiques</h5>#}
+{#                                        <div class="mt-4" style="max-height: 1250px; overflow-y: auto;">#}
+{#                                            {% for epidemie in epidemies %}#}
+{#                                                <div class="card epidemie-card bg-light mb-3">#}
+{#                                                    <div class="card-body">#}
+{#                                                        <div class="d-flex flex-wrap justify-content-between align-items-center">#}
+{#                                                            <div class="d-flex align-items-center mb-3 mb-md-0">#}
+{#                                                                <div class="mr-3">#}
+{#                                                                    <div class="user-avatar bg-{{ epidemie.status_class }}-dim">#}
+{#                                                                        {% if epidemie.thumbnails %}#}
+{#                                                                            <img src="{{ epidemie.thumbnails.url }}"#}
+{#                                                                                 alt="">#}
+{#                                                                        {% else %}#}
+{#                                                                            <em class="icon ni ni-bug"></em>#}
+{#                                                                        {% endif %}#}
+{#                                                                    </div>#}
+{#                                                                </div>#}
+{#                                                                <div>#}
+{#                                                                    <h6 class="card-title mb-0"><a href="{% url 'epidemie-detail' epidemie.pk %}" >{{ epidemie.nom }}</a></h6>#}
+{#                                                                    <p class="text-soft text-sm">Dernier#}
+{#                                                                        cas: {{ epidemie.last_activity|date:"d M Y H:m"|default:"Aucun" }}</p>#}
+{#                                                                </div>#}
+{#                                                            </div>#}
+{#                                                            <div class="d-flex align-items-center">#}
+{#                                                                <div class="text-center px-3">#}
+{#                                                                    <div class="h4 font-weight-bold">{{ epidemie.total_cases|intcomma }}</div>#}
+{#                                                                    <div class="text-xs text-soft">Total Cas</div>#}
+{#                                                                </div>#}
+{#                                                                <div class="text-center px-3 border-left border-right">#}
+{#                                                                    <div class="h4 font-weight-bold">{{ epidemie.total_deaths|intcomma }}</div>#}
+{#                                                                    <div class="text-xs text-soft">Décès</div>#}
+{#                                                                </div>#}
+{#                                                                <div class="text-center pl-3">#}
+{#                                                                    <div class="h5 font-weight-bold text-{{ epidemie.status_class }}">#}
+{#                                                                        +{{ epidemie.new_cases_7d|intcomma }}</div>#}
+{#                                                                    <div class="text-xs text-soft">7 derniers jours</div>#}
+{#                                                                </div>#}
+{#                                                            </div>#}
+{#                                                            <div class="d-flex align-items-center mt-3 mt-md-0">#}
+{#                                                                <span class="badge badge-pill badge-{{ epidemie.status_class }} ml-md-4 mr-2">{{ epidemie.status_display }}</span>#}
+{#                                                                <button class="btn btn-sm btn-icon btn-trigger" onclick="openSymptomModal({{ epidemie.id }})"><em class="icon ni ni-info"></em></button>#}
+{#                                                                <button class="btn btn-sm btn-icon btn-trigger"><a href="{% url 'epidemie-detail' epidemie.pk %}" ><em class="icon ni ni-eye"></em></a></button>#}
+{##}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            {% empty %}#}
+{#                                                <div class="text-center py-5">#}
+{#                                                    <p class="text-soft">Aucune maladie épidémique à surveiller.</p>#}
+{#                                                </div>#}
+{#                                            {% endfor %}#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
 
                             <!-- Right Column -->
                             <div class="col-lg-4">
                                 <div class="row g-gs">
                                     <div class="col-lg-12">
-                                        <div class="card card-bordered h-100">
-                                            <div class="card-inner">
-                                                <h5 class="card-title">Dernières Alertes</h5>
-                                                <div class="timeline mt-4">
-                                                    {% for alerte in dernieres_alertes %}
-                                                        <div class="timeline-item">
-                                                            <div class="timeline-dot timeline-dot-{% if alerte.niveau == 'H' %}danger{% elif alerte.niveau == 'M' %}warning{% else %}primary{% endif %}"></div>
-                                                            <div class="timeline-content">
-                                                                <div class="d-flex justify-content-between align-items-center">
-                                                                    <h6 class="mb-0"><a href="{% url 'epidemie-detail' alerte.maladie.pk %}" >{{ alerte.maladie.nom }}</a> <span
-                                                                            class="text-soft font-weight-normal">- {{ alerte.commune.district.region.nom }}</span>
-                                                                    </h6>
-                                                                    <span class="text-soft text-sm">Il y a {{ alerte.created_at|timesince }}</span>
-                                                                </div>
-                                                                <p class="text-soft mt-1">{{ alerte.message|truncatechars:150 }}
-                                                                    de {{ alerte.source_application|truncatechars:150 }}</p>
-                                                            </div>
-                                                        </div>
-                                                    {% empty %}
-                                                        <div class="text-center py-4 text-soft">Aucune alerte récente.
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+    <div class="card card-bordered h-100">
+        <div class="card-inner">
+            <h5 class="card-title">Dernières Alertes</h5>
+
+            <div id="alertesContainer"
+                 hx-get="{% url 'dernieres_alertes_partial' %}"
+                 hx-trigger="every 7s"
+                 hx-swap="innerHTML"
+                 hx-on="
+                    htmx:beforeSwap: this.classList.remove('slide-up-enter', 'slide-up-enter-active');
+                    htmx:afterSwap: this.classList.add('slide-up-enter');
+                    setTimeout(() => this.classList.add('slide-up-enter-active'), 10);
+                 "
+            >
+                {% include "partials/_alertes_list.html" %}
+            </div>
+
+        </div>
+    </div>
+</div>
                                  <div class="col-lg-12">
                                <div class="card card-bordered mt-4" >
     <div class="card-inner" style="max-height: 400px; overflow-y: auto;">
@@ -591,6 +624,22 @@
         $('#symptomModal').modal('show');
     }
 </script>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script>
+    document.body.addEventListener('htmx:beforeSwap', function(evt) {
+        const el = evt.detail.target;
+        if (el) {
+            el.classList.add('transition-opacity');
+            el.classList.add('htmx-swapping');
+        }
+    });
 
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        const el = evt.detail.target;
+        if (el) {
+            el.classList.remove('htmx-swapping');
+        }
+    });
+</script>
 </body>
 </html>

@@ -24,19 +24,19 @@ services:
     networks:
       - default
       - proxy
-  labels:
-    - traefik.enable=true
-    - traefik.docker.network=proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
 
-    # Couvre veillesanitaire.com ET www.veillesanitaire.com
-    - traefik.http.routers.epidemieweb.rule=Host(`veillesanitaire.com`, `www.veillesanitaire.com`)
-    - traefik.http.routers.epidemieweb.entrypoints=websecure
-    - traefik.http.routers.epidemieweb.tls=true
-    - traefik.http.routers.epidemieweb.tls.certresolver=lets
-    - traefik.http.routers.epidemieweb.middlewares=sec-headers@docker,compress@docker,ratelimit@docker
+      # Couvre veillesanitaire.com ET www.veillesanitaire.com
+      - traefik.http.routers.epidemieweb.rule=Host(`veillesanitaire.com`, `www.veillesanitaire.com`)
+      - traefik.http.routers.epidemieweb.entrypoints=websecure
+      - traefik.http.routers.epidemieweb.tls=true
+      - traefik.http.routers.epidemieweb.tls.certresolver=lets
+      - traefik.http.routers.epidemieweb.middlewares=sec-headers@docker,compress@docker,ratelimit@docker
 
-    # Service: port interne Gunicorn
-    - traefik.http.services.epidemieweb.loadbalancer.server.port=8000
+      # Service: port interne Gunicorn
+      - traefik.http.services.epidemieweb.loadbalancer.server.port=8000
 
   epidemieDB:
     image: postgis/postgis:16-3.4

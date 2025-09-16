@@ -16,7 +16,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage, default_storage
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction, models
-from django.db.models import Count, Q, F, Max
+from django.db.models import Count, Q, F, Max, OuterRef, Subquery
 from django.db.models.functions import Lower, TruncDate
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -778,6 +778,7 @@ class LandingPageView(LoginRequiredMixin, ListView):
 #     }
 #
 #     return JsonResponse(data)
+
 @require_GET
 def landing_page_api(request):
     """
@@ -900,7 +901,7 @@ def landing_page_api(request):
     foyers = (
         SignalementJournal.objects.filter(
             created_at__gte=timezone.now() - timedelta(days=90),
-            commune__geom__isnull=False,            # ⬅️ filtre corrigé
+            commune__geom__isnull=False,
         )
         .select_related('maladie', 'commune')
         .order_by('commune', '-created_at')
@@ -916,10 +917,24 @@ def landing_page_api(request):
             'lat': lat,
             'lon': lon,
             'maladie': f.maladie.nom,
-            'commune': f.commune.name,   # ⬅️ name (pas nom)
+            'commune': f.commune.name,   # Commune.name (pas nom)
             'niveau': f.get_niveau_display(),
             'date': f.created_at.strftime('%d/%m/%Y'),
         })
+
+    # Subqueries: dernière maladie signalée par commune
+    last_maladie_name_for_commune = (
+        SignalementJournal.objects
+        .filter(commune=OuterRef("commune__id"))
+        .order_by("-created_at")
+        .values("maladie__nom")[:1]
+    )
+    last_maladie_name_for_patient_commune = (
+        SignalementJournal.objects
+        .filter(commune=OuterRef("patient__commune__id"))
+        .order_by("-created_at")
+        .values("maladie__nom")[:1]
+    )
 
     # Agrégations par commune : confirmés / guéris / décès / suspects
     # Branche 1: Patient.commune ; Fallback: Echantillon.patient__commune
@@ -933,7 +948,8 @@ def landing_page_api(request):
                 deaths=Count('id', filter=Q(decede=True, echantillons__resultat=True), distinct=True),
                 suspects=Count('id', filter=Q(cas_suspects=True), distinct=True),
                 last_activity=Max('echantillons__date_collect', filter=Q(echantillons__resultat=True)),
-                geom_json=AsGeoJSON('commune__geom'),   # ⬅️ récupère les coords
+                geom_json=AsGeoJSON('commune__geom'),
+                maladie_nom=Subquery(last_maladie_name_for_commune),  # ← ajoute la maladie
             )
         )
         branch = 'patient'
@@ -948,13 +964,14 @@ def landing_page_api(request):
                 suspects=Count('patient', filter=Q(patient__cas_suspects=True), distinct=True),
                 last_activity=Max('date_collect', filter=Q(resultat=True)),
                 geom_json=AsGeoJSON('patient__commune__geom'),
+                maladie_nom=Subquery(last_maladie_name_for_patient_commune),  # ← ajoute la maladie
             )
         )
         branch = 'echantillon'
 
     commune_stats = []
     for row in commune_stats_qs:
-        # Récupère l'ID/nom selon la branche
+        # ID / nom de la commune selon la branche
         if branch == 'patient':
             cid = row['commune__id']
             nom = row['commune__name']
@@ -963,14 +980,16 @@ def landing_page_api(request):
             nom = row['patient__commune__name']
 
         # Parse AsGeoJSON -> {"type":"Point","coordinates":[lon,lat]}
-        coords = [None, None]
+        lon = lat = None
         try:
             gj = json.loads(row['geom_json']) if row.get('geom_json') else None
-            if isinstance(gj, dict) and isinstance(gj.get('coordinates'), (list, tuple)) and len(gj['coordinates']) >= 2:
-                coords = gj['coordinates']
+            if isinstance(gj, dict):
+                coords = gj.get('coordinates')
+                if isinstance(coords, (list, tuple)) and len(coords) >= 2:
+                    lon, lat = coords[0], coords[1]
         except Exception:
             pass
-        lon, lat = coords[0], coords[1]
+
         if lon is None or lat is None:
             continue
 
@@ -985,8 +1004,10 @@ def landing_page_api(request):
             'deaths': int(row.get('deaths') or 0),
             'suspects': int(row.get('suspects') or 0),
             'last_activity': last.strftime('%d/%m/%Y') if last else None,
+            'maladie_nom': row.get('maladie_nom') or '—',   # ← exposé au frontend
         })
 
+    # Dernières alertes
     alertes_qs = (
         SignalementJournal.objects
         .select_related('maladie', 'commune__district__region')
@@ -998,7 +1019,9 @@ def landing_page_api(request):
             'region_nom': a.commune.district.region.name if a.commune and a.commune.district else '',
             'message': a.message,
             'created_since': a.created_at.strftime('%d %b, %H:%M'),
-            'niveau_class': 'danger' if a.statut_reception == 'H' else ('warning' if a.statut_reception == 'M' else 'primary'),
+            # si ton modèle a 'statut_reception' avec valeurs 'H','M','L'
+            'niveau_class': 'danger' if getattr(a, 'statut_reception', None) == 'H'
+                            else ('warning' if getattr(a, 'statut_reception', None) == 'M' else 'primary'),
         }
         for a in alertes_qs
     ]

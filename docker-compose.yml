@@ -27,7 +27,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=proxy
-
+      - traefik.http.routers.epidemieweb.service=epidemieweb-svc
       # Couvre veillesanitaire.com ET www.veillesanitaire.com
       - traefik.http.routers.epidemieweb.rule=Host(`veillesanitaire.com`, `www.veillesanitaire.com`)
       - traefik.http.routers.epidemieweb.entrypoints=websecure

@@ -7,15 +7,17 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.contrib.gis.db.models.functions import AsGeoJSON
 from django.contrib.postgres.search import TrigramSimilarity
-from django.core import cache
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage, default_storage
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import transaction, models
 from django.db.models import Count, Q, F, Max
-from django.db.models.functions import Lower
+from django.db.models.functions import Lower, TruncDate
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -608,12 +610,181 @@ class LandingPageView(LoginRequiredMixin, ListView):
         return context
 
 
+# @require_GET
+# def landing_page_api(request):
+#     """
+#     This new API view provides all the dashboard data in a single JSON response.
+#     It's designed to be called asynchronously by the frontend.
+#     """
+#     # --- Global Statistics (Cached) ---
+#     global_stats = cache.get('global_epidemic_stats_v2')
+#     if not global_stats:
+#         stats = Patient.objects.aggregate(
+#             total_confirmed=Count('id', filter=Q(echantillons__resultat=True), distinct=True),
+#             total_recovered=Count('id', filter=Q(gueris=True, echantillons__resultat=True), distinct=True),
+#             total_deaths=Count('id', filter=Q(decede=True, echantillons__resultat=True), distinct=True),
+#             total_suspects=Count('id', filter=Q(cas_suspects=True)),
+#             new_suspects_7d=Count('id', filter=Q(cas_suspects=True, created_at__gte=timezone.now() - timedelta(days=7)))
+#         )
+#         confirmed = stats.get('total_confirmed', 0)
+#         recovered = stats.get('total_recovered', 0)
+#         deaths = stats.get('total_deaths', 0)
+#
+#         global_stats = {
+#             'total_cas_actifs': confirmed - recovered - deaths,
+#             'total_gueris': recovered,
+#             'total_deces': deaths,
+#             'total_suspects': stats.get('total_suspects', 0),
+#             'nouveaux_suspects_7j': stats.get('new_suspects_7d', 0),
+#             'taux_guerison': round((recovered / confirmed) * 100, 1) if confirmed else 0,
+#             'taux_mortalite': round((deaths / confirmed) * 100, 1) if confirmed else 0,
+#         }
+#         cache.set('global_epidemic_stats_v2', global_stats, 60 * 15)
+#
+#     # --- Epidemics List ---
+#     epidemies_qs = Epidemie.objects.annotate(
+#         last_activity=Max('echantillon__date_collect', filter=Q(echantillon__resultat=True)),
+#         total_cases=Count('echantillon__patient', filter=Q(echantillon__resultat=True), distinct=True),
+#         total_deaths=Count('echantillon__patient',
+#                            filter=Q(echantillon__resultat=True, echantillon__patient__decede=True), distinct=True),
+#         new_cases_7d=Count('echantillon', filter=Q(echantillon__resultat=True,
+#                                                    echantillon__date_collect__gte=timezone.now() - timedelta(days=7)))
+#     ).order_by(F('last_activity').desc(nulls_last=True))
+#
+#     epidemies_data = [{
+#         'id': e.id,
+#         'nom': e.nom,
+#         'thumbnails_url': e.thumbnails.url if e.thumbnails else '',
+#         'last_activity': e.last_activity.strftime('%d %b %Y') if e.last_activity else 'Aucun',
+#         'total_cases': e.total_cases,
+#         'total_deaths': e.total_deaths,
+#         'new_cases_7d': e.new_cases_7d,
+#         'status_display': e.status_display,
+#         'status_class': e.status_class,
+#     } for e in epidemies_qs]
+#
+#     # --- Chart Data (Cached) ---
+#     chart_data = cache.get('chart_evolution_data_v2')
+#     if not chart_data:
+#         dates = [(timezone.now() - timedelta(days=i)).date() for i in range(29, -1, -1)]
+#         daily_counts = Echantillon.objects.filter(date_collect__date__gte=dates[0]).extra(
+#             {"day": "date(date_collect)"}).values("day").annotate(
+#             confirmed=Count('id', filter=Q(resultat=True)),
+#             deaths=Count('id', filter=Q(resultat=True, patient__decede=True))
+#         ).order_by('day')
+#         counts_by_date = {item['day'].strftime('%Y-%m-%d'): item for item in daily_counts}
+#         chart_data = {
+#             'labels': [d.strftime('%d/%m') for d in dates],
+#             'confirmed': [counts_by_date.get(d.strftime('%Y-%m-%d'), {}).get('confirmed', 0) for d in dates],
+#             'deaths': [counts_by_date.get(d.strftime('%Y-%m-%d'), {}).get('deaths', 0) for d in dates],
+#         }
+#         cache.set('chart_evolution_data_v2', chart_data, 60 * 15)
+#
+#     # --- Map & Alerts Data ---
+#     # --- Map & Alerts Data ---
+#     foyers = SignalementJournal.objects.filter(
+#         created_at__gte=timezone.now() - timedelta(days=90),
+#         commune__latitude__isnull=False, commune__longitude__isnull=False
+#     ).select_related('maladie', 'commune').order_by('commune', '-created_at').distinct('commune')
+#
+#     foyers_data = [
+#         {
+#             'lat': f.commune.latitude,
+#             'lon': f.commune.longitude,
+#             'maladie': f.maladie.nom,
+#             'commune': f.commune.nom,
+#             'niveau': f.get_niveau_display(),
+#             'date': f.created_at.strftime('%d/%m/%Y'),
+#         }
+#         for f in foyers
+#     ]
+#
+#     # >>> Nouveau: agrégations par commune pour la carte (confirmés/guéris/décès/suspects)
+#     # Essaie Patient.commune ; sinon, bascule sur Echantillon.patient__commune
+#     try:
+#         commune_stats_qs = (
+#             Patient.objects.filter(commune__isnull=False)
+#             .values('commune__id', 'commune__nom', 'commune__latitude', 'commune__longitude')
+#             .annotate(
+#                 confirmed=Count('id', filter=Q(echantillons__resultat=True), distinct=True),
+#                 recovered=Count('id', filter=Q(gueris=True, echantillons__resultat=True), distinct=True),
+#                 deaths=Count('id', filter=Q(decede=True, echantillons__resultat=True), distinct=True),
+#                 suspects=Count('id', filter=Q(cas_suspects=True), distinct=True),
+#                 last_activity=Max('echantillons__date_collect', filter=Q(echantillons__resultat=True)),
+#             )
+#         )
+#     except Exception:
+#         commune_stats_qs = (
+#             Echantillon.objects.filter(patient__commune__isnull=False)
+#             .values('patient__commune__id', 'patient__commune__nom',
+#                     'patient__commune__latitude', 'patient__commune__longitude')
+#             .annotate(
+#                 confirmed=Count('id', filter=Q(resultat=True)),
+#                 deaths=Count('id', filter=Q(resultat=True, patient__decede=True)),
+#                 recovered=Count('id', filter=Q(resultat=True, patient__gueris=True)),
+#                 suspects=Count('patient', filter=Q(patient__cas_suspects=True), distinct=True),
+#                 last_activity=Max('date_collect', filter=Q(resultat=True)),
+#             )
+#         )
+#
+#     # Normalisation des champs selon la branche utilisée ci-dessus
+#     commune_stats = []
+#     for row in commune_stats_qs:
+#         # Détecte quelle clé est présente
+#         cid = row.get('commune__id') or row.get('patient__commune__id')
+#         nom = row.get('commune__nom') or row.get('patient__commune__nom')
+#         lat = row.get('commune__latitude') or row.get('patient__commune__latitude')
+#         lon = row.get('commune__longitude') or row.get('patient__commune__longitude')
+#         last = row.get('last_activity')
+#
+#         if lat is None or lon is None:
+#             continue
+#
+#         commune_stats.append({
+#             'commune_id': cid,
+#             'commune': nom,
+#             'lat': float(lat),
+#             'lon': float(lon),
+#             'confirmed': int(row.get('confirmed') or 0),
+#             'recovered': int(row.get('recovered') or 0),
+#             'deaths': int(row.get('deaths') or 0),
+#             'suspects': int(row.get('suspects') or 0),
+#             'last_activity': last.strftime('%d/%m/%Y') if last else None,
+#         })
+#
+#     alertes_qs = SignalementJournal.objects.select_related('maladie', 'commune__district__region').order_by(
+#         '-created_at')[:5]
+#     alertes_data = [{
+#         'maladie_nom': a.maladie.nom,
+#         'region_nom': a.commune.district.region.nom,
+#         'message': a.message,
+#         'created_since': f"{a.created_at.strftime('%d %b, %H:%M')}",
+#         'niveau_class': 'danger' if a.niveau == 'H' else ('warning' if a.niveau == 'M' else 'primary')
+#     } for a in alertes_qs]
+#
+#     data = {
+#         'global_stats': global_stats,
+#         'epidemies': epidemies_data,
+#         'chart_data': chart_data,
+#         'map_data': {
+#             'foyers': foyers_data,
+#             'regions_touchees': foyers.values('commune__district__region').distinct().count(),
+#             'foyers_actifs': foyers.count(),
+#             # >>> expose les stats par commune
+#             'commune_stats': commune_stats,
+#         },
+#         'alertes': alertes_data,
+#         'last_updated': timezone.now().strftime('%H:%M:%S')
+#     }
+#
+#     return JsonResponse(data)
 @require_GET
 def landing_page_api(request):
     """
-    This new API view provides all the dashboard data in a single JSON response.
-    It's designed to be called asynchronously by the frontend.
+    API renvoyant toutes les données du tableau de bord en un seul JSON.
+    Compatible avec Commune.geom (PointField).
     """
+
     # --- Global Statistics (Cached) ---
     global_stats = cache.get('global_epidemic_stats_v2')
     if not global_stats:
@@ -621,56 +792,101 @@ def landing_page_api(request):
             total_confirmed=Count('id', filter=Q(echantillons__resultat=True), distinct=True),
             total_recovered=Count('id', filter=Q(gueris=True, echantillons__resultat=True), distinct=True),
             total_deaths=Count('id', filter=Q(decede=True, echantillons__resultat=True), distinct=True),
-            total_suspects=Count('id', filter=Q(cas_suspects=True)),
-            new_suspects_7d=Count('id', filter=Q(cas_suspects=True, created_at__gte=timezone.now() - timedelta(days=7)))
+            total_suspects=Count('id', filter=Q(cas_suspects=True), distinct=True),
+            new_suspects_7d=Count(
+                'id',
+                filter=Q(cas_suspects=True, created_at__gte=timezone.now() - timedelta(days=7)),
+                distinct=True,
+            ),
         )
-        confirmed = stats.get('total_confirmed', 0)
-        recovered = stats.get('total_recovered', 0)
-        deaths = stats.get('total_deaths', 0)
+        confirmed = stats.get('total_confirmed') or 0
+        recovered = stats.get('total_recovered') or 0
+        deaths = stats.get('total_deaths') or 0
 
         global_stats = {
-            'total_cas_actifs': confirmed - recovered - deaths,
+            'total_cas_actifs': max(0, confirmed - recovered - deaths),
             'total_gueris': recovered,
             'total_deces': deaths,
-            'total_suspects': stats.get('total_suspects', 0),
-            'nouveaux_suspects_7j': stats.get('new_suspects_7d', 0),
+            'total_suspects': stats.get('total_suspects') or 0,
+            'nouveaux_suspects_7j': stats.get('new_suspects_7d') or 0,
             'taux_guerison': round((recovered / confirmed) * 100, 1) if confirmed else 0,
             'taux_mortalite': round((deaths / confirmed) * 100, 1) if confirmed else 0,
         }
         cache.set('global_epidemic_stats_v2', global_stats, 60 * 15)
 
-    # --- Epidemics List ---
-    epidemies_qs = Epidemie.objects.annotate(
-        last_activity=Max('echantillon__date_collect', filter=Q(echantillon__resultat=True)),
-        total_cases=Count('echantillon__patient', filter=Q(echantillon__resultat=True), distinct=True),
-        total_deaths=Count('echantillon__patient',
-                           filter=Q(echantillon__resultat=True, echantillon__patient__decede=True), distinct=True),
-        new_cases_7d=Count('echantillon', filter=Q(echantillon__resultat=True,
-                                                   echantillon__date_collect__gte=timezone.now() - timedelta(days=7)))
-    ).order_by(F('last_activity').desc(nulls_last=True))
+    # --- Epidemics List (gère echantillon/echantillons) ---
+    try:
+        epidemies_qs = (
+            Epidemie.objects.annotate(
+                last_activity=Max('echantillon__date_collect', filter=Q(echantillon__resultat=True)),
+                total_cases=Count('echantillon__patient', filter=Q(echantillon__resultat=True), distinct=True),
+                total_deaths=Count(
+                    'echantillon__patient',
+                    filter=Q(echantillon__resultat=True, echantillon__patient__decede=True),
+                    distinct=True,
+                ),
+                new_cases_7d=Count(
+                    'echantillon',
+                    filter=Q(
+                        echantillon__resultat=True,
+                        echantillon__date_collect__gte=timezone.now() - timedelta(days=7),
+                    ),
+                ),
+            ).order_by(F('last_activity').desc(nulls_last=True))
+        )
+    except Exception:
+        epidemies_qs = (
+            Epidemie.objects.annotate(
+                last_activity=Max('echantillons__date_collect', filter=Q(echantillons__resultat=True)),
+                total_cases=Count('echantillons__patient', filter=Q(echantillons__resultat=True), distinct=True),
+                total_deaths=Count(
+                    'echantillons__patient',
+                    filter=Q(echantillons__resultat=True, echantillons__patient__decede=True),
+                    distinct=True,
+                ),
+                new_cases_7d=Count(
+                    'echantillons',
+                    filter=Q(
+                        echantillons__resultat=True,
+                        echantillons__date_collect__gte=timezone.now() - timedelta(days=7),
+                    ),
+                ),
+            ).order_by(F('last_activity').desc(nulls_last=True))
+        )
 
-    epidemies_data = [{
-        'id': e.id,
-        'nom': e.nom,
-        'thumbnails_url': e.thumbnails.url if e.thumbnails else '',
-        'last_activity': e.last_activity.strftime('%d %b %Y') if e.last_activity else 'Aucun',
-        'total_cases': e.total_cases,
-        'total_deaths': e.total_deaths,
-        'new_cases_7d': e.new_cases_7d,
-        'status_display': e.status_display,
-        'status_class': e.status_class,
-    } for e in epidemies_qs]
+    epidemies_data = [
+        {
+            'id': e.id,
+            'nom': e.nom,
+            'thumbnails_url': e.thumbnails.url if getattr(e, 'thumbnails', None) else '',
+            'last_activity': e.last_activity.strftime('%d %b %Y') if e.last_activity else 'Aucun',
+            'total_cases': e.total_cases,
+            'total_deaths': e.total_deaths,
+            'new_cases_7d': e.new_cases_7d,
+            'status_display': getattr(e, 'status_display', None),
+            'status_class': getattr(e, 'status_class', None),
+        }
+        for e in epidemies_qs
+    ]
 
     # --- Chart Data (Cached) ---
     chart_data = cache.get('chart_evolution_data_v2')
     if not chart_data:
+        start_date = (timezone.now() - timedelta(days=29)).date()
+        daily_counts = (
+            Echantillon.objects.filter(date_collect__date__gte=start_date)
+            .annotate(day=TruncDate('date_collect'))
+            .values('day')
+            .annotate(
+                confirmed=Count('id', filter=Q(resultat=True)),
+                deaths=Count('id', filter=Q(resultat=True, patient__decede=True)),
+            )
+            .order_by('day')
+        )
+        counts_by_date = {
+            item['day'].strftime('%Y-%m-%d'): item for item in daily_counts if item['day'] is not None
+        }
         dates = [(timezone.now() - timedelta(days=i)).date() for i in range(29, -1, -1)]
-        daily_counts = Echantillon.objects.filter(date_collect__date__gte=dates[0]).extra(
-            {"day": "date(date_collect)"}).values("day").annotate(
-            confirmed=Count('id', filter=Q(resultat=True)),
-            deaths=Count('id', filter=Q(resultat=True, patient__decede=True))
-        ).order_by('day')
-        counts_by_date = {item['day'].strftime('%Y-%m-%d'): item for item in daily_counts}
         chart_data = {
             'labels': [d.strftime('%d/%m') for d in dates],
             'confirmed': [counts_by_date.get(d.strftime('%Y-%m-%d'), {}).get('confirmed', 0) for d in dates],
@@ -679,38 +895,126 @@ def landing_page_api(request):
         cache.set('chart_evolution_data_v2', chart_data, 60 * 15)
 
     # --- Map & Alerts Data ---
-    foyers = SignalementJournal.objects.filter(
-        created_at__gte=timezone.now() - timedelta(days=90),
-        commune__latitude__isnull=False, commune__longitude__isnull=False
-    ).select_related('maladie', 'commune').order_by('commune', '-created_at').distinct('commune')
 
-    foyers_data = [
-        {'lat': f.commune.latitude, 'lon': f.commune.longitude, 'maladie': f.maladie.nom, 'commune': f.commune.nom,
-         'niveau': f.get_niveau_display(), 'date': f.created_at.strftime('%d/%m/%Y')}
-        for f in foyers
+    # Foyers (1 par commune), avec géom présente
+    foyers = (
+        SignalementJournal.objects.filter(
+            created_at__gte=timezone.now() - timedelta(days=90),
+            commune__geom__isnull=False,            # ⬅️ filtre corrigé
+        )
+        .select_related('maladie', 'commune')
+        .order_by('commune', '-created_at')
+        .distinct('commune')
+    )
+
+    foyers_data = []
+    for f in foyers:
+        # geom est un Point : x=lon, y=lat
+        lat = float(f.commune.geom.y)
+        lon = float(f.commune.geom.x)
+        foyers_data.append({
+            'lat': lat,
+            'lon': lon,
+            'maladie': f.maladie.nom,
+            'commune': f.commune.name,   # ⬅️ name (pas nom)
+            'niveau': f.get_niveau_display(),
+            'date': f.created_at.strftime('%d/%m/%Y'),
+        })
+
+    # Agrégations par commune : confirmés / guéris / décès / suspects
+    # Branche 1: Patient.commune ; Fallback: Echantillon.patient__commune
+    try:
+        commune_stats_qs = (
+            Patient.objects.filter(commune__isnull=False, commune__geom__isnull=False)
+            .values('commune__id', 'commune__name')
+            .annotate(
+                confirmed=Count('id', filter=Q(echantillons__resultat=True), distinct=True),
+                recovered=Count('id', filter=Q(gueris=True, echantillons__resultat=True), distinct=True),
+                deaths=Count('id', filter=Q(decede=True, echantillons__resultat=True), distinct=True),
+                suspects=Count('id', filter=Q(cas_suspects=True), distinct=True),
+                last_activity=Max('echantillons__date_collect', filter=Q(echantillons__resultat=True)),
+                geom_json=AsGeoJSON('commune__geom'),   # ⬅️ récupère les coords
+            )
+        )
+        branch = 'patient'
+    except Exception:
+        commune_stats_qs = (
+            Echantillon.objects.filter(patient__commune__isnull=False, patient__commune__geom__isnull=False)
+            .values('patient__commune__id', 'patient__commune__name')
+            .annotate(
+                confirmed=Count('id', filter=Q(resultat=True)),
+                deaths=Count('id', filter=Q(resultat=True, patient__decede=True)),
+                recovered=Count('id', filter=Q(resultat=True, patient__gueris=True)),
+                suspects=Count('patient', filter=Q(patient__cas_suspects=True), distinct=True),
+                last_activity=Max('date_collect', filter=Q(resultat=True)),
+                geom_json=AsGeoJSON('patient__commune__geom'),
+            )
+        )
+        branch = 'echantillon'
+
+    commune_stats = []
+    for row in commune_stats_qs:
+        # Récupère l'ID/nom selon la branche
+        if branch == 'patient':
+            cid = row['commune__id']
+            nom = row['commune__name']
+        else:
+            cid = row['patient__commune__id']
+            nom = row['patient__commune__name']
+
+        # Parse AsGeoJSON -> {"type":"Point","coordinates":[lon,lat]}
+        coords = [None, None]
+        try:
+            gj = json.loads(row['geom_json']) if row.get('geom_json') else None
+            if isinstance(gj, dict) and isinstance(gj.get('coordinates'), (list, tuple)) and len(gj['coordinates']) >= 2:
+                coords = gj['coordinates']
+        except Exception:
+            pass
+        lon, lat = coords[0], coords[1]
+        if lon is None or lat is None:
+            continue
+
+        last = row.get('last_activity')
+        commune_stats.append({
+            'commune_id': cid,
+            'commune': nom,
+            'lat': float(lat),
+            'lon': float(lon),
+            'confirmed': int(row.get('confirmed') or 0),
+            'recovered': int(row.get('recovered') or 0),
+            'deaths': int(row.get('deaths') or 0),
+            'suspects': int(row.get('suspects') or 0),
+            'last_activity': last.strftime('%d/%m/%Y') if last else None,
+        })
+
+    alertes_qs = (
+        SignalementJournal.objects
+        .select_related('maladie', 'commune__district__region')
+        .order_by('-created_at')[:5]
+    )
+    alertes_data = [
+        {
+            'maladie_nom': a.maladie.nom,
+            'region_nom': a.commune.district.region.name if a.commune and a.commune.district else '',
+            'message': a.message,
+            'created_since': a.created_at.strftime('%d %b, %H:%M'),
+            'niveau_class': 'danger' if a.statut_reception == 'H' else ('warning' if a.statut_reception == 'M' else 'primary'),
+        }
+        for a in alertes_qs
     ]
 
-    alertes_qs = SignalementJournal.objects.select_related('maladie', 'commune__district__region').order_by(
-        '-created_at')[:5]
-    alertes_data = [{
-        'maladie_nom': a.maladie.nom,
-        'region_nom': a.commune.district.region.nom,
-        'message': a.message,
-        'created_since': f"{a.created_at.strftime('%d %b, %H:%M')}",
-        'niveau_class': 'danger' if a.niveau == 'H' else ('warning' if a.niveau == 'M' else 'primary')
-    } for a in alertes_qs]
-
-    data = {
-        'global_stats': global_stats,
-        'epidemies': epidemies_data,
-        'chart_data': chart_data,
-        'map_data': {
-            'foyers': foyers_data,
-            'regions_touchees': foyers.values('commune__district__region').distinct().count(),
-            'foyers_actifs': foyers.count(),
-        },
-        'alertes': alertes_data,
-        'last_updated': timezone.now().strftime('%H:%M:%S')
-    }
-
-    return JsonResponse(data)
+    return JsonResponse(
+        {
+            'global_stats': global_stats,
+            'epidemies': epidemies_data,
+            'chart_data': chart_data,
+            'map_data': {
+                'foyers': foyers_data,
+                'regions_touchees': foyers.values('commune__district__region').distinct().count(),
+                'foyers_actifs': foyers.count(),
+                'commune_stats': commune_stats,
+            },
+            'alertes': alertes_data,
+            'last_updated': timezone.now().strftime('%H:%M:%S'),
+        }
+    )

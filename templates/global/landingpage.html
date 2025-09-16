@@ -6,17 +6,21 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0, user-scalable=no">
 
     <!-- Métadonnées standards -->
     <meta name="author" content="Ministère de la Santé et de l'Hygiène Publique, Côte d'Ivoire">
-    <meta name="description" content="Tableau de bord national de surveillance épidémiologique - Système de veille sanitaire pour le suivi des maladies en Côte d'Ivoire">
-    <meta name="keywords" content="santé publique, veille sanitaire, épidémiologie, Côte d'Ivoire, surveillance des maladies, ministère de la santé">
+    <meta name="description"
+          content="Tableau de bord national de surveillance épidémiologique - Système de veille sanitaire pour le suivi des maladies en Côte d'Ivoire">
+    <meta name="keywords"
+          content="santé publique, veille sanitaire, épidémiologie, Côte d'Ivoire, surveillance des maladies, ministère de la santé">
     <meta name="robots" content="index, follow">
 
     <!-- Métadonnées Open Graph pour le partage social -->
     <meta property="og:title" content="Système National de Veille Sanitaire - Côte d'Ivoire">
-    <meta property="og:description" content="Tableau de bord de surveillance épidémiologique du Ministère de la Santé de Côte d'Ivoire">
+    <meta property="og:description"
+          content="Tableau de bord de surveillance épidémiologique du Ministère de la Santé de Côte d'Ivoire">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://[URL-DU-SITE]">
     <meta property="og:image" content="{% static 'images/logoMSHPCMU.svg' %}">
@@ -26,7 +30,8 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Système National de Veille Sanitaire">
-    <meta name="twitter:description" content="Tableau de bord de surveillance épidémiologique du Ministère de la Santé de Côte d'Ivoire">
+    <meta name="twitter:description"
+          content="Tableau de bord de surveillance épidémiologique du Ministère de la Santé de Côte d'Ivoire">
     <meta name="twitter:image" content="{% static 'images/logoMSHPCMU.svg' %}">
 
     <!-- Favicon -->
@@ -34,7 +39,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
-    <link rel="manifest" href="{% static 'site.webmanifest' %}">
+    {#    <link rel="manifest" href="{% static 'site.webmanifest' %}">#}
 
     <title>Système National de Veille Sanitaire - Ministère de la Santé Côte d'Ivoire</title>
 
@@ -52,77 +57,77 @@
     <meta name="theme-color" content="#0056b3">
     <meta name="msapplication-TileColor" content="#0056b3">
 </head>
- <style>
-        :root {
-            --primary-color: #2c7be5;
-            --success-color: #00d97e;
-            --warning-color: #f6c343;
-            --danger-color: #e63757;
-            --light-color: #f9f9f9;
-            --dark-color: #12263f;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #f5f6fa;
-        }
-
-        .stat-card {
-            border: none;
-            border-radius: .5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        }
-
-        .epidemie-card {
-            border-radius: .5rem;
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .epidemie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        }
-
-        .map-container {
-            height: 400px;
-            border-radius: .5rem;
-            overflow: hidden;
-        }
-
-        .timeline-item::before {
-            background-color: #e3ebf6;
-        }
-
-        .timeline-dot {
-            background-color: var(--primary-color);
-        }
-
-        .leaflet-popup-content-wrapper {
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border: none;
-        }
-
-        .leaflet-popup-content {
-            margin: 1rem;
-            font-size: 14px;
-            min-width: 220px;
-        }
-
-        .leaflet-popup-tip {
-            box-shadow: none;
-        }
-    </style>
 <style>
-/* Transition de l'opacité au remplacement HTMX */
+    :root {
+        --primary-color: #2c7be5;
+        --success-color: #00d97e;
+        --warning-color: #f6c343;
+        --danger-color: #e63757;
+        --light-color: #f9f9f9;
+        --dark-color: #12263f;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f5f6fa;
+    }
+
+    .stat-card {
+        border: none;
+        border-radius: .5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .epidemie-card {
+        border-radius: .5rem;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .epidemie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .map-container {
+        height: 400px;
+        border-radius: .5rem;
+        overflow: hidden;
+    }
+
+    .timeline-item::before {
+        background-color: #e3ebf6;
+    }
+
+    .timeline-dot {
+        background-color: var(--primary-color);
+    }
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .leaflet-popup-content {
+        margin: 1rem;
+        font-size: 14px;
+        min-width: 220px;
+    }
+
+    .leaflet-popup-tip {
+        box-shadow: none;
+    }
+</style>
+<style>
+    /* Transition de l'opacité au remplacement HTMX */
     .transition-opacity {
         transition: opacity 0.5s ease-in-out;
     }
@@ -148,279 +153,225 @@
 <body class="nk-body npc-covid has-sidebar has-sidebar-short ui-clean ui-rounder">
 <div class="nk-app-root">
     {% include 'global/layouts/navhead.html' %}
-        <div class="nk-content">
-            <div class="container-fluid">
-                <div class="nk-content-body">
-                    <!-- Header -->
-                    <div class="nk-block-head">
-                        <div class="nk-block-between mb-3">
-                            <div class="nk-block-head-content">
-                                <h2 class="nk-block-title"><em class="icon ni ni-dashboard-fill"></em> Tableau de Bord
-                                    National de la veille sanitaire</h2>
-                                <p class="text-soft">Données en temps réel - Mise à jour: {% now "j F Y, H:i" %}</p>
-                            </div>
+    <div class="nk-content">
+        <div class="container-fluid">
+            <div class="nk-content-body">
+                <!-- Header -->
+                <div class="nk-block-head">
+                    <div class="nk-block-between mb-3">
+                        <div class="nk-block-head-content">
+                            <h2 class="nk-block-title"><em class="icon ni ni-dashboard-fill"></em> Tableau de Bord
+                                National de la veille sanitaire</h2>
+                            <p class="text-soft">Données en temps réel - Mise à jour: {% now "j F Y, H:i" %}</p>
                         </div>
                     </div>
+                </div>
 
 
-
-                    <!-- Stat Cards -->
-                    <div class="nk-block">
-                        <div class="row g-gs">
-                            <div class="col-md-6 col-lg-3">
-                                <div class="card card-bordered stat-card bg-gray-100">
-                                    <div class="card-inner">
-                                        <div class="d-flex justify-content-between align-items-start mb-3">
-                                            <div class="text-primary"><em class="icon ni ni-activity-round"
-                                                                          style="font-size: 2.5rem;"></em></div>
-                                        </div>
-                                        <div class="h3 text-dark font-weight-bold">{{ total_cas_actifs|intcomma }}</div>
-                                        <div class="text-soft">Cas Actifs</div>
+                <!-- Stat Cards -->
+                <div class="nk-block">
+                    <div class="row g-gs">
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card card-bordered stat-card bg-gray-100">
+                                <div class="card-inner">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="text-primary"><em class="icon ni ni-activity-round"
+                                                                      style="font-size: 2.5rem;"></em></div>
                                     </div>
+                                    <div class="h3 text-dark font-weight-bold">{{ total_cas_actifs|intcomma }}</div>
+                                    <div class="text-soft">Cas Actifs</div>
                                 </div>
                             </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="card card-bordered stat-card bg-gray-100">
-                                    <div class="card-inner ">
-                                        <div class="d-flex justify-content-between align-items-start mb-3 ">
-                                            <div class="text-success"><em class="icon ni ni-shield-check-fill"
-                                                                          style="font-size: 2.5rem;"></em></div>
-                                        </div>
-                                        <div class="h3 text-dark font-weight-bold">{{ total_gueris|intcomma }}</div>
-                                        <div class="d-flex align-items-center">
-                                            <div class="text-soft mr-2">Guéris</div>
-                                            <span class="badge badge-dim badge-success">{{ taux_guerison }}%</span>
-                                        </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card card-bordered stat-card bg-gray-100">
+                                <div class="card-inner ">
+                                    <div class="d-flex justify-content-between align-items-start mb-3 ">
+                                        <div class="text-success"><em class="icon ni ni-shield-check-fill"
+                                                                      style="font-size: 2.5rem;"></em></div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="card card-bordered stat-card bg-gray-100">
-                                    <div class="card-inner">
-                                        <div class="d-flex justify-content-between align-items-start mb-3">
-                                            <div class="text-danger"><em class="icon ni ni-cross-circle-fill"
-                                                                         style="font-size: 2.5rem;"></em></div>
-                                        </div>
-                                        <div class="h3 text-dark font-weight-bold">{{ total_deces|intcomma }}</div>
-                                        <div class="d-flex align-items-center">
-                                            <div class="text-soft mr-2">Décès</div>
-                                            <span class="badge badge-dim badge-danger">{{ taux_mortalite }}%</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-lg-3">
-                                <div class="card card-bordered stat-card bg-gray-100">
-                                    <div class="card-inner">
-                                        <div class="d-flex justify-content-between align-items-start mb-3">
-                                            <div class="text-warning"><em class="icon ni ni-alert-fill" style="font-size: 2.5rem;"></em></div>
-                                        </div>
-                                        <div class="h3 text-dark font-weight-bold">{{ total_suspects|intcomma }}</div>
-                                        <div class="text-soft">Cas Suspects (+{{ nouveaux_suspects_7j }} récents)</div>
+                                    <div class="h3 text-dark font-weight-bold">{{ total_gueris|intcomma }}</div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-soft mr-2">Guéris</div>
+                                        <span class="badge badge-dim badge-success">{{ taux_guerison }}%</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-   <!-- Geographic Map -->  <div class="nk-block">
-                        <div class="row g-gs">
-                                    <div class="col-12">
-                                        <div class="card card-bordered h-100">
-                                            <div class="card-inner">
-                                                <h5 class="card-title">Répartition Géographique</h5>
-                                                <div class="map-container mt-3">
-                                                    <div id="map" style="height:400px"></div>
-                                                </div>
-                                                <div class="d-flex justify-content-between pt-3">
-                                                    <span class="text-soft"><em class="icon ni ni-map-pin-fill text-primary"></em> Régions: {{ regions_touchees }}</span>
-                                                    <span class="text-soft"><em class="icon ni ni-alert-c-fill text-danger"></em> Foyers: {{ foyers_actifs }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card card-bordered stat-card bg-gray-100">
+                                <div class="card-inner">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="text-danger"><em class="icon ni ni-cross-circle-fill"
+                                                                     style="font-size: 2.5rem;"></em></div>
                                     </div>
-                        </div></div>
-                    <!-- Main Content Block -->
-                    <div class="nk-block">
-                        <div class="row g-gs">
-                            <!-- Epidemics List -->
-                            <div class="col-lg-8">
-                                <div class="card card-bordered h-100">
-                                    <div class="card-inner">
-                                        <h5 class="card-title">Surveillance des Maladies Épidémiques</h5>
-                                        <div class="mt-4" style="max-height: 1250px; overflow-y: auto;"
-                                             id="epidemiesContainer"
-                                             hx-get="{% url 'epidemies-partial' %}"
-                                             hx-trigger="every 5s"
-                                             hx-swap="innerHTML transition:true"
-                                             hx-on="
+                                    <div class="h3 text-dark font-weight-bold">{{ total_deces|intcomma }}</div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-soft mr-2">Décès</div>
+                                        <span class="badge badge-dim badge-danger">{{ taux_mortalite }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="card card-bordered stat-card bg-gray-100">
+                                <div class="card-inner">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="text-warning"><em class="icon ni ni-alert-fill"
+                                                                      style="font-size: 2.5rem;"></em></div>
+                                    </div>
+                                    <div class="h3 text-dark font-weight-bold">{{ total_suspects|intcomma }}</div>
+                                    <div class="text-soft">Cas Suspects (+{{ nouveaux_suspects_7j }} récents)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Geographic Map -->
+                <div class="nk-block">
+                    <div class="row g-gs">
+                        <div class="col-12">
+                            <div class="card card-bordered h-100">
+                                <div class="card-inner">
+                                    <h5 class="card-title">Répartition Géographique</h5>
+                                    <div class="map-container mt-3">
+                                        <div id="map" style="height:400px"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between pt-3">
+                                        <span class="text-soft"><em class="icon ni ni-map-pin-fill text-primary"></em> Régions: {{ regions_touchees }}</span>
+                                        <span class="text-soft"><em class="icon ni ni-alert-c-fill text-danger"></em> Foyers: {{ foyers_actifs }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Main Content Block -->
+                <div class="nk-block">
+                    <div class="row g-gs">
+                        <!-- Epidemics List -->
+                        <div class="col-lg-8">
+                            <div class="card card-bordered h-100">
+                                <div class="card-inner">
+                                    <h5 class="card-title">Surveillance des Maladies Épidémiques</h5>
+                                    <div class="mt-4" style="max-height: 1250px; overflow-y: auto;"
+                                         id="epidemiesContainer"
+                                         hx-get="{% url 'epidemies-partial' %}"
+                                         hx-trigger="every 5s"
+                                         hx-swap="innerHTML transition:true"
+                                         hx-on="
         htmx:beforeSwap: this.classList.remove('slide-up-enter', 'slide-up-enter-active');
         htmx:afterSwap: this.classList.add('slide-up-enter');
         setTimeout(() => this.classList.add('slide-up-enter-active'), 10);
      " class="transition-opacity">
-                                            {% include "partials/_epidemies_list.html" %}
-                                        </div>
+                                        {% include "partials/_epidemies_list.html" %}
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-{#                            <div class="col-lg-8">#}
-{#                                <div class="card card-bordered h-100">#}
-{#                                    <div class="card-inner">#}
-{#                                        <h5 class="card-title">Surveillance des Maladies Épidémiques</h5>#}
-{#                                        <div class="mt-4" style="max-height: 1250px; overflow-y: auto;">#}
-{#                                            {% for epidemie in epidemies %}#}
-{#                                                <div class="card epidemie-card bg-light mb-3">#}
-{#                                                    <div class="card-body">#}
-{#                                                        <div class="d-flex flex-wrap justify-content-between align-items-center">#}
-{#                                                            <div class="d-flex align-items-center mb-3 mb-md-0">#}
-{#                                                                <div class="mr-3">#}
-{#                                                                    <div class="user-avatar bg-{{ epidemie.status_class }}-dim">#}
-{#                                                                        {% if epidemie.thumbnails %}#}
-{#                                                                            <img src="{{ epidemie.thumbnails.url }}"#}
-{#                                                                                 alt="">#}
-{#                                                                        {% else %}#}
-{#                                                                            <em class="icon ni ni-bug"></em>#}
-{#                                                                        {% endif %}#}
-{#                                                                    </div>#}
-{#                                                                </div>#}
-{#                                                                <div>#}
-{#                                                                    <h6 class="card-title mb-0"><a href="{% url 'epidemie-detail' epidemie.pk %}" >{{ epidemie.nom }}</a></h6>#}
-{#                                                                    <p class="text-soft text-sm">Dernier#}
-{#                                                                        cas: {{ epidemie.last_activity|date:"d M Y H:m"|default:"Aucun" }}</p>#}
-{#                                                                </div>#}
-{#                                                            </div>#}
-{#                                                            <div class="d-flex align-items-center">#}
-{#                                                                <div class="text-center px-3">#}
-{#                                                                    <div class="h4 font-weight-bold">{{ epidemie.total_cases|intcomma }}</div>#}
-{#                                                                    <div class="text-xs text-soft">Total Cas</div>#}
-{#                                                                </div>#}
-{#                                                                <div class="text-center px-3 border-left border-right">#}
-{#                                                                    <div class="h4 font-weight-bold">{{ epidemie.total_deaths|intcomma }}</div>#}
-{#                                                                    <div class="text-xs text-soft">Décès</div>#}
-{#                                                                </div>#}
-{#                                                                <div class="text-center pl-3">#}
-{#                                                                    <div class="h5 font-weight-bold text-{{ epidemie.status_class }}">#}
-{#                                                                        +{{ epidemie.new_cases_7d|intcomma }}</div>#}
-{#                                                                    <div class="text-xs text-soft">7 derniers jours</div>#}
-{#                                                                </div>#}
-{#                                                            </div>#}
-{#                                                            <div class="d-flex align-items-center mt-3 mt-md-0">#}
-{#                                                                <span class="badge badge-pill badge-{{ epidemie.status_class }} ml-md-4 mr-2">{{ epidemie.status_display }}</span>#}
-{#                                                                <button class="btn btn-sm btn-icon btn-trigger" onclick="openSymptomModal({{ epidemie.id }})"><em class="icon ni ni-info"></em></button>#}
-{#                                                                <button class="btn btn-sm btn-icon btn-trigger"><a href="{% url 'epidemie-detail' epidemie.pk %}" ><em class="icon ni ni-eye"></em></a></button>#}
-{##}
-{#                                                            </div>#}
-{#                                                        </div>#}
-{#                                                    </div>#}
-{#                                                </div>#}
-{#                                            {% empty %}#}
-{#                                                <div class="text-center py-5">#}
-{#                                                    <p class="text-soft">Aucune maladie épidémique à surveiller.</p>#}
-{#                                                </div>#}
-{#                                            {% endfor %}#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
 
-                            <!-- Right Column -->
-                            <div class="col-lg-4">
-                                <div class="row g-gs">
-                                    <div class="col-lg-12">
-    <div class="card card-bordered h-100">
-        <div class="card-inner">
-            <h5 class="card-title">Dernières Alertes</h5>
+                        <!-- Right Column -->
+                        <div class="col-lg-4">
+                            <div class="row g-gs">
+                                <div class="col-lg-12">
+                                    <div class="card card-bordered h-100">
+                                        <div class="card-inner">
+                                            <h5 class="card-title">Dernières Alertes</h5>
 
-            <div id="alertesContainer"
-                 hx-get="{% url 'dernieres_alertes_partial' %}"
-                 hx-trigger="every 7s"
-                 hx-swap="innerHTML"
-                 hx-on="
+                                            <div id="alertesContainer"
+                                                 hx-get="{% url 'dernieres_alertes_partial' %}"
+                                                 hx-trigger="every 7s"
+                                                 hx-swap="innerHTML"
+                                                 hx-on="
                     htmx:beforeSwap: this.classList.remove('slide-up-enter', 'slide-up-enter-active');
                     htmx:afterSwap: this.classList.add('slide-up-enter');
                     setTimeout(() => this.classList.add('slide-up-enter-active'), 10);
                  "
-            >
-                {% include "partials/_alertes_list.html" %}
-            </div>
+                                            >
+                                                {% include "partials/_alertes_list.html" %}
+                                            </div>
 
-        </div>
-    </div>
-</div>
-                                 <div class="col-lg-12">
-                               <div class="card card-bordered mt-4" >
-    <div class="card-inner" style="max-height: 400px; overflow-y: auto;">
-        <h5 class="card-title">Épidémies par Pôle Régional</h5>
-        {% if stats_epidemies_par_pole %}
-            {% for pole, maladies in stats_epidemies_par_pole.items %}
-                <div class="mt-3" >
-                    <h6 class="text-primary">{{ pole }}</h6>
-                    <ul class="list-group list-group-sm">
-                        {% for maladie, stats in maladies.items %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ maladie }}</strong><br>
-                                    <small>Cas positifs : {{ stats.cas }}</small><br>
-                                    <small class="text-danger">Décès : {{ stats.deces }}</small>
+                                        </div>
+                                    </div>
                                 </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-soft">Aucune donnée disponible.</p>
-        {% endif %}
-    </div>
-</div>
-                            </div>
-                                 <div class="col-12">
-    <div class="card card-bordered h-100">
-        <div class="card-inner">
-            <h5 class="card-title">Statistiques par Pôle Régional</h5>
-            <div class="gy-1 mt-3">
-                {% for pole in stats_par_pole %}
-                    <div class="d-flex justify-content-between align-items-center py-1">
-                        <div>
-                            <strong>{{ pole.district_sanitaire__region__poles__name|default:"Sans Pôle" }}</strong><br>
-                            <small class="text-muted">Cas: {{ pole.total_cas_positifs }} | Guéris: {{ pole.total_gueris }} | Décès: {{ pole.total_deces }}</small>
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="text-soft text-center">Aucune donnée disponible</div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-
+                                <div class="col-lg-12">
+                                    <div class="card card-bordered mt-4">
+                                        <div class="card-inner" style="max-height: 400px; overflow-y: auto;">
+                                            <h5 class="card-title">Épidémies par Pôle Régional</h5>
+                                            {% if stats_epidemies_par_pole %}
+                                                {% for pole, maladies in stats_epidemies_par_pole.items %}
+                                                    <div class="mt-3">
+                                                        <h6 class="text-primary">{{ pole }}</h6>
+                                                        <ul class="list-group list-group-sm">
+                                                            {% for maladie, stats in maladies.items %}
+                                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    <div>
+                                                                        <strong>{{ maladie }}</strong><br>
+                                                                        <small>Cas positifs
+                                                                            : {{ stats.cas }}</small><br>
+                                                                        <small class="text-danger">Décès
+                                                                            : {{ stats.deces }}</small>
+                                                                    </div>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p class="text-soft">Aucune donnée disponible.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="col-12">
+                                    <div class="card card-bordered h-100">
+                                        <div class="card-inner">
+                                            <h5 class="card-title">Statistiques par Pôle Régional</h5>
+                                            <div class="gy-1 mt-3">
+                                                {% for pole in stats_par_pole %}
+                                                    <div class="d-flex justify-content-between align-items-center py-1">
+                                                        <div>
+                                                            <strong>{{ pole.district_sanitaire__region__poles__name|default:"Sans Pôle" }}</strong><br>
+                                                            <small class="text-muted">Cas: {{ pole.total_cas_positifs }}
+                                                                | Guéris: {{ pole.total_gueris }} |
+                                                                Décès: {{ pole.total_deces }}</small>
+                                                        </div>
+                                                    </div>
+                                                {% empty %}
+                                                    <div class="text-soft text-center">Aucune donnée disponible</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
-                        </div>
-                    </div>
-                    <!-- Additional Info Block -->
-                    <div class="nk-block">
-                        <div class="row g-gs">
-                            <!-- Recent Alerts -->
-                           <!-- Evolution Chart -->
-                                   <div class="col-12">
-    <div class="card card-bordered h-100">
-        <div class="card-inner">
-            <h5 class="card-title">Évolution des épidémies par pôle (30 jours)</h5>
-            <div id="evolutionApexChart" class="mt-4" style="height: 300px;"></div>
-        </div>
-    </div>
-</div>
-
-
-
                         </div>
                     </div>
                 </div>
+                <!-- Additional Info Block -->
+                <div class="nk-block">
+                    <div class="row g-gs">
+                        <!-- Recent Alerts -->
+                        <!-- Evolution Chart -->
+                        <div class="col-12">
+                            <div class="card card-bordered h-100">
+                                <div class="card-inner">
+                                    <h5 class="card-title">Évolution des épidémies par pôle (30 jours)</h5>
+                                    <div id="evolutionApexChart" class="mt-4" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Dynamic Symptom Modal -->
 <div class="modal fade" tabindex="-1" id="symptomModal">
@@ -446,26 +397,29 @@
     </div>
 </div>
 
- <div class="nk-footer ">
-                    <div class="container-fluid">
-                        <div class="nk-footer-wrap gy-1 gx-4">
-                            <div class="nk-footer-links">
-                                <ul class="nav nav-sm">
-                                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">A propos</a></li>
-                                    </ul>
-                            </div>
-                            <span><img src="{% static 'images/ivory-coast.png' %}" width="30"></span><span> République de Côte d'Ivoire</span>
+<div class="nk-footer ">
+    <div class="container-fluid">
+        <div class="nk-footer-wrap gy-1 gx-4">
+            <div class="nk-footer-links">
+                <ul class="nav nav-sm">
+                    <li class="nav-item"><a class="nav-link" href="#" data-toggle="modal" data-target="#covid-feedback">A
+                        propos</a></li>
+                </ul>
+            </div>
+            <span><img src="{% static 'images/ivory-coast.png' %}"
+                       width="30"></span><span> République de Côte d'Ivoire</span>
 
-                            <span>|</span>
-                            <span>Ministère de la Santé de l'Hygiène Publique et de la Couverture Maladie Universelle</span><span> <img src="{% static 'images/logoMSHPCMU.svg' %}" width="30"></span>
-                            <span>|</span>
-                            <span>Système National de surveillance Épidémiologique </span>
-                            <span>|</span>
-                            <div class="nk-footer-copyright white"> &copy; Copyright 2024, <a href="#">afriqconsulting</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <span>|</span>
+            <span>Ministère de la Santé de l'Hygiène Publique et de la Couverture Maladie Universelle</span><span> <img
+                src="{% static 'images/logoMSHPCMU.svg' %}" width="30"></span>
+            <span>|</span>
+            <span>Système National de surveillance Épidémiologique </span>
+            <span>|</span>
+            <div class="nk-footer-copyright white"> &copy; Copyright 2024, <a href="#">afriqconsulting</a>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- JavaScript -->
 <script src="{% static 'assets/js/bundle.js' %}"></script>
 <script src="{% static 'assets/js/scripts.js' %}"></script>
@@ -473,194 +427,630 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-    const apexSeries = {{ apex_series_json|safe }};
-    const apexLabels = {{ apex_labels|safe }};
+        const apexSeries = {{ apex_series_json|safe }};
+        const apexLabels = {{ apex_labels|safe }};
 
-    if (document.getElementById('evolutionApexChart')) {
-        const options = {
-            chart: {
-                type: 'area',
-                height: 300,
-                animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 800,
+        if (document.getElementById('evolutionApexChart')) {
+            const options = {
+                chart: {
+                    type: 'area',
+                    height: 300,
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800,
+                    },
+                    zoom: {enabled: false},
+                    toolbar: {show: false}
                 },
-                zoom: {enabled: false},
-                toolbar: {show: false}
-            },
-            colors: ['#2c7be5', '#e63757', '#63c78d', '#f4b940', '#6610f2'],
-            dataLabels: {enabled: false},
-            stroke: {
-                curve: 'smooth',
-                width: 2
-            },
-            series: apexSeries,
-            xaxis: {
-                categories: apexLabels,
-                labels: {rotate: -45}
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                y: {formatter: val => val + " cas"}
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'left'
-            },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.4,
-                    opacityTo: 0,
-                    stops: [0, 90, 100]
+                colors: ['#2c7be5', '#e63757', '#63c78d', '#f4b940', '#6610f2'],
+                dataLabels: {enabled: false},
+                stroke: {
+                    curve: 'smooth',
+                    width: 2
+                },
+                series: apexSeries,
+                xaxis: {
+                    categories: apexLabels,
+                    labels: {rotate: -45}
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    y: {formatter: val => val + " cas"}
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'left'
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.4,
+                        opacityTo: 0,
+                        stops: [0, 90, 100]
+                    }
                 }
+            };
+
+            const chart = new ApexCharts(document.querySelector("#evolutionApexChart"), options);
+            chart.render();
+        }
+    });
+</script>
+
+{#<script>#}
+{#    document.addEventListener('DOMContentLoaded', function () {#}
+{##}
+{#        // --- Evolution Chart ---#}
+{#        const evolutionChartData = {{ evolution_data_json|safe }};#}
+{#        if (document.getElementById('evolutionChartCanvas') && evolutionChartData) {#}
+{#            const ctx = document.getElementById('evolutionChartCanvas').getContext('2d');#}
+{#            new Chart(ctx, {#}
+{#                type: 'line',#}
+{#                data: {#}
+{#                    labels: evolutionChartData.labels,#}
+{#                    datasets: [{#}
+{#                        label: 'Cas Confirmés',#}
+{#                        data: evolutionChartData.confirmed,#}
+{#                        backgroundColor: 'rgba(44, 123, 229, 0.1)',#}
+{#                        borderColor: '#2c7be5',#}
+{#                        borderWidth: 2,#}
+{#                        pointRadius: 0,#}
+{#                        pointHoverRadius: 4,#}
+{#                        tension: 0.3,#}
+{#                        fill: true,#}
+{#                    }, {#}
+{#                        label: 'Décès',#}
+{#                        data: evolutionChartData.deaths,#}
+{#                        backgroundColor: 'rgba(230, 55, 87, 0.1)',#}
+{#                        borderColor: '#e63757',#}
+{#                        borderWidth: 2,#}
+{#                        pointRadius: 0,#}
+{#                        pointHoverRadius: 4,#}
+{#                        tension: 0.3,#}
+{#                        fill: true,#}
+{#                    }]#}
+{#                },#}
+{#                options: {#}
+{#                    responsive: true,#}
+{#                    maintainAspectRatio: false,#}
+{#                    scales: {y: {beginAtZero: true, grid: {drawBorder: false}}, x: {grid: {display: false}}},#}
+{#                    plugins: {#}
+{#                        legend: {#}
+{#                            display: true,#}
+{#                            position: 'top',#}
+{#                            labels: {usePointStyle: true, boxWidth: 8, padding: 15}#}
+{#                        }, tooltip: {mode: 'index', intersect: false}#}
+{#                    }#}
+{#                }#}
+{#            });#}
+{#        }#}
+{#        #}
+{#        // --- Leaflet Map with MarkerCluster ---#}
+{#        const foyersData = {{ foyers_epidemiques_json|safe }};#}
+        {#console.log('FOYERS DATA:', {{ foyers_epidemiques_json|safe }});#}
+{#        if (document.getElementById('map') && L && foyersData.length > 0) {#}
+{#            const map = L.map('map').setView([7.54, -5.55], 6);#}
+{##}
+{#            L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {#}
+{#                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'#}
+{#            }).addTo(map);#}
+{##}
+{#            const redIcon = L.icon({#}
+{#                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',#}
+{#                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',#}
+{#                iconSize: [25, 41],#}
+{#                iconAnchor: [12, 41],#}
+{#                popupAnchor: [1, -34],#}
+{#                shadowSize: [41, 41]#}
+{#            });#}
+{##}
+{#            // Initialiser le cluster group#}
+{#            const markers = L.markerClusterGroup();#}
+{##}
+{#            foyersData.forEach(foyer => {#}
+{#                const marker = L.marker([foyer.lat, foyer.lon], {icon: redIcon});#}
+{##}
+{#                const popupContent = `#}
+{#            <div>#}
+{#                <h6 class="fw-bold text-primary mb-1">${foyer.maladie}</h6>#}
+{#                <p class="text-soft mb-1">Commune : <strong>${foyer.commune}</strong></p>#}
+{#                <p class="text-soft mb-1">Date : ${foyer.date}</p>#}
+{#                ${foyer.niveau ? `<span class="badge bg-danger-soft">Gravité : ${foyer.niveau}</span>` : ''}#}
+{#            </div>#}
+{#        `;#}
+{##}
+{#                marker.bindPopup(popupContent);#}
+{#                markers.addLayer(marker);#}
+{#            });#}
+{##}
+{#            map.addLayer(markers);#}
+{#        }#}
+{#    });#}
+{##}
+{#    // --- Dynamic Symptom Modal ---#}
+{#    const allSymptomsData = {{ symptoms_data_json|safe }};#}
+{##}
+{#    function openSymptomModal(epidemieId) {#}
+{#        const data = allSymptomsData[epidemieId];#}
+{#        if (!data) return;#}
+{##}
+{#        document.getElementById('symptomModalTitle').innerText = `Symptômes - ${data.nom}`;#}
+{#        document.getElementById('symptomModalDescription').innerText = data.description;#}
+{##}
+{#        const listContainer = document.getElementById('symptomModalList');#}
+{#        listContainer.innerHTML = ''; // Clear previous content#}
+{##}
+{#        if (data.symptomes.length > 0) {#}
+{#            data.symptomes.forEach(symptome => {#}
+{#                const gravityClass = symptome.gravite >= 4 ? 'danger' : (symptome.gravite >= 2 ? 'warning' : 'success');#}
+{#                const col = document.createElement('div');#}
+{#                col.className = 'col-md-6';#}
+{#                col.innerHTML = `#}
+{#                    <div class="card card-bordered h-100">#}
+{#                        <div class="card-inner">#}
+{#                            <h6 class="card-title">${symptome.nom}</h6>#}
+{#                            <p class="text-soft small mt-1">${symptome.description}</p>#}
+{#                            <div class="d-flex justify-content-between small mt-3">#}
+{#                                <span>Fréquence: <strong>${symptome.frequence}%</strong></span>#}
+{#                                <span>Gravité: <strong class="text-${gravityClass}">${symptome.gravite}/5</strong></span>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                `;#}
+{#                listContainer.appendChild(col);#}
+{#            });#}
+{#        } else {#}
+{#            listContainer.innerHTML = '<div class="col-12"><div class="alert alert-light">Aucun symptôme enregistré pour cette maladie.</div></div>';#}
+{#        }#}
+{##}
+{#        // Use jQuery from DashLite's bundle to show the modal#}
+{#        $('#symptomModal').modal('show');#}
+{#    }#}
+{#</script>#}
+<!-- Injection de données côté Django via balises JSON sûres -->
+{#<script type="application/json" id="evolution-data-json">{{ evolution_data_json|json_script:"evolution-data-json" }}</script>#}
+{#<script type="application/json" id="foyers-data-json">{{ foyers_epidemiques_json|json_script:"foyers-data-json" }}</script>#}
+{#<script type="application/json" id="symptoms-data-json">{{ symptoms_data_json|json_script:"symptoms-data-json" }}"></script>#}
+
+<script>
+    (function () {
+        // Utilitaires
+        const fmt = new Intl.NumberFormat('fr-FR');
+        const esc = (s) => String(s)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+        const getJSON = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            try {
+                return JSON.parse(el.textContent);
+            } catch {
+                return null;
             }
         };
 
-        const chart = new ApexCharts(document.querySelector("#evolutionApexChart"), options);
-        chart.render();
-    }
-});
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            // -------- Chart.js (évolution) --------
+            const evolutionChartData = getJSON('evolution-data-json');
+            const canvas = document.getElementById('evolutionChartCanvas');
 
-        // --- Evolution Chart ---
-        const evolutionChartData = {{ evolution_data_json|safe }};
-        if (document.getElementById('evolutionChartCanvas') && evolutionChartData) {
-            const ctx = document.getElementById('evolutionChartCanvas').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: evolutionChartData.labels,
-                    datasets: [{
-                        label: 'Cas Confirmés',
-                        data: evolutionChartData.confirmed,
-                        backgroundColor: 'rgba(44, 123, 229, 0.1)',
-                        borderColor: '#2c7be5',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 4,
-                        tension: 0.3,
-                        fill: true,
-                    }, {
-                        label: 'Décès',
-                        data: evolutionChartData.deaths,
-                        backgroundColor: 'rgba(230, 55, 87, 0.1)',
-                        borderColor: '#e63757',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 4,
-                        tension: 0.3,
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {y: {beginAtZero: true, grid: {drawBorder: false}}, x: {grid: {display: false}}},
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {usePointStyle: true, boxWidth: 8, padding: 15}
-                        }, tooltip: {mode: 'index', intersect: false}
+            if (canvas && evolutionChartData && typeof Chart !== 'undefined') {
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: evolutionChartData.labels || [],
+                        datasets: [
+                            {
+                                label: 'Cas confirmés',
+                                data: evolutionChartData.confirmed || [],
+                                backgroundColor: 'rgba(44, 123, 229, 0.10)',
+                                borderColor: '#2c7be5',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                tension: 0.3,
+                                fill: true,
+                            },
+                            {
+                                label: 'Décès',
+                                data: evolutionChartData.deaths || [],
+                                backgroundColor: 'rgba(230, 55, 87, 0.10)',
+                                borderColor: '#e63757',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                tension: 0.3,
+                                fill: true,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {mode: 'index', intersect: false},
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {drawBorder: false},
+                                ticks: {callback: (v) => fmt.format(v)}
+                            },
+                            x: {
+                                grid: {display: false}
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {usePointStyle: true, boxWidth: 8, padding: 15}
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => `${ctx.dataset.label}: ${fmt.format(ctx.parsed.y)}`
+                                }
+                            }
+                        }
                     }
-                }
-            });
-        }
+                });
+            }
 
-        // --- Leaflet Map ---
-        // --- Leaflet Map with MarkerCluster ---
-        const foyersData = {{ foyers_epidemiques_json|safe }};
-        {#console.log('FOYERS DATA:', {{ foyers_epidemiques_json|safe }});#}
-        if (document.getElementById('map') && L && foyersData.length > 0) {
-            const map = L.map('map').setView([7.54, -5.55], 6);
+            // -------- Leaflet + MarkerCluster (foyers) --------
+            const foyersData = getJSON('foyers-data-json') || [];
+            const mapDiv = document.getElementById('map');
+            const hasLeaflet = typeof L !== 'undefined';
 
-            L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            }).addTo(map);
+            if (mapDiv && hasLeaflet && foyersData.length > 0) {
+                const map = L.map('map', {zoomControl: true}).setView([7.54, -5.55], 6);
 
-            const redIcon = L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            });
+                L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution:
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
+                        '&copy; <a href="https://carto.com/attributions">CARTO</a>'
+                }).addTo(map);
 
-            // Initialiser le cluster group
-            const markers = L.markerClusterGroup();
+                // Icônes stables (versions récentes des URLs)
+                const redIcon = L.icon({
+                    iconUrl: 'https://unpkg.com/leaflet-color-markers@1.1.1/img/marker-icon-2x-red.png',
+                    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -28],
+                    shadowSize: [41, 41],
+                });
 
-            foyersData.forEach(foyer => {
-                const marker = L.marker([foyer.lat, foyer.lon], {icon: redIcon});
+                // MarkerCluster optionnel
+                const canCluster = typeof L.markerClusterGroup === 'function';
+                const group = canCluster
+                    ? L.markerClusterGroup({
+                        disableClusteringAtZoom: 11,
+                        spiderfyOnMaxZoom: true,
+                        chunkedLoading: true
+                    })
+                    : L.featureGroup();
 
-                const popupContent = `
-            <div>
-                <h6 class="fw-bold text-primary mb-1">${foyer.maladie}</h6>
-                <p class="text-soft mb-1">Commune : <strong>${foyer.commune}</strong></p>
-                <p class="text-soft mb-1">Date : ${foyer.date}</p>
-                ${foyer.niveau ? `<span class="badge bg-danger-soft">Gravité : ${foyer.niveau}</span>` : ''}
-            </div>
+                const bounds = [];
+
+                foyersData.forEach((foyer) => {
+                    const lat = Number(foyer.lat), lon = Number(foyer.lon);
+                    if (!isFinite(lat) || !isFinite(lon)) return;
+
+                    const marker = L.marker([lat, lon], {icon: redIcon});
+
+                    // Popup sécurisé (échappage)
+                    const maladie = esc(foyer.maladie ?? '');
+                    const commune = esc(foyer.commune ?? '');
+                    const date = esc(foyer.date ?? '');
+                    const niveau = foyer.niveau ? esc(foyer.niveau) : null;
+
+                    let html = `
+          <div>
+            <h6 class="fw-bold text-primary mb-1">${maladie}</h6>
+            <p class="text-soft mb-1">Commune : <strong>${commune}</strong></p>
+            <p class="text-soft mb-1">Date : ${date}</p>
         `;
+                    if (niveau) {
+                        html += `<span class="badge bg-danger-soft">Gravité : ${niveau}</span>`;
+                    }
+                    html += `</div>`;
 
-                marker.bindPopup(popupContent);
-                markers.addLayer(marker);
-            });
+                    marker.bindPopup(html);
+                    group.addLayer(marker);
+                    bounds.push([lat, lon]);
+                });
 
-            map.addLayer(markers);
-        }
+                group.addTo(map);
+                if (bounds.length) map.fitBounds(bounds, {padding: [20, 20]});
+
+                // Si la carte est dans un onglet/modal caché, forcer le resize à l’ouverture
+                if (window.jQuery) {
+                    $(document).on('shown.bs.modal shown.bs.tab', function () {
+                        map.invalidateSize();
+                    });
+                } else {
+                    setTimeout(() => map.invalidateSize(), 300);
+                }
+
+                L.control.scale({metric: true, imperial: false}).addTo(map);
+            }
+
+            // -------- Modal Symptômes (sécurisé) --------
+            const allSymptomsData = getJSON('symptoms-data-json') || {};
+
+            window.openSymptomModal = function (epidemieId) {
+                const data = allSymptomsData[String(epidemieId)];
+                if (!data) return;
+
+                // Titres/texte : utiliser textContent plutôt que innerHTML
+                const titleEl = document.getElementById('symptomModalTitle');
+                const descEl = document.getElementById('symptomModalDescription');
+                const listContainer = document.getElementById('symptomModalList');
+
+                if (titleEl) titleEl.textContent = `Symptômes - ${data.nom || ''}`;
+                if (descEl) descEl.textContent = data.description || '';
+
+                if (!listContainer) return;
+                listContainer.innerHTML = '';
+
+                const items = Array.isArray(data.symptomes) ? data.symptomes : [];
+                if (items.length > 0) {
+                    items.forEach((symptome) => {
+                        const gravityClass = (Number(symptome.gravite) >= 4)
+                            ? 'danger'
+                            : (Number(symptome.gravite) >= 2 ? 'warning' : 'success');
+
+                        // Construction via DOM pour éviter l’HTML non échappé
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6';
+
+                        const card = document.createElement('div');
+                        card.className = 'card card-bordered h-100';
+
+                        const inner = document.createElement('div');
+                        inner.className = 'card-inner';
+
+                        const h6 = document.createElement('h6');
+                        h6.className = 'card-title';
+                        h6.textContent = symtpSafe(symptome.nom);
+
+                        const p = document.createElement('p');
+                        p.className = 'text-soft small mt-1';
+                        p.textContent = symtpSafe(symptome.description);
+
+                        const row = document.createElement('div');
+                        row.className = 'd-flex justify-content-between small mt-3';
+
+                        const f = document.createElement('span');
+                        f.innerHTML = `Fréquence: <strong>${fmt.format(Number(symptome.frequence) || 0)}%</strong>`;
+
+                        const g = document.createElement('span');
+                        g.innerHTML = `Gravité: <strong class="text-${gravityClass}">${Number(symptome.gravite) || 0}/5</strong>`;
+
+                        row.appendChild(f);
+                        row.appendChild(g);
+                        inner.appendChild(h6);
+                        inner.appendChild(p);
+                        inner.appendChild(row);
+                        card.appendChild(inner);
+                        col.appendChild(card);
+                        listContainer.appendChild(col);
+                    });
+                } else {
+                    listContainer.innerHTML =
+                        '<div class="col-12"><div class="alert alert-light">Aucun symptôme enregistré pour cette maladie.</div></div>';
+                }
+
+                if (window.jQuery) {
+                    $('#symptomModal').modal('show');
+                } else {
+                    // Fallback éventuel si pas de jQuery/Bootstrap modals
+                    document.getElementById('symptomModal')?.classList.add('show');
+                }
+            };
+
+            function symtpSafe(v) {
+                return (v == null ? '' : String(v));
+            }
+        });
+    })();
+</script>
+
+<!-- map api -->
+<script>
+document.addEventListener('DOMContentLoaded', async function () {
+  const mapDiv = document.getElementById('map');
+  if (!mapDiv) return;
+  if (typeof L === 'undefined') { console.error('Leaflet non chargé'); return; }
+
+  // 1) Carte
+  const map = L.map('map', { zoomControl: true });
+  L.tileLayer('https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap & CARTO'
+  }).addTo(map);
+
+  // 2) Fetch robuste (évite "Unexpected token '<'")
+  let payload = null;
+  try {
+    const r = await fetch("{% url 'dashboard_api_data' %}", {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!r.ok) {
+      const text = await r.text();
+      throw new Error(`HTTP ${r.status} — ${text.slice(0, 300)}`);
+    }
+    const ct = (r.headers.get('content-type') || '').toLowerCase();
+    if (!ct.includes('application/json')) {
+      const text = await r.text();
+      throw new Error(`Contenu non-JSON (${ct}) — extrait: ${text.slice(0, 300)}`);
+    }
+    payload = await r.json();
+  } catch (e) {
+    console.error('API landing_page_api indisponible:', e);
+    const warn = L.control({ position: 'topright' });
+    warn.onAdd = () => {
+      const d = L.DomUtil.create('div');
+      d.style.background = '#fff';
+      d.style.padding = '8px 10px';
+      d.style.borderRadius = '6px';
+      d.style.boxShadow = '0 2px 10px rgba(0,0,0,.08)';
+      d.innerHTML = `<strong>⚠ Données indisponibles</strong><br><small>API en erreur — voir console</small>`;
+      return d;
+    };
+    warn.addTo(map);
+    map.setView([7.54, -5.55], 6);
+    return;
+  }
+
+  const communeStats = payload?.map_data?.commune_stats || [];
+  const foyers = payload?.map_data?.foyers || [];
+
+  // 3) Calques & couleurs
+  const layers = {
+    confirmed: L.featureGroup(),
+    recovered: L.featureGroup(),
+    deaths:    L.featureGroup(),
+    suspects:  L.featureGroup(),
+  };
+  const color = {
+    confirmed: '#2c7be5',
+    recovered: '#00d97e',
+    deaths:    '#e63757',
+    suspects:  '#f6c343',
+  };
+
+  const radiusFor = (val) => {
+    const v = Math.max(0, Number(val) || 0);
+    return v === 0 ? 6 : Math.min(28, 6 + Math.sqrt(v) * 2.2);
+  };
+  const esc = (s) => String(s ?? '')
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+
+  const bounds = [];
+
+  if (communeStats.length > 0) {
+    // 4a) Markers par commune et type
+    communeStats.forEach(c => {
+      const lat = Number(c.lat), lon = Number(c.lon);
+      if (!isFinite(lat) || !isFinite(lon)) return;
+
+      [
+        ['confirmed', c.confirmed],
+        ['recovered', c.recovered],
+        ['deaths',    c.deaths],
+        ['suspects',  c.suspects],
+      ].forEach(([key, val]) => {
+        if (!val || val <= 0) return;
+
+        const m = L.circleMarker([lat, lon], {
+          radius: radiusFor(val),
+          color: color[key],
+          fillColor: color[key],
+          fillOpacity: 0.20,
+          weight: 2,
+        }).bindPopup(`
+          <div>
+            <h6 class="fw-bold mb-1">${esc(c.commune)}</h6>
+            <div class="small text-soft mb-1">Dernière activité : ${esc(c.last_activity || '—')}</div>
+            <div class="d-flex flex-column small">
+              <span style="color:${color.confirmed}">Confirmés : <strong>${c.confirmed}</strong></span>
+              <span style="color:${color.recovered}">Guéris : <strong>${c.recovered}</strong></span>
+              <span style="color:${color.deaths}">Décès : <strong>${c.deaths}</strong></span>
+              <span style="color:${color.suspects}">Suspects : <strong>${c.suspects}</strong></span>
+            </div>
+          </div>
+        `);
+
+        m.addTo(layers[key]);
+        bounds.push([lat, lon]);
+      });
     });
 
-    // --- Dynamic Symptom Modal ---
-    const allSymptomsData = {{ symptoms_data_json|safe }};
+    layers.confirmed.addTo(map);
+    layers.deaths.addTo(map);
 
-    function openSymptomModal(epidemieId) {
-        const data = allSymptomsData[epidemieId];
-        if (!data) return;
+    L.control.layers(null, {
+      'Confirmés': layers.confirmed,
+      'Guéris': layers.recovered,
+      'Décès': layers.deaths,
+      'Suspects': layers.suspects,
+    }, { collapsed: false }).addTo(map);
 
-        document.getElementById('symptomModalTitle').innerText = `Symptômes - ${data.nom}`;
-        document.getElementById('symptomModalDescription').innerText = data.description;
+  } else {
+    // 4b) Fallback: foyers récents (cluster)
+    const redIcon = L.icon({
+      iconUrl: 'https://unpkg.com/leaflet-color-markers@1.1.1/img/marker-icon-2x-red.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -28], shadowSize: [41, 41],
+    });
 
-        const listContainer = document.getElementById('symptomModalList');
-        listContainer.innerHTML = ''; // Clear previous content
+    const group = typeof L.markerClusterGroup === 'function'
+      ? L.markerClusterGroup({ disableClusteringAtZoom: 11, chunkedLoading: true })
+      : L.featureGroup();
 
-        if (data.symptomes.length > 0) {
-            data.symptomes.forEach(symptome => {
-                const gravityClass = symptome.gravite >= 4 ? 'danger' : (symptome.gravite >= 2 ? 'warning' : 'success');
-                const col = document.createElement('div');
-                col.className = 'col-md-6';
-                col.innerHTML = `
-                    <div class="card card-bordered h-100">
-                        <div class="card-inner">
-                            <h6 class="card-title">${symptome.nom}</h6>
-                            <p class="text-soft small mt-1">${symptome.description}</p>
-                            <div class="d-flex justify-content-between small mt-3">
-                                <span>Fréquence: <strong>${symptome.frequence}%</strong></span>
-                                <span>Gravité: <strong class="text-${gravityClass}">${symptome.gravite}/5</strong></span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                listContainer.appendChild(col);
-            });
-        } else {
-            listContainer.innerHTML = '<div class="col-12"><div class="alert alert-light">Aucun symptôme enregistré pour cette maladie.</div></div>';
-        }
+    foyers.forEach(f => {
+      const lat = Number(f.lat), lon = Number(f.lon);
+      if (!isFinite(lat) || !isFinite(lon)) return;
+      const m = L.marker([lat, lon], { icon: redIcon }).bindPopup(`
+        <div>
+          <h6 class="fw-bold text-primary mb-1">${esc(f.maladie)}</h6>
+          <p class="text-soft mb-1">Commune : <strong>${esc(f.commune)}</strong></p>
+          <p class="text-soft mb-1">Date : ${esc(f.date)}</p>
+          ${f.niveau ? `<span class="badge bg-danger-soft">Gravité : ${esc(f.niveau)}</span>` : ''}
+        </div>
+      `);
+      group.addLayer(m);
+      bounds.push([lat, lon]);
+    });
 
-        // Use jQuery from DashLite's bundle to show the modal
-        $('#symptomModal').modal('show');
-    }
+    group.addTo(map);
+  }
+
+  // 5) Vue
+  if (bounds.length) map.fitBounds(bounds, { padding: [20, 20] });
+  else map.setView([7.54, -5.55], 6);
+
+  // 6) Légende
+  const legend = L.control({ position: 'bottomleft' });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'info legend');
+    div.style.background = 'white';
+    div.style.padding = '8px 10px';
+    div.style.borderRadius = '6px';
+    div.style.boxShadow = '0 2px 10px rgba(0,0,0,.08)';
+    div.innerHTML = `
+      <div style="font-weight:600;margin-bottom:6px;">Types de cas</div>
+      <div><span style="display:inline-block;width:10px;height:10px;background:${color.confirmed};border-radius:50%;margin-right:6px;"></span>Confirmés</div>
+      <div><span style="display:inline-block;width:10px;height:10px;background:${color.recovered};border-radius:50%;margin-right:6px;"></span>Guéris</div>
+      <div><span style="display:inline-block;width:10px;height:10px;background:${color.deaths};border-radius:50%;margin-right:6px;"></span>Décès</div>
+      <div><span style="display:inline-block;width:10px;height:10px;background:${color.suspects};border-radius:50%;margin-right:6px;"></span>Suspects</div>
+      <div class="text-muted" style="font-size:11px;margin-top:6px;">Taille ∝ nombre de cas</div>
+    `;
+    return div;
+  };
+  legend.addTo(map);
+
+  // 7) Resize si onglet/modal
+  if (window.jQuery) {
+    $(document).on('shown.bs.modal shown.bs.tab', () => map.invalidateSize());
+  } else {
+    setTimeout(() => map.invalidateSize(), 300);
+  }
+});
 </script>
 <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
 <script>
-    document.body.addEventListener('htmx:beforeSwap', function(evt) {
+    document.body.addEventListener('htmx:beforeSwap', function (evt) {
         const el = evt.detail.target;
         if (el) {
             el.classList.add('transition-opacity');
@@ -668,7 +1058,7 @@
         }
     });
 
-    document.body.addEventListener('htmx:afterSwap', function(evt) {
+    document.body.addEventListener('htmx:afterSwap', function (evt) {
         const el = evt.detail.target;
         if (el) {
             el.classList.remove('htmx-swapping');

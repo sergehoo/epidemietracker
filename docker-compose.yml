@@ -26,7 +26,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-
+      - "traefik.docker.network=proxy"
       # Router HTTPS principal
       - "traefik.http.routers.epidemieweb.rule=Host(`veillesanitaire.com`)"
       - "traefik.http.routers.epidemieweb.entrypoints=websecure"

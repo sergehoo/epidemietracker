@@ -28,7 +28,7 @@ services:
       - "traefik.enable=true"
 
       # Router HTTPS principal
-      - "traefik.http.routers.epidemieweb.rule=Host(`${EPID_HOST}`)"
+      - "traefik.http.routers.epidemieweb.rule=Host(`veillesanitaire.com`)"
       - "traefik.http.routers.epidemieweb.entrypoints=websecure"
       - "traefik.http.routers.epidemieweb.tls=true"
       - "traefik.http.routers.epidemieweb.tls.certresolver=lets"

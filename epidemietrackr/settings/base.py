@@ -7,7 +7,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "changeme-dev-key")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'veillesanitaire.com', 'localhost:8000', 'localhost', '127.0.0.1:8000', 'www.veillesanitaire.com',
+    'veillesanitaire.com', 'localhost', '127.0.0.1', 'www.veillesanitaire.com',
     'https://veillesanitaire.com'
 ]
 CSRF_TRUSTED_ORIGINS = []

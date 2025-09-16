@@ -3,7 +3,7 @@ from .base import *
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    'veillesanitaire.com', 'localhost:8000', '127.0.0.1:8000', 'www.veillesanitaire.com', 'https://veillesanitaire.com'
+    'veillesanitaire.com', 'localhost', '127.0.0.1', 'www.veillesanitaire.com', 'https://veillesanitaire.com'
 ]
 CSRF_TRUSTED_ORIGINS = ['https://veillesanitaire.com', 'localhost:8000', '127.0.0.1:8000', ]
 CORS_ALLOWED_ORIGINS = ['https://veillesanitaire.com', 'localhost:8000', '127.0.0.1:8000', ]

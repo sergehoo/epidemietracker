@@ -25,18 +25,24 @@ services:
       - default
       - proxy
     labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
+      - traefik.enable=true
+      - traefik.docker.network=proxy
       # Router HTTPS principal
-      - "traefik.http.routers.epidemieweb.rule=Host(`veillesanitaire.com`)"
-      - "traefik.http.routers.epidemieweb.entrypoints=websecure"
-      - "traefik.http.routers.epidemieweb.tls=true"
-      - "traefik.http.routers.epidemieweb.tls.certresolver=lets"
+      - traefik.http.routers.epidemieweb.rule=Host(`veillesanitaire.com`)
+      - traefik.http.routers.epidemieweb.entrypoints=websecure
+      - traefik.http.routers.epidemieweb.tls=true
+      - traefik.http.routers.epidemieweb.tls.certresolver=lets
       # Middlewares (si tu as déjà ces middlewares côté Traefik)
-      - "traefik.http.routers.epidemieweb.middlewares=compress@docker,sec-headers@docker"
+#      - traefik.http.routers.epidemieweb.middlewares=compress@docker,sec-headers@docker
+      - traefik.http.routers.epidemieweb.middlewares=sec-headers@docker,compress@docker,ratelimit@docker
+
+      - traefik.http.routers.epidemieweb-http.rule=Host(`veillesanitaire.com`)
+      - traefik.http.routers.epidemieweb-http.entrypoints=web
+      - traefik.http.routers.epidemieweb-http.middlewares=redirect-to-https@docker
 
       # Service: port interne Gunicorn
-      - "traefik.http.services.epidemieweb.loadbalancer.server.port=8000"
+#      - traefik.http.services.epidemieweb.loadbalancer.server.port=8000"
+      - traefik.http.services.dashboardsih-svc.loadbalancer.server.port=8000
 
   epidemieDB:
     image: postgis/postgis:16-3.4
@@ -87,6 +93,7 @@ volumes:
     driver: local
   static_volume:
   media_volume:
+
 #services:
 #
 #  epidemieweb:
